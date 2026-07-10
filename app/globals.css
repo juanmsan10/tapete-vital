@@ -545,8 +545,9 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
 .gracias p { color: var(--gris-texto); font-size: 17px; margin-bottom: 12px; }
 .gracias .caja--sombra p strong { color: #000; }
 .gracias .pedido-id strong { color: #00AE84; }
-.gracias-grid { display: flex; align-items: center; gap: 24px; }
-.check-col { display: none; }
+.gracias-titulo-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.check-desktop { display: none; flex-shrink: 0; }
+.check-movil { margin-bottom: 20px; }
 .soporte-gracias { margin-top: 40px; text-align: center; }
 .soporte-gracias h2 { font-size: 22px; font-weight: 700; color: #000; margin-bottom: 8px; }
 .soporte-gracias a { color: var(--verde); text-decoration: none; }
@@ -624,13 +625,17 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
   .nota-boton { font-size: 16px; }
 
   .cta-final p { font-size: 20px; }
+
+  .gracias p { font-size: 19px; }
+  .soporte-gracias p { font-size: 19px; }
 }
 
 /* ============================================================
    RESPONSIVE — DESKTOP (min-width: 768px)
    ============================================================ */
 @media (min-width: 768px) {
-  .check-col { display: flex; align-items: center; flex-shrink: 0; }
+  .check-desktop { display: flex; align-items: center; }
+  .check-movil { display: none; }
 
   .video-banda { font-size: 18px; }
   .video-marco { margin-bottom: 40px; }

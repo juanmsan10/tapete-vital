@@ -38,23 +38,29 @@ function ContenidoGracias() {
 
   return (
     <>
-      <div className="caja caja--sombra gracias-grid">
-        <div>
+      <div className="check-movil">
+        <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#00AE84" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M8 12.5l2.5 2.5L16 9" />
+        </svg>
+      </div>
+      <div className="caja caja--sombra">
+        <div className="gracias-titulo-row">
           <h1>¡Tu Tapete Vital está en camino!</h1>
-          {orderId && <p className="pedido-id">Número de pedido: <strong>{orderId}</strong></p>}
-          <p>
-            <strong>Lo estamos alistando para que llegue a ti lo más pronto posible.</strong>
-          </p>
-          <p>
-            Te contactaremos para confirmarte que está en camino y entregarte el # de guía con el que podrás rastrear tu paquete.
-          </p>
+          <div className="check-desktop">
+            <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#00AE84" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M8 12.5l2.5 2.5L16 9" />
+            </svg>
+          </div>
         </div>
-        <div className="check-col">
-          <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#00AE84" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M8 12.5l2.5 2.5L16 9" />
-          </svg>
-        </div>
+        {orderId && <p className="pedido-id">Número de pedido: <strong>{orderId}</strong></p>}
+        <p>
+          <strong>Lo estamos alistando para que llegue a ti lo más pronto posible.</strong>
+        </p>
+        <p>
+          Te contactaremos para confirmarte que está en camino y entregarte el # de guía con el que podrás rastrear tu paquete.
+        </p>
       </div>
       <div className="soporte-gracias">
         <h2>¿Necesitas soporte?</h2>
