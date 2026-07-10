@@ -526,6 +526,7 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
 .gracias {
   min-height: 70vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
@@ -533,8 +534,20 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
   background: var(--crema);
 }
 .gracias .caja { max-width: 560px; }
-.gracias h1 { font-size: clamp(28px, 5vw, 40px); color: var(--teal-oscuro); margin: 22px 0 14px; }
+.gracias .caja--sombra {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 40px 36px;
+  text-align: left;
+}
+.gracias h1 { font-size: clamp(28px, 5vw, 40px); color: var(--teal-oscuro); margin: 0 0 14px; }
 .gracias p { color: var(--gris-texto); font-size: 17px; margin-bottom: 12px; }
+.gracias .caja--sombra p strong { color: var(--teal-oscuro); }
+.soporte-gracias { margin-top: 40px; text-align: center; }
+.soporte-gracias h2 { font-size: 22px; font-weight: 700; color: var(--teal-oscuro); margin-bottom: 8px; }
+.soporte-gracias a { color: var(--verde); text-decoration: none; }
+.soporte-gracias a:hover { text-decoration: underline; }
 
 /* ---------- Utilidades ---------- */
 .mt-32 { margin-top: 32px; }
