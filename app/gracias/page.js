@@ -38,22 +38,14 @@ function ContenidoGracias() {
 
   return (
     <>
-      <div className="check-movil">
+      <div className="check-gracias">
         <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#00AE84" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <path d="M8 12.5l2.5 2.5L16 9" />
         </svg>
       </div>
       <div className="caja caja--sombra">
-        <div className="gracias-titulo-row">
-          <h1>¡Tu Tapete Vital está en camino!</h1>
-          <div className="check-desktop">
-            <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#00AE84" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M8 12.5l2.5 2.5L16 9" />
-            </svg>
-          </div>
-        </div>
+        <h1>¡Tu Tapete Vital está en camino!</h1>
         {orderId && <p className="pedido-id">Número de pedido: <strong>{orderId}</strong></p>}
         <p>
           <strong>Lo estamos alistando para que llegue a ti lo más pronto posible.</strong>
