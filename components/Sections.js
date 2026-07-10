@@ -5,27 +5,27 @@ const CDN = 'https://assets.cdn.filesafe.space/TfH7DWHmeMH26MxEDE8t/media';
 /* ---------- Iconos SVG inline (trazo limpio, estilo del manual) ---------- */
 const Icono = {
   luna: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16302a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00ae84" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
     </svg>
   ),
-  hoja: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16302a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11 20A7 7 0 0 1 4 13c0-4 3-8 8-10 0 0 8 2 8 10a7 7 0 0 1-7 7z" />
-      <path d="M12 21c0-6 1-9 5-13" />
+  gota: (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00ae84" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
     </svg>
   ),
   corazon: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16302a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00ae84" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M19 14c1.5-1.5 2-3.2 2-5a5 5 0 0 0-9-3 5 5 0 0 0-9 3c0 1.8.5 3.5 2 5l7 7z" />
     </svg>
   ),
-  calma: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16302a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" />
-      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-      <circle cx="9" cy="9.5" r="1" fill="#16302a" stroke="none" />
-      <circle cx="15" cy="9.5" r="1" fill="#16302a" stroke="none" />
+  amanecer: (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00ae84" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 18a5 5 0 0 0-10 0" />
+      <line x1="12" y1="9" x2="12" y2="3" />
+      <line x1="5.6" y1="14.4" x2="4.2" y2="15.8" />
+      <line x1="18.4" y1="14.4" x2="19.8" y2="15.8" />
+      <line x1="2" y1="18" x2="22" y2="18" />
     </svg>
   ),
   candado: (
@@ -118,9 +118,9 @@ export function FranjaConfianza() {
 export function Beneficios() {
   const items = [
     { icono: Icono.luna, titulo: 'Duerme profundo', texto: 'Mejora tu sueño y despierta con más energía.' },
-    { icono: Icono.hoja, titulo: 'Menos inflamación', texto: 'Descongestiona tu cuerpo y alivia tus dolores crónicos.' },
+    { icono: Icono.gota, titulo: 'Menos inflamación', texto: 'Descongestiona tu cuerpo y alivia tus dolores crónicos.' },
     { icono: Icono.corazon, titulo: 'Mejor circulación', texto: 'Revitaliza tu sangre y controla tu presión arterial.' },
-    { icono: Icono.calma, titulo: 'Más tranquilidad', texto: 'Disminuye el estrés y calma tu ansiedad.' },
+    { icono: Icono.amanecer, titulo: 'Más tranquilidad', texto: 'Disminuye el estrés y calma tu ansiedad.' },
   ];
   return (
     <section id="beneficios" className="seccion seccion--crema centro">
