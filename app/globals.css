@@ -21,7 +21,7 @@
   --radio: 14px;
   --radio-boton: 10px;
   --sombra-suave: 0 10px 30px rgba(0, 82, 97, 0.08);
-  --grad-marca: linear-gradient(135deg, #00ae84 0%, #27798f 100%);
+  --grad-marca: linear-gradient(135deg, #27798f 0%, #005261 100%);
   --ancho: 1080px;
 }
 
@@ -230,7 +230,7 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
 }
 .paso .num {
   font-size: 44px;
-  font-weight: 200;
+  font-weight: 700;
   color: var(--verde);
   line-height: 1;
   margin-bottom: 12px;
@@ -289,7 +289,7 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
 }
 .estrellas { color: var(--arena); font-size: 16px; letter-spacing: 2px; }
 .testimonio p { font-size: 15.5px; color: var(--tinta); }
-.testimonio cite { font-style: normal; font-weight: 700; color: var(--teal-oscuro); font-size: 14.5px; }
+.testimonio cite { font-style: normal; font-weight: 700; color: #00ae84; font-size: 14.5px; }
 
 /* ---------- Oferta ---------- */
 .oferta-caja {
@@ -543,4 +543,102 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   * { transition: none !important; }
+}
+
+/* ============================================================
+   EXTENSIONES
+   ============================================================ */
+
+.salto-movil { display: none; }
+
+.medicos-nota-caja {
+  margin: 44px auto 0;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--radio);
+  padding: 22px 28px;
+  max-width: 700px;
+}
+.medicos-nota-caja > .medicos-nota { margin-top: 0; max-width: none; }
+
+.cta-final .boton--claro { color: #00ae84; }
+
+.seccion--grad .eyebrow--claro { color: rgba(255, 255, 255, 0.82); }
+
+/* ============================================================
+   RESPONSIVE — MOBILE (max-width: 767px)
+   ============================================================ */
+@media (max-width: 767px) {
+  .salto-movil { display: inline; }
+
+  .hero .subtitulo { font-size: 20px; }
+  .video-banda { font-size: 18px; }
+  .video-marco { margin-bottom: 20px; }
+
+  .franja-confianza .item { font-size: 17.5px; }
+  .franja-confianza svg { width: 19px; height: 19px; }
+
+  .eyebrow { font-size: 15px; }
+
+  .beneficio h3 { font-size: 20px; }
+  .beneficio p { font-size: 18px; }
+
+  .paso h3 { font-size: 20px; }
+  .paso p { font-size: 18.5px; }
+
+  .medico img { width: 192px; height: 192px; }
+  .medico h3 { font-size: 21px; }
+  .medico blockquote { font-size: 18.5px; }
+  .medicos-nota { font-size: 18px; }
+
+  .testimonio p { font-size: 17.5px; }
+  .testimonio cite { font-size: 16.5px; }
+
+  .texto-grande { font-size: 19px; }
+  .oferta-caja .cabeza h3 { font-size: 24px; }
+  .regalo { font-size: 18px; }
+
+  .garantia h3 { font-size: 24px; }
+  .garantia p { font-size: 18px; }
+
+  .faq-item summary { font-size: 18.5px; }
+  .faq-item .respuesta { font-size: 17.5px; }
+
+  .boton { font-size: 22px; }
+  .nota-boton { font-size: 16px; }
+
+  .cta-final p { font-size: 20px; }
+}
+
+/* ============================================================
+   RESPONSIVE — DESKTOP (min-width: 768px)
+   ============================================================ */
+@media (min-width: 768px) {
+  .video-banda { font-size: 18px; }
+  .video-marco { margin-bottom: 40px; }
+
+  .franja-confianza .item { font-size: 16.5px; }
+  .franja-confianza .items { gap: 14px 60px; }
+
+  .beneficio p { font-size: 17px; }
+
+  .paso h3 { font-size: 20px; }
+  .paso p { font-size: 17.5px; }
+
+  .medico img { width: 154px; height: 154px; }
+  .medico blockquote { font-size: 17.5px; }
+  .medicos-nota { font-size: 18px; }
+
+  .testimonio p { font-size: 16.5px; }
+  .testimonio cite { font-size: 15.5px; }
+
+  .oferta-caja .cabeza h3 { font-size: 24px; }
+  .regalo { font-size: 18px; }
+
+  .faq-item summary { padding: 13px 22px; }
+  .faq-item .respuesta { padding: 14px 22px 20px; }
+
+  .boton { font-size: 20px; }
+  .nota-boton { font-size: 15px; }
+
+  .cta-final p { font-size: 19px; }
 }

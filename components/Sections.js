@@ -5,16 +5,32 @@ const CDN = 'https://assets.cdn.filesafe.space/TfH7DWHmeMH26MxEDE8t/media';
 /* ---------- Iconos SVG inline (trazo limpio, estilo del manual) ---------- */
 const Icono = {
   luna: (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path stroke="#16302a" strokeWidth="1.8" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+      <circle cx="18.5" cy="5" r="0.9" fill="#00ae84" />
+      <circle cx="20.5" cy="8.5" r="0.7" fill="#00ae84" />
+      <circle cx="15.5" cy="3" r="0.7" fill="#00ae84" />
+    </svg>
   ),
   hoja: (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-4 3-8 8-10 0 0 8 2 8 10a7 7 0 0 1-7 7z" /><path d="M12 21c0-6 1-9 5-13" /></svg>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path stroke="#00ae84" strokeWidth="1.8" d="M11 20A7 7 0 0 1 4 13c0-4 3-8 8-10 0 0 8 2 8 10a7 7 0 0 1-7 7z" />
+      <path stroke="#16302a" strokeWidth="1.8" d="M12 21c0-6 1-9 5-13" />
+    </svg>
   ),
   corazon: (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.5-1.5 2-3.2 2-5a5 5 0 0 0-9-3 5 5 0 0 0-9 3c0 1.8.5 3.5 2 5l7 7z" /></svg>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path stroke="#16302a" strokeWidth="1.8" d="M19 14c1.5-1.5 2-3.2 2-5a5 5 0 0 0-9-3 5 5 0 0 0-9 3c0 1.8.5 3.5 2 5l7 7z" />
+      <polyline stroke="#00ae84" strokeWidth="1.5" points="7,13 9,13 10.5,10 12.5,15 14,11.5 15,13 17,13" />
+    </svg>
   ),
   calma: (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" stroke="#16302a" strokeWidth="1.8" />
+      <path stroke="#00ae84" strokeWidth="1.8" d="M8 14s1.5 2 4 2 4-2 4-2" />
+      <circle cx="9" cy="9.5" r="1" fill="#16302a" />
+      <circle cx="15" cy="9.5" r="1" fill="#16302a" />
+    </svg>
   ),
   candado: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
@@ -67,7 +83,7 @@ export function Hero() {
           ¿Estás cansado, con insomnio y dolores que tu médico <em>no puede explicar</em>?
         </h1>
         <p className="subtitulo">
-          La ciencia aclara por qué tu casa te está inflamando — y qué hacer para revertirlo.
+          La ciencia aclara por qué tu casa te está inflamando y qué hacer para revertirlo.
         </p>
         <div className="video-marco">
           <div className="video-inner">
@@ -105,16 +121,16 @@ export function FranjaConfianza() {
 
 export function Beneficios() {
   const items = [
-    { icono: Icono.luna, titulo: 'Duerme profundo', texto: 'Mejora tu sueño y despierta con energía real.' },
-    { icono: Icono.hoja, titulo: 'Menos inflamación', texto: 'Reduce la inflamación y alivia tus dolores crónicos.' },
-    { icono: Icono.corazon, titulo: 'Mejor circulación', texto: 'Mejora tu circulación y protege tus células.' },
-    { icono: Icono.calma, titulo: 'Calma real', texto: 'Disminuye el estrés y calma tu ansiedad.' },
+    { icono: Icono.luna, titulo: 'Duerme profundo', texto: 'Mejora tu sueño y despierta con más energía.' },
+    { icono: Icono.hoja, titulo: 'Menos inflamación', texto: 'Descongestiona tu cuerpo y alivia tus dolores crónicos.' },
+    { icono: Icono.corazon, titulo: 'Mejor circulación', texto: 'Revitaliza tu sangre y controla tu presión arterial.' },
+    { icono: Icono.calma, titulo: 'Tranquilidad', texto: 'Disminuye el estrés y calma tu ansiedad.' },
   ];
   return (
-    <section className="seccion seccion--crema centro">
+    <section id="beneficios" className="seccion seccion--crema centro">
       <div className="contenedor">
         <span className="eyebrow">Rápidamente verás cómo</span>
-        <h2 className="titulo-seccion">Tu cuerpo empieza a regularse</h2>
+        <h2 className="titulo-seccion">Tu cuerpo empieza<br className="salto-movil" /> a regularse</h2>
         <div className="beneficios-grid">
           {items.map((b) => (
             <div className="beneficio" key={b.titulo}>
@@ -136,14 +152,13 @@ export function Beneficios() {
 export function ComoFunciona() {
   const pasos = [
     { titulo: 'Conéctalo', texto: 'Conecta el cable al tercer orificio del tomacorriente: el polo a tierra.' },
-    { titulo: 'Colócalo', texto: 'Ponlo sobre tu cama o sobre tu escritorio. Donde pasas más horas.' },
+    { titulo: 'Ubícalo', texto: <>Ponlo sobre tu cama o sobre tu escritorio.<br className="salto-movil" /> Donde pasas más horas.</> },
     { titulo: 'Tócalo', texto: 'Tu cuerpo empieza a descargarse de inmediato, sin cambiar tu rutina.' },
   ];
   return (
     <section className="seccion centro">
       <div className="contenedor">
-        <span className="eyebrow">Así de simple</span>
-        <h2 className="titulo-seccion">Cómo funciona el Tapete Vital</h2>
+        <h2 className="titulo-seccion">Cómo funciona el<br className="salto-movil" /> Tapete Vital</h2>
         <div className="pasos">
           {pasos.map((p, i) => (
             <div className="paso" key={p.titulo}>
@@ -153,7 +168,6 @@ export function ComoFunciona() {
             </div>
           ))}
         </div>
-        <RaizDivisor />
       </div>
     </section>
   );
@@ -191,10 +205,12 @@ export function Medicos() {
             </div>
           ))}
         </div>
-        <p className="medicos-nota">
-          Decenas de artículos en las principales revistas científicas del mundo explican cómo la
-          terapia de polo a tierra está transformando la vida de millones de pacientes.
-        </p>
+        <div className="medicos-nota-caja">
+          <p className="medicos-nota">
+            Decenas de artículos en las principales revistas científicas del mundo explican cómo la
+            terapia de polo a tierra está transformando la vida de millones de pacientes.
+          </p>
+        </div>
       </div>
     </section>
   );
@@ -202,7 +218,7 @@ export function Medicos() {
 
 export function Testimonios() {
   const lista = [
-    { texto: 'Mi doctora me recomendó el tapete para el insomnio, los dolores lumbares y el exceso de carga electromagnética. Usándolo he logrado un sueño reparador y mis dolores han disminuido casi en un 80%.', autor: 'Lola Carvajal' },
+    { texto: 'Mi doctora me recomendó el tapete para el insomnio, los dolores lumbares y el exceso de carga electromagnética. Usándolo he logrado un sueño reparador y mis dolores han disminuido un 80%.', autor: 'Lola Carvajal' },
     { texto: 'Duermo mucho mejor y ya no me siento tan cansada. Ya no me duele la espalda. A mi esposo le dolía una mano, lo ensayó y en 3 días sintió una mejoría impresionante.', autor: 'Tatiana Gallego' },
     { texto: 'Soy maratonista, y el tapete cambió mi proceso de recuperación. Con solo dormir una noche en él, mi siguiente día fue como si nada.', autor: 'Mónica Agudelo' },
     { texto: 'El tapete me ha ayudado a mejorar la calidad del sueño y el descanso. Duermo con él todas las noches y no volví a presentar episodios de insomnio.', autor: 'Adriana Osorio' },
@@ -212,7 +228,6 @@ export function Testimonios() {
   return (
     <section className="seccion seccion--crema centro">
       <div className="contenedor">
-        <span className="eyebrow">Historias reales</span>
         <h2 className="titulo-seccion">Lo que sienten quienes ya hacen polo a tierra</h2>
         <div className="testimonios-grid">
           {lista.map((t) => (
@@ -236,7 +251,7 @@ export function Oferta() {
         <h2 className="titulo-seccion">El insomnio y la fatiga no aparecen de un día para otro</h2>
         <p className="texto-grande mt-32" style={{ maxWidth: 620, margin: '18px auto 0' }}>
           Se acumulan silenciosamente hasta que el cuerpo no aguanta más. El Tapete Vital le
-          devuelve a tu cuerpo lo que tanto necesita — sin esfuerzo, sin cambiar tu rutina.
+          devuelve a tu cuerpo lo que tanto necesita. Sin esfuerzo, sin cambiar tu rutina.
         </p>
         <div className="oferta-caja mt-44">
           <div className="cabeza">
@@ -278,12 +293,12 @@ export function Garantia() {
             <svg width="84" height="84" viewBox="0 0 96 96" fill="none">
               <circle cx="48" cy="48" r="44" stroke="#00AE84" strokeWidth="3" />
               <circle cx="48" cy="48" r="36" stroke="#64C9A7" strokeWidth="1.5" strokeDasharray="4 5" />
-              <text x="48" y="43" textAnchor="middle" fontSize="22" fontWeight="700" fill="#005261" fontFamily="inherit">60</text>
-              <text x="48" y="60" textAnchor="middle" fontSize="10.5" fontWeight="700" fill="#00AE84" letterSpacing="1">DÍAS</text>
+              <text x="48" y="45" textAnchor="middle" dominantBaseline="middle" fontSize="26" fontWeight="700" fill="#005261" fontFamily="inherit">60</text>
+              <text x="48" y="58" textAnchor="middle" fontSize="10.5" fontWeight="700" fill="#00AE84" letterSpacing="1">DÍAS</text>
             </svg>
           </div>
           <div>
-            <h3>Garantía de satisfacción total</h3>
+            <h3>Garantía de satisfacción</h3>
             <p>
               Si en 60 días no sientes ninguna diferencia en tu sueño, tu energía o tus dolores,
               te devolvemos tu dinero. Sin preguntas incómodas, sin letra pequeña.
@@ -327,7 +342,7 @@ export function FAQ() {
     },
   ];
   return (
-    <section className="seccion seccion--crema">
+    <section id="faq" className="seccion seccion--crema">
       <div className="contenedor centro">
         <span className="eyebrow">Resolvemos tus dudas</span>
         <h2 className="titulo-seccion">Preguntas frecuentes</h2>
@@ -350,7 +365,7 @@ export function CTAFinal() {
   return (
     <section className="seccion seccion--grad">
       <div className="contenedor cta-final">
-        <h2>Tu cuerpo lleva años pidiendo tierra</h2>
+        <h2>Tu cuerpo lleva años<br className="salto-movil" /> pidiendo tierra</h2>
         <p>
           Dásela esta noche. Y si en 60 días no sientes la diferencia, te devolvemos tu dinero.
         </p>
