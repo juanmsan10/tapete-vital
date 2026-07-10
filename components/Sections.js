@@ -83,7 +83,7 @@ export function Hero() {
           ¿Estás cansado, con insomnio y dolores que tu médico <em>no puede explicar</em>?
         </h1>
         <p className="subtitulo">
-          La ciencia aclara por qué tu casa te está inflamando y qué hacer para revertirlo.
+          La ciencia aclara por qué tu casa te está inflamando<br className="salto-desktop" /> y qué hacer para revertirlo.
         </p>
         <div className="video-marco">
           <div className="video-inner">
@@ -266,7 +266,7 @@ export function Oferta() {
             />
             <div className="precio-antes">$449.000</div>
             <div className="precio-ahora"><strong>$299.000</strong></div>
-            <p style={{ color: 'var(--gris-texto)', fontSize: 15 }}>
+            <p style={{ color: 'var(--gris-texto)', fontSize: 18 }}>
               Y llevando 2 o más, cada tapete queda en $269.000
             </p>
             <div className="regalo">
@@ -293,8 +293,8 @@ export function Garantia() {
             <svg width="84" height="84" viewBox="0 0 96 96" fill="none">
               <circle cx="48" cy="48" r="44" stroke="#00AE84" strokeWidth="3" />
               <circle cx="48" cy="48" r="36" stroke="#64C9A7" strokeWidth="1.5" strokeDasharray="4 5" />
-              <text x="48" y="45" textAnchor="middle" dominantBaseline="middle" fontSize="26" fontWeight="700" fill="#005261" fontFamily="inherit">60</text>
-              <text x="48" y="58" textAnchor="middle" fontSize="10.5" fontWeight="700" fill="#00AE84" letterSpacing="1">DÍAS</text>
+              <text x="48" y="45" textAnchor="middle" dominantBaseline="middle" fontSize="30" fontWeight="700" fill="#005261" fontFamily="inherit">60</text>
+              <text x="48" y="63" textAnchor="middle" fontSize="10.5" fontWeight="700" fill="#00AE84" letterSpacing="1">DÍAS</text>
             </svg>
           </div>
           <div>

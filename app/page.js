@@ -11,7 +11,6 @@ import {
   Garantia,
   FAQ,
   CTAFinal,
-  Footer,
 } from '@/components/Sections';
 
 export default function Landing() {
@@ -30,7 +29,6 @@ export default function Landing() {
         <FAQ />
         <CTAFinal />
       </main>
-      <Footer />
       <Script id="evento-viewcontent" strategy="afterInteractive">
         {`if (window.fbq) fbq('track', 'ViewContent', { content_name: 'Tapete Vital', currency: 'COP', value: 299000 });`}
       </Script>
