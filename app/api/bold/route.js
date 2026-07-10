@@ -30,7 +30,7 @@ export async function POST(request) {
 
     // Total calculado server-side con la matriz oficial
     const totales = calcularTotal(cantidad, zona);
-    const orderId = `PAT-${Date.now()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+    const orderId = `TV-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
     const currency = 'COP';
 
     // Firma de integridad Bold: SHA256(orderId + amount + currency + secret)
