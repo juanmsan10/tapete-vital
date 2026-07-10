@@ -544,7 +544,7 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
 .gracias h1 { font-size: clamp(28px, 5vw, 40px); color: #000; margin: 0 0 14px; }
 .gracias p { color: var(--gris-texto); font-size: 17px; margin-bottom: 12px; }
 .gracias .caja--sombra p strong { color: #000; }
-.gracias .pedido-id, .gracias .pedido-id strong { color: #00AE84; }
+.gracias .pedido-id strong { color: #00AE84; }
 .check-gracias { margin-bottom: 20px; text-align: center; }
 .soporte-gracias { margin-top: 40px; text-align: center; }
 .soporte-gracias h2 { font-size: 22px; font-weight: 700; color: #000; margin-bottom: 8px; }
@@ -632,7 +632,7 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
    RESPONSIVE — DESKTOP (min-width: 768px)
    ============================================================ */
 @media (min-width: 768px) {
-  .gracias { padding: 90px 20px; }
+  .gracias { padding: 60px 20px 110px; }
 
   .video-banda { font-size: 18px; }
   .video-marco { margin-bottom: 40px; }
