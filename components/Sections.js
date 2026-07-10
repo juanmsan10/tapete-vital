@@ -75,7 +75,7 @@ export function Header() {
 }
 
 export function Hero() {
-  const videoId = process.env.NEXT_PUBLIC_VSL_YOUTUBE_ID;
+  const videoId = 'YqL-kYW0FXA';
   return (
     <section className="hero">
       <div className="contenedor">
