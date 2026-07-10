@@ -635,7 +635,7 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
   .gracias { padding: 60px 20px 110px; }
 
   .video-banda { font-size: 18px; }
-  .video-marco { margin-bottom: 40px; }
+  .video-marco { margin: 0; max-width: none; width: 100%; }
 
   .franja-confianza .item { font-size: 16.5px; }
   .franja-confianza .items { gap: 14px 60px; }
@@ -645,7 +645,11 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
   .paso h3 { font-size: 20px; }
   .paso p { font-size: 17.5px; }
 
-  .hero h1 { max-width: 1050px; }
+  .hero .contenedor { max-width: 1340px; }
+  .hero-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 48px; align-items: center; }
+  .hero-texto { text-align: left; }
+  .hero h1 { max-width: none; margin: 0 0 20px; }
+  .hero .subtitulo { max-width: none; margin: 0; }
   .salto-desktop { display: inline; }
 
   .medicos-grid { gap: 43px; }

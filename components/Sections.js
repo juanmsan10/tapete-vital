@@ -78,13 +78,15 @@ export function Hero() {
   const videoId = 'YqL-kYW0FXA';
   return (
     <section className="hero">
-      <div className="contenedor">
-        <h1>
-          ¿Estás cansado, con insomnio y dolores que tu médico <em>no puede explicar</em>?
-        </h1>
-        <p className="subtitulo">
-          La ciencia aclara por qué tu casa te está inflamando<br className="salto-desktop" /> y qué hacer para revertirlo.
-        </p>
+      <div className="contenedor hero-grid">
+        <div className="hero-texto">
+          <h1>
+            ¿Estás cansado, con insomnio y dolores que tu médico <em>no puede explicar</em>?
+          </h1>
+          <p className="subtitulo">
+            La ciencia aclara por qué tu casa te está inflamando<br className="salto-desktop" /> y qué hacer para revertirlo.
+          </p>
+        </div>
         <div className="video-marco">
           <div className="video-inner">
             {videoId ? (
@@ -100,7 +102,7 @@ export function Hero() {
               </div>
             )}
           </div>
-          <div className="video-banda">🔊 Activa el sonido y mira el video</div>
+          <div className="video-banda">🔊 ACTIVA EL SONIDO Y MIRA EL VIDEO</div>
         </div>
       </div>
     </section>
@@ -112,7 +114,7 @@ export function FranjaConfianza() {
     <div className="franja-confianza">
       <div className="contenedor items">
         <span className="item">{Icono.escudo} Garantía de 60 días o te devolvemos tu dinero</span>
-        <span className="item">{Icono.candado} Pago seguro con Bold — tarjetas, PSE y Nequi</span>
+        <span className="item">{Icono.candado} Pago seguro con Bold (tarjetas, PSE y Nequi)</span>
         <span className="item">{Icono.camion} Envíos a toda Colombia</span>
       </div>
     </div>
