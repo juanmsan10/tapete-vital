@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Header, Footer } from '@/components/Sections';
+import { Header } from '@/components/Sections';
 import CheckoutForm from '@/components/CheckoutForm';
 
 export const metadata = {
@@ -26,7 +26,6 @@ export default function Comprar() {
           </p>
         </div>
       </main>
-      <Footer />
     </>
   );
 }

@@ -554,12 +554,12 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
 
 .medicos-nota-caja {
   margin: 44px auto 0;
-  background: rgba(0, 82, 97, 0.35);
+  background: var(--crema);
   border-radius: var(--radio);
   padding: 22px 28px;
   max-width: 700px;
 }
-.medicos-nota-caja > .medicos-nota { margin-top: 0; max-width: none; }
+.medicos-nota-caja > .medicos-nota { margin-top: 0; max-width: none; color: #005261; }
 
 .cta-final .boton--claro { color: #00ae84; }
 

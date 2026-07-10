@@ -5,31 +5,27 @@ const CDN = 'https://assets.cdn.filesafe.space/TfH7DWHmeMH26MxEDE8t/media';
 /* ---------- Iconos SVG inline (trazo limpio, estilo del manual) ---------- */
 const Icono = {
   luna: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <path stroke="#16302a" strokeWidth="1.8" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
-      <circle cx="18.5" cy="5" r="0.9" fill="#00ae84" />
-      <circle cx="20.5" cy="8.5" r="0.7" fill="#00ae84" />
-      <circle cx="15.5" cy="3" r="0.7" fill="#00ae84" />
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16302a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
     </svg>
   ),
   hoja: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <path stroke="#00ae84" strokeWidth="1.8" d="M11 20A7 7 0 0 1 4 13c0-4 3-8 8-10 0 0 8 2 8 10a7 7 0 0 1-7 7z" />
-      <path stroke="#16302a" strokeWidth="1.8" d="M12 21c0-6 1-9 5-13" />
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16302a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 20A7 7 0 0 1 4 13c0-4 3-8 8-10 0 0 8 2 8 10a7 7 0 0 1-7 7z" />
+      <path d="M12 21c0-6 1-9 5-13" />
     </svg>
   ),
   corazon: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <path stroke="#16302a" strokeWidth="1.8" d="M19 14c1.5-1.5 2-3.2 2-5a5 5 0 0 0-9-3 5 5 0 0 0-9 3c0 1.8.5 3.5 2 5l7 7z" />
-      <polyline stroke="#00ae84" strokeWidth="1.5" points="7,13 9,13 10.5,10 12.5,15 14,11.5 15,13 17,13" />
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16302a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 14c1.5-1.5 2-3.2 2-5a5 5 0 0 0-9-3 5 5 0 0 0-9 3c0 1.8.5 3.5 2 5l7 7z" />
     </svg>
   ),
   calma: (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" stroke="#16302a" strokeWidth="1.8" />
-      <path stroke="#00ae84" strokeWidth="1.8" d="M8 14s1.5 2 4 2 4-2 4-2" />
-      <circle cx="9" cy="9.5" r="1" fill="#16302a" />
-      <circle cx="15" cy="9.5" r="1" fill="#16302a" />
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16302a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+      <circle cx="9" cy="9.5" r="1" fill="#16302a" stroke="none" />
+      <circle cx="15" cy="9.5" r="1" fill="#16302a" stroke="none" />
     </svg>
   ),
   candado: (
@@ -124,7 +120,7 @@ export function Beneficios() {
     { icono: Icono.luna, titulo: 'Duerme profundo', texto: 'Mejora tu sueño y despierta con más energía.' },
     { icono: Icono.hoja, titulo: 'Menos inflamación', texto: 'Descongestiona tu cuerpo y alivia tus dolores crónicos.' },
     { icono: Icono.corazon, titulo: 'Mejor circulación', texto: 'Revitaliza tu sangre y controla tu presión arterial.' },
-    { icono: Icono.calma, titulo: 'Tranquilidad', texto: 'Disminuye el estrés y calma tu ansiedad.' },
+    { icono: Icono.calma, titulo: 'Más tranquilidad', texto: 'Disminuye el estrés y calma tu ansiedad.' },
   ];
   return (
     <section id="beneficios" className="seccion seccion--crema centro">
@@ -178,7 +174,7 @@ export function Medicos() {
     {
       foto: `${CDN}/6a21e17f83cb7337aa16bb7c.jpg`,
       nombre: 'Dr. Santiago Rojas',
-      cita: '“Tenemos una enfermedad por haber perdido el contacto que ancestralmente, desde todas las civilizaciones, habíamos tenido de manera permanente con la tierra.”',
+      cita: '”Tenemos una enfermedad por haber perdido el contacto que ancestralmente habíamos tenido de manera permanente con la tierra.”',
     },
     {
       foto: `${CDN}/6a21e2c8fc95b24549777307.jpg`,
@@ -188,7 +184,7 @@ export function Medicos() {
     {
       foto: `${CDN}/6a21e2e0bca3eb667377516f.png`,
       nombre: 'Dr. Javier Galvis',
-      cita: '“Preguntar si nuestros pacientes hacen polo a tierra debería ser el quinto signo vital que les busquemos. ¡Así de importante es!”',
+      cita: <>”Preguntar si nuestros pacientes hacen polo a tierra debería ser el quinto signo vital que les busquemos.<br /> ¡Así de importante es!”</>,
     },
   ];
   return (
@@ -367,7 +363,7 @@ export function CTAFinal() {
       <div className="contenedor cta-final">
         <h2>Tu cuerpo lleva años<br className="salto-movil" /> pidiendo tierra</h2>
         <p>
-          Dásela esta noche. Y si en 60 días no sientes la diferencia, te devolvemos tu dinero.
+          Comienza ahora mismo. Si en 60 días no sientes la diferencia, te devolvemos tu dinero.
         </p>
         <Link href="/comprar" className="boton boton--claro">Quiero mi Tapete Vital</Link>
       </div>

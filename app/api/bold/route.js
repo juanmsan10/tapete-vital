@@ -13,9 +13,9 @@ import { enviarCorreo, htmlPedido } from '@/lib/email';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { cantidad, zona, nombre, telefono, email, ciudad, direccion, notas } = body;
+    const { cantidad, zona, nombre, cedula, telefono, email, ciudad, direccion, notas } = body;
 
-    if (!nombre || !telefono || !direccion || !ciudad) {
+    if (!nombre || !cedula || !telefono || !direccion || !ciudad) {
       return Response.json({ error: 'Faltan datos de envío obligatorios.' }, { status: 400 });
     }
 
@@ -50,6 +50,7 @@ export async function POST(request) {
         orden: orderId,
         datos: {
           Nombre: nombre,
+          'Cédula / NIT': cedula,
           'Teléfono / WhatsApp': telefono,
           Email: email || 'No indicado',
           Ciudad: ciudad,

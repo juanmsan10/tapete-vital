@@ -19,6 +19,7 @@ export default function CheckoutForm() {
   const [zona, setZona] = useState('bogota');
   const [form, setForm] = useState({
     nombre: '',
+    cedula: '',
     telefono: '',
     email: '',
     ciudad: '',
@@ -91,8 +92,8 @@ export default function CheckoutForm() {
     e.preventDefault();
     setError('');
 
-    if (!form.nombre.trim() || !form.telefono.trim() || !form.ciudad.trim() || !form.direccion.trim()) {
-      setError('Completa los campos obligatorios: nombre, teléfono, ciudad y dirección.');
+    if (!form.nombre.trim() || !form.cedula.trim() || !form.telefono.trim() || !form.ciudad.trim() || !form.direccion.trim()) {
+      setError('Completa los campos obligatorios: nombre, cédula/NIT, teléfono, ciudad y dirección.');
       return;
     }
 
@@ -171,14 +172,20 @@ export default function CheckoutForm() {
               <input id="nombre" value={form.nombre} onChange={(e) => actualizar('nombre', e.target.value)} autoComplete="name" />
             </div>
             <div className="campo">
+              <label htmlFor="cedula">Cédula / NIT *</label>
+              <input id="cedula" value={form.cedula} onChange={(e) => actualizar('cedula', e.target.value)} inputMode="numeric" />
+            </div>
+          </div>
+          <div className="campos-2">
+            <div className="campo">
               <label htmlFor="telefono">Teléfono / WhatsApp *</label>
               <input id="telefono" type="tel" value={form.telefono} onChange={(e) => actualizar('telefono', e.target.value)} autoComplete="tel" placeholder="300 000 0000" />
             </div>
-          </div>
-          <div className="campo">
-            <label htmlFor="email">Correo electrónico</label>
-            <input id="email" type="email" value={form.email} onChange={(e) => actualizar('email', e.target.value)} autoComplete="email" />
-            <p className="ayuda">Te enviaremos la confirmación de tu pedido.</p>
+            <div className="campo">
+              <label htmlFor="email">Correo electrónico</label>
+              <input id="email" type="email" value={form.email} onChange={(e) => actualizar('email', e.target.value)} autoComplete="email" />
+              <p className="ayuda">Te enviaremos la confirmación de tu pedido.</p>
+            </div>
           </div>
           <div className="campos-2">
             <div className="campo">
