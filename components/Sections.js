@@ -19,13 +19,17 @@ const Icono = {
       <path d="M19 14c1.5-1.5 2-3.2 2-5a5 5 0 0 0-9-3 5 5 0 0 0-9 3c0 1.8.5 3.5 2 5l7 7z" />
     </svg>
   ),
-  amanecer: (
+  sol: (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00ae84" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 18a5 5 0 0 0-10 0" />
-      <line x1="12" y1="9" x2="12" y2="3" />
-      <line x1="5.6" y1="14.4" x2="4.2" y2="15.8" />
-      <line x1="18.4" y1="14.4" x2="19.8" y2="15.8" />
-      <line x1="2" y1="18" x2="22" y2="18" />
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="4" />
+      <line x1="12" y1="20" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="6.34" y2="6.34" />
+      <line x1="17.66" y1="17.66" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="4" y2="12" />
+      <line x1="20" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="6.34" y2="17.66" />
+      <line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
     </svg>
   ),
   candado: (
@@ -120,7 +124,7 @@ export function Beneficios() {
     { icono: Icono.luna, titulo: 'Duerme profundo', texto: 'Mejora tu sueño y despierta con más energía.' },
     { icono: Icono.gota, titulo: 'Menos inflamación', texto: 'Descongestiona tu cuerpo y alivia tus dolores crónicos.' },
     { icono: Icono.corazon, titulo: 'Mejor circulación', texto: 'Revitaliza tu sangre y controla tu presión arterial.' },
-    { icono: Icono.amanecer, titulo: 'Más tranquilidad', texto: 'Disminuye el estrés y calma tu ansiedad.' },
+    { icono: Icono.sol, titulo: 'Más tranquilidad', texto: 'Disminuye el estrés y calma tu ansiedad.' },
   ];
   return (
     <section id="beneficios" className="seccion seccion--crema centro">
