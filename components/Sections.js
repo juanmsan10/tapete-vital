@@ -178,7 +178,7 @@ export function Medicos() {
     {
       foto: `${CDN}/6a21e17f83cb7337aa16bb7c.jpg`,
       nombre: 'Dr. Santiago Rojas',
-      cita: '”Tenemos una enfermedad por haber perdido el contacto que ancestralmente habíamos tenido de manera permanente con la tierra.”',
+      cita: '“Tenemos una enfermedad por haber perdido el contacto que ancestralmente habíamos tenido de manera permanente con la tierra.”',
     },
     {
       foto: `${CDN}/6a21e2c8fc95b24549777307.jpg`,
@@ -188,7 +188,7 @@ export function Medicos() {
     {
       foto: `${CDN}/6a21e2e0bca3eb667377516f.png`,
       nombre: 'Dr. Javier Galvis',
-      cita: <>”Preguntar si nuestros pacientes hacen polo a tierra debería ser el quinto signo vital que les busquemos.<br /> ¡Así de importante es!”</>,
+      cita: <>“Preguntar si nuestros pacientes hacen polo a tierra debería ser el quinto signo vital que les busquemos.<br /> ¡Así de importante es!”</>,
     },
   ];
   return (
