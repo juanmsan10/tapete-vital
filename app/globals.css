@@ -645,6 +645,7 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
   .paso h3 { font-size: 20px; }
   .paso p { font-size: 17.5px; }
 
+  .hero h1 { max-width: 1050px; }
   .salto-desktop { display: inline; }
 
   .medicos-grid { gap: 43px; }
