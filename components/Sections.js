@@ -122,8 +122,8 @@ export function FranjaConfianza() {
 export function Beneficios() {
   const items = [
     { icono: Icono.luna, titulo: 'Duerme profundo', texto: 'Mejora tu sueño y despierta con más energía.' },
-    { icono: Icono.gota, titulo: 'Menos inflamación', texto: 'Descongestiona tu cuerpo y alivia tus dolores crónicos.' },
-    { icono: Icono.corazon, titulo: 'Mejor circulación', texto: 'Revitaliza tu sangre y controla tu presión arterial.' },
+    { icono: Icono.gota, titulo: 'Menos inflamación', texto: 'Descarga tu cuerpo y alivia tus dolores.' },
+    { icono: Icono.corazon, titulo: 'Mejor circulación', texto: 'Revitaliza tu sangre y regula tu presión arterial.' },
     { icono: Icono.sol, titulo: 'Más tranquilidad', texto: 'Disminuye el estrés y calma tu ansiedad.' },
   ];
   return (
