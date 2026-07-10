@@ -645,8 +645,9 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
   .paso h3 { font-size: 20px; }
   .paso p { font-size: 17.5px; }
 
+  .hero { padding: 106px 40px 90px; }
   .hero .contenedor { max-width: 1340px; }
-  .hero-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 48px; align-items: center; }
+  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
   .hero-texto { text-align: left; }
   .hero h1 { max-width: none; margin: 0 0 20px; }
   .hero .subtitulo { max-width: none; margin: 0; }
