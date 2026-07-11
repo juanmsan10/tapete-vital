@@ -8,7 +8,7 @@
 // ============================================================
 import crypto from 'crypto';
 import { calcularTotal, formatoCOP } from '@/lib/pricing';
-import { enviarCorreo, htmlPedido } from '@/lib/email';
+import { enviarCorreo, htmlPedido, registrarSheet } from '@/lib/email';
 
 export async function POST(request) {
   try {
@@ -40,6 +40,21 @@ export async function POST(request) {
       .digest('hex');
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || new URL(request.url).origin;
+
+    // Registrar en Google Sheet
+    await registrarSheet({
+      fecha: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+      orden: orderId,
+      estado: 'Iniciado',
+      cantidad: totales.cantidad,
+      total: totales.total,
+      nombre,
+      telefono,
+      email: email || '',
+      ciudad,
+      direccion,
+      notas: notas || '',
+    });
 
     // Correo interno: pedido iniciado (recuperación de abandonos incluida)
     await enviarCorreo({

@@ -7,7 +7,7 @@
 // https://TU-DOMINIO/api/webhook/bold
 // ============================================================
 import crypto from 'crypto';
-import { enviarCorreo, htmlPedido } from '@/lib/email';
+import { enviarCorreo, htmlPedido, registrarSheet } from '@/lib/email';
 import { enviarPurchaseCAPI } from '@/lib/meta';
 import { formatoCOP } from '@/lib/pricing';
 
@@ -50,6 +50,21 @@ export async function POST(request) {
   console.log(`[webhook/bold] Evento ${tipo} — orden ${orderId} — total ${total}`);
 
   if (tipo === 'SALE_APPROVED') {
+    // Actualizar estado en Google Sheet
+    await registrarSheet({
+      fecha: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+      orden: orderId,
+      estado: 'Aprobado',
+      cantidad: '',
+      total,
+      nombre: '',
+      telefono: '',
+      email: emailCliente || '',
+      ciudad: '',
+      direccion: '',
+      notas: '',
+    });
+
     // 1. Correo interno de confirmación
     await enviarCorreo({
       to: process.env.EMAIL_INTERNO || 'pedidos@tapetevital.co',
