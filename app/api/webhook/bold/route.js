@@ -53,14 +53,14 @@ export async function POST(request) {
     // 1. Correo interno de confirmación
     await enviarCorreo({
       to: process.env.EMAIL_INTERNO || 'pedidos@tapetevital.co',
-      subject: `✅ PAGO CONFIRMADO ${orderId} — ${formatoCOP(total)}`,
+      subject: `✅ Pago confirmado ${orderId}`,
       html: htmlPedido({
-        titulo: 'Pago confirmado — preparar envío',
+        titulo: 'Pago confirmado → Preparar envío',
         orden: orderId,
         datos: {
           Estado: 'APROBADO',
           Total: formatoCOP(total),
-          'Email del pagador': emailCliente || 'No disponible (ver correo de pedido iniciado)',
+          Correo: emailCliente || 'No disponible (ver correo de pedido iniciado)',
           'ID transacción Bold': data?.payment_id || '—',
         },
         totales: formatoCOP(total),
@@ -71,14 +71,13 @@ export async function POST(request) {
     if (emailCliente) {
       await enviarCorreo({
         to: emailCliente,
-        subject: '🌿 Tu Tapete Vital está en camino — Polo a Tierra',
+        subject: 'Acabas de comprar el Tapete Vital',
         html: htmlPedido({
           titulo: '¡Gracias por tu compra!',
           orden: orderId,
           datos: {
             Estado: 'Pago confirmado',
             'Siguiente paso': 'Prepararemos tu pedido y te contactaremos por WhatsApp con la guía de envío.',
-            Garantía: '60 días de satisfacción. Si no sientes la diferencia, te devolvemos tu dinero.',
           },
           totales: formatoCOP(total),
         }),
