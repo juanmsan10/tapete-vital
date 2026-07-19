@@ -50,20 +50,8 @@ export async function POST(request) {
   console.log(`[webhook/bold] Evento ${tipo} — orden ${orderId} — total ${total}`);
 
   if (tipo === 'SALE_APPROVED') {
-    // Actualizar estado en Google Sheet
-    await registrarSheet({
-      fecha: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
-      orden: orderId,
-      estado: 'Aprobado',
-      cantidad: '',
-      total,
-      nombre: '',
-      telefono: '',
-      email: emailCliente || '',
-      ciudad: '',
-      direccion: '',
-      notas: '',
-    });
+    // Actualizar estado de la fila existente (no crear duplicado)
+    await registrarSheet({ action: 'update', orden: orderId, estado: 'Aprobado' });
 
     // 1. Correo interno de confirmación
     await enviarCorreo({
