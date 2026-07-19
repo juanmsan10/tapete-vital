@@ -95,6 +95,7 @@ export async function POST(request) {
             'Siguiente paso': 'Prepararemos tu pedido y te contactaremos por WhatsApp con la guía de envío.',
           },
           totales: formatoCOP(total),
+          guiaUrl: 'https://drive.google.com/file/d/1yFV3aBrEuUjPDzpHI0YGOR1R6JAQHNHK/view?usp=sharing',
         }),
       });
     }
