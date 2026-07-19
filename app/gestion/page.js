@@ -11,6 +11,12 @@ const ESTADO_COLOR = {
   Entregado: '#5B3623',
 };
 
+const SUB_TABS = [
+  { estado: 'Aprobado', label: 'Empacar', next: 'Empacado', accion: 'Marcar como empacado', color: '#00AE84' },
+  { estado: 'Empacado', label: 'Enviar', next: 'Enviado', accion: 'Marcar como enviado', color: '#27798F' },
+  { estado: 'Enviado', label: 'Confirmar entrega', next: 'Entregado', accion: 'Marcar como entregado', color: '#005261' },
+];
+
 function formatoCOP(v) {
   return '$' + Number(v).toLocaleString('es-CO');
 }
@@ -39,76 +45,100 @@ function EstadoBadge({ estado }) {
   return <span className="g-badge" style={{ background: bg }}>{estado}</span>;
 }
 
-function SeccionPendientes({ titulo, color, pedidos, accion, onAction }) {
-  if (!pedidos.length) return null;
+function imprimirEtiquetas(pedidos) {
+  const etiquetas = pedidos.map(p => `
+    <div class="etiqueta">
+      <div class="et-marca">POLO A TIERRA</div>
+      <div class="et-orden">${p.orden}</div>
+      <div class="et-campo"><span class="et-label">Para:</span> ${p.nombre || '—'}</div>
+      <div class="et-campo"><span class="et-label">Tel:</span> ${p.telefono || '—'}</div>
+      <div class="et-campo"><span class="et-label">Ciudad:</span> ${p.ciudad || '—'}</div>
+      <div class="et-campo"><span class="et-label">Dirección:</span> ${p.direccion || '—'}</div>
+      <div class="et-campo"><span class="et-label">Cantidad:</span> <strong>${p.cantidad || '—'}</strong></div>
+      ${p.notas ? `<div class="et-campo"><span class="et-label">Notas:</span> ${p.notas}</div>` : ''}
+    </div>
+  `).join('');
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Etiquetas de envío</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: Arial, sans-serif; }
+      .etiqueta { border: 2px solid #333; border-radius: 8px; padding: 20px; margin: 16px; page-break-inside: avoid; max-width: 400px; }
+      .et-marca { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #005261; text-transform: uppercase; margin-bottom: 4px; }
+      .et-orden { font-size: 18px; font-weight: 700; color: #00ae84; margin-bottom: 12px; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+      .et-campo { font-size: 14px; padding: 3px 0; }
+      .et-label { font-weight: 700; color: #333; }
+      @media print {
+        .etiqueta { margin: 12px 0; border-width: 1.5px; }
+      }
+    </style></head><body>${etiquetas}</body></html>`);
+  win.document.close();
+  win.print();
+}
+
+function TabPendientes({ pedidos, onUpdateEstado }) {
+  const [subTab, setSubTab] = useState(0);
+
+  const counts = SUB_TABS.map(st => pedidos.filter(p => p.estado === st.estado).length);
+  const totalPendientes = counts.reduce((a, b) => a + b, 0);
+
+  if (!totalPendientes) {
+    return <div className="g-empty">No hay tareas pendientes.</div>;
+  }
+
+  const current = SUB_TABS[subTab];
+  const lista = pedidos.filter(p => p.estado === current.estado);
+
   return (
-    <div className="g-seccion">
-      <div className="g-seccion-header">
-        <span className="g-seccion-dot" style={{ background: color }} />
-        <span className="g-seccion-titulo">{titulo}</span>
-        <span className="g-seccion-count">{pedidos.length}</span>
+    <div className="g-pendientes">
+      <div className="g-sub-tabs">
+        {SUB_TABS.map((st, i) => (
+          <button
+            key={st.estado}
+            className={`g-sub-tab ${subTab === i ? 'active' : ''}`}
+            style={subTab === i ? { borderColor: st.color, color: st.color } : {}}
+            onClick={() => setSubTab(i)}
+          >
+            {st.label}
+            {counts[i] > 0 && <span className="g-sub-count" style={subTab === i ? { background: st.color } : {}}>{counts[i]}</span>}
+          </button>
+        ))}
       </div>
+
+      {lista.length > 0 && (
+        <div className="g-print-bar">
+          <button className="g-btn g-btn-outline" onClick={() => imprimirEtiquetas(lista)}>
+            Imprimir etiquetas ({lista.length})
+          </button>
+        </div>
+      )}
+
       <div className="g-seccion-list">
-        {pedidos.map(p => (
+        {lista.length ? lista.map(p => (
           <div key={p.orden} className="g-prep-card">
             <div className="g-prep-header">
               <span className="g-prep-orden">{p.orden}</span>
               <EstadoBadge estado={p.estado} />
             </div>
             <div className="g-prep-body">
+              <div className="g-prep-row g-prep-qty"><span className="g-prep-label">Cantidad</span><strong>{p.cantidad || '—'}</strong></div>
               <div className="g-prep-row"><span className="g-prep-label">Cliente</span><span>{p.nombre || '—'}</span></div>
               <div className="g-prep-row"><span className="g-prep-label">Teléfono</span><span>{p.telefono || '—'}</span></div>
               <div className="g-prep-row"><span className="g-prep-label">Ciudad</span><span>{p.ciudad || '—'}</span></div>
               <div className="g-prep-row"><span className="g-prep-label">Dirección</span><span>{p.direccion || '—'}</span></div>
-              <div className="g-prep-row"><span className="g-prep-label">Cantidad</span><span>{p.cantidad || '—'}</span></div>
               {p.notas && <div className="g-prep-row"><span className="g-prep-label">Notas</span><span>{p.notas}</span></div>}
             </div>
             <div className="g-prep-actions">
-              <button className="g-btn g-btn-primary" onClick={() => onAction(p.orden)}>
-                {accion}
+              <button className="g-btn g-btn-primary" onClick={() => onUpdateEstado(p.orden, current.next)}>
+                {current.accion}
               </button>
             </div>
           </div>
-        ))}
+        )) : (
+          <div className="g-empty">No hay pedidos en este paso.</div>
+        )}
       </div>
-    </div>
-  );
-}
-
-function TabPreparacion({ pedidos, onUpdateEstado }) {
-  const porEmpacar = pedidos.filter(p => p.estado === 'Aprobado');
-  const porEnviar = pedidos.filter(p => p.estado === 'Empacado');
-  const porConfirmar = pedidos.filter(p => p.estado === 'Enviado');
-
-  const totalPendientes = porEmpacar.length + porEnviar.length + porConfirmar.length;
-
-  if (!totalPendientes) {
-    return <div className="g-empty">No hay tareas pendientes.</div>;
-  }
-
-  return (
-    <div className="g-pendientes">
-      <SeccionPendientes
-        titulo="Por empacar"
-        color="#00AE84"
-        pedidos={porEmpacar}
-        accion="Marcar como empacado"
-        onAction={orden => onUpdateEstado(orden, 'Empacado')}
-      />
-      <SeccionPendientes
-        titulo="Por enviar"
-        color="#27798F"
-        pedidos={porEnviar}
-        accion="Marcar como enviado"
-        onAction={orden => onUpdateEstado(orden, 'Enviado')}
-      />
-      <SeccionPendientes
-        titulo="Por confirmar entrega"
-        color="#005261"
-        pedidos={porConfirmar}
-        accion="Marcar como entregado"
-        onAction={orden => onUpdateEstado(orden, 'Entregado')}
-      />
     </div>
   );
 }
@@ -259,7 +289,7 @@ function TabInventario({ pedidos, inventario, onUpdateInventario }) {
 }
 
 export default function Gestion() {
-  const [tab, setTab] = useState('preparacion');
+  const [tab, setTab] = useState('pendientes');
   const [pedidos, setPedidos] = useState([]);
   const [inventario, setInventario] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -313,7 +343,7 @@ export default function Gestion() {
   };
 
   const tabs = [
-    { id: 'preparacion', label: 'Preparación' },
+    { id: 'pendientes', label: 'Pendientes' },
     { id: 'pedidos', label: 'Pedidos' },
     { id: 'clientes', label: 'Clientes' },
     { id: 'inventario', label: 'Inventario' },
@@ -343,12 +373,15 @@ export default function Gestion() {
         .g-stat-label { font-size: 14px; color: #45564f; margin-top: 4px; }
         .g-stat-sub { font-size: 13px; color: #e67700; margin-top: 4px; font-weight: 600; }
 
-        .g-pendientes { display: flex; flex-direction: column; gap: 32px; }
+        .g-pendientes { display: flex; flex-direction: column; gap: 20px; }
 
-        .g-seccion-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-        .g-seccion-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-        .g-seccion-titulo { font-size: 17px; font-weight: 700; color: #005261; }
-        .g-seccion-count { background: rgba(0,82,97,0.1); color: #005261; font-size: 13px; font-weight: 700; padding: 2px 9px; border-radius: 10px; }
+        .g-sub-tabs { display: flex; gap: 4px; }
+        .g-sub-tab { display: flex; align-items: center; gap: 6px; padding: 10px 18px; border: none; border-bottom: 3px solid transparent; background: none; font-size: 15px; font-weight: 600; color: #45564f; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .g-sub-tab:hover { color: #005261; }
+        .g-sub-tab.active { border-bottom-color: #005261; }
+        .g-sub-count { font-size: 11px; font-weight: 700; color: #fff; background: #999; padding: 1px 7px; border-radius: 10px; min-width: 18px; text-align: center; }
+
+        .g-print-bar { display: flex; justify-content: flex-end; }
 
         .g-seccion-list { display: flex; flex-direction: column; gap: 12px; }
 
@@ -357,6 +390,7 @@ export default function Gestion() {
         .g-prep-orden { font-weight: 700; color: #00ae84; font-size: 16px; }
         .g-prep-body { padding: 16px 20px; }
         .g-prep-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 15px; }
+        .g-prep-qty { font-size: 16px; padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid rgba(0,82,97,0.06); }
         .g-prep-label { color: #45564f; }
         .g-prep-actions { padding: 12px 20px; border-top: 1px solid rgba(0,82,97,0.06); }
 
@@ -378,6 +412,8 @@ export default function Gestion() {
         .g-btn-primary { background: linear-gradient(135deg, #00ae84, #005261); color: #fff; }
         .g-btn-primary:hover { opacity: 0.9; }
         .g-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .g-btn-outline { background: #fff; color: #005261; border: 1.5px solid #005261; }
+        .g-btn-outline:hover { background: #f0f7f4; }
         .g-btn-small { padding: 5px 12px; font-size: 13px; background: #e8f5f0; color: #005261; }
         .g-btn-small:hover { background: #d0ece4; }
 
@@ -412,7 +448,7 @@ export default function Gestion() {
               onClick={() => setTab(t.id)}
             >
               {t.label}
-              {t.id === 'preparacion' && totalPendientes > 0 && (
+              {t.id === 'pendientes' && totalPendientes > 0 && (
                 <span className="g-nav-badge">{totalPendientes}</span>
               )}
             </button>
@@ -426,7 +462,7 @@ export default function Gestion() {
             <div className="g-loading">Cargando datos...</div>
           ) : (
             <>
-              {tab === 'preparacion' && <TabPreparacion pedidos={pedidos} onUpdateEstado={updateEstado} />}
+              {tab === 'pendientes' && <TabPendientes pedidos={pedidos} onUpdateEstado={updateEstado} />}
               {tab === 'pedidos' && <TabPedidos pedidos={pedidos} onUpdateEstado={updateEstado} />}
               {tab === 'clientes' && <TabClientes pedidos={pedidos} />}
               {tab === 'inventario' && <TabInventario pedidos={pedidos} inventario={inventario} onUpdateInventario={updateInventario} />}
