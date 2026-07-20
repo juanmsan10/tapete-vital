@@ -356,13 +356,13 @@ export default function Gestion() {
       <style>{`
         .g-layout { min-height: 100vh; background: #f5faf8; font-family: 'Assistant', system-ui, sans-serif; }
 
-        .g-header { background: linear-gradient(135deg, #00ae84 0%, #005261 100%); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
-        .g-header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+        .g-header { background: linear-gradient(135deg, #00ae84 0%, #005261 100%); padding: 16px 0; position: sticky; top: 0; z-index: 100; }
+        .g-header-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; gap: 12px; }
         .g-header-title { color: #fff; font-size: 19px; font-weight: 700; letter-spacing: 0.02em; }
         .g-header-sub { color: rgba(255,255,255,0.7); font-size: 14px; margin-left: auto; }
 
-        .g-nav { background: #fff; border-bottom: 1px solid rgba(0,82,97,0.1); padding: 12px 24px; }
-        .g-nav-inner { max-width: 1200px; margin: 0 auto; display: flex; gap: 4px; overflow-x: auto; }
+        .g-nav { background: #fff; border-bottom: 1px solid rgba(0,82,97,0.1); padding: 12px 0; }
+        .g-nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; overflow-x: auto; }
         .g-nav-btn { display: flex; align-items: center; gap: 6px; padding: 10px 18px; border: none; background: none; font-size: 15px; font-weight: 600; color: #45564f; cursor: pointer; border-radius: 8px; transition: all 0.2s; white-space: nowrap; font-family: inherit; position: relative; }
         .g-nav-btn:hover { background: #f0f7f4; color: #005261; }
         .g-nav-btn.active { background: #e8f5f0; color: #005261; }
