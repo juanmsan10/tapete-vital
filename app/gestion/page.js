@@ -21,15 +21,6 @@ function formatoCOP(v) {
   return '$' + Number(v).toLocaleString('es-CO');
 }
 
-function Logo() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2v20M2 12h20M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
 function StatCard({ label, value, sub }) {
   return (
     <div className="g-stat">
@@ -438,7 +429,6 @@ export default function Gestion() {
       <div className="g-layout">
         <header className="g-header">
           <div className="g-header-inner">
-            <Logo />
             <span className="g-header-title">POLO A TIERRA</span>
             <span className="g-header-sub">Gestión</span>
           </div>
