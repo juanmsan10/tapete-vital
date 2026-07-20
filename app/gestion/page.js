@@ -385,7 +385,7 @@ export default function Gestion() {
 
         .g-print-bar { display: flex; justify-content: flex-end; }
 
-        .g-seccion-list { display: flex; flex-direction: column; gap: 12px; }
+        .g-seccion-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
 
         .g-prep-card { background: #fff; border-radius: 12px; border: 1px solid rgba(0,82,97,0.08); overflow: hidden; }
         .g-prep-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(0,82,97,0.06); }
