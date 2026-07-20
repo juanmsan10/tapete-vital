@@ -74,10 +74,6 @@ function TabPendientes({ pedidos, onUpdateEstado }) {
   const counts = SUB_TABS.map(st => pedidos.filter(p => p.estado === st.estado).length);
   const totalPendientes = counts.reduce((a, b) => a + b, 0);
 
-  if (!totalPendientes) {
-    return <div className="g-empty">No hay tareas pendientes.</div>;
-  }
-
   const current = SUB_TABS[subTab];
   const lista = pedidos.filter(p => p.estado === current.estado);
 
