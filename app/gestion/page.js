@@ -13,7 +13,7 @@ const ESTADO_COLOR = {
 
 const SUB_TABS = [
   { estado: 'Aprobado', label: 'Empacar', next: 'Empacado', accion: 'Marcar como empacado', color: '#00AE84' },
-  { estado: 'Empacado', label: 'Enviar', next: 'Enviado', accion: 'Marcar como enviado', color: '#27798F' },
+  { estado: 'Empacado', label: 'Enviar', next: 'Enviado', accion: 'Enviado', color: '#27798F' },
 ];
 
 function formatoCOP(v) {
@@ -69,12 +69,14 @@ function imprimirEtiquetas(pedidos) {
 
 function TabPendientes({ pedidos, onUpdateEstado }) {
   const [subTab, setSubTab] = useState(0);
+  const [guias, setGuias] = useState({});
 
   const counts = SUB_TABS.map(st => pedidos.filter(p => p.estado === st.estado).length);
   const totalPendientes = counts.reduce((a, b) => a + b, 0);
 
   const current = SUB_TABS[subTab];
   const lista = pedidos.filter(p => p.estado === current.estado);
+  const isEnviar = subTab === 1;
 
   return (
     <div className="g-pendientes">
@@ -116,7 +118,19 @@ function TabPendientes({ pedidos, onUpdateEstado }) {
               {p.notas && <div className="g-prep-row"><span className="g-prep-label">Notas</span><span>{p.notas}</span></div>}
             </div>
             <div className="g-prep-actions">
-              <button className="g-btn g-btn-primary" onClick={() => onUpdateEstado(p.orden, current.next)}>
+              {isEnviar && (
+                <div className="g-guia-row">
+                  <label className="g-guia-label">Guía #</label>
+                  <input
+                    className="g-input g-guia-input"
+                    type="text"
+                    placeholder="Número de guía"
+                    value={guias[p.orden] || ''}
+                    onChange={e => setGuias(prev => ({ ...prev, [p.orden]: e.target.value }))}
+                  />
+                </div>
+              )}
+              <button className="g-btn g-btn-primary" onClick={() => onUpdateEstado(p.orden, current.next, isEnviar ? guias[p.orden] : undefined)}>
                 {current.accion}
               </button>
             </div>
@@ -247,10 +261,11 @@ function TabConfirmar({ pedidos, onUpdateEstado }) {
               <div className="g-prep-row"><span className="g-prep-label">Cliente</span><span>{p.nombre || '—'}</span></div>
               <div className="g-prep-row"><span className="g-prep-label">Ciudad</span><span>{p.ciudad || '—'}</span></div>
               <div className="g-prep-row"><span className="g-prep-label">Teléfono</span><span>{p.telefono || '—'}</span></div>
+              {p.guia && <div className="g-prep-row"><span className="g-prep-label">Guía #</span><span className="g-guia-value">{p.guia}</span></div>}
             </div>
             <div className="g-prep-actions">
               <button className="g-btn g-btn-primary" onClick={() => onUpdateEstado(p.orden, 'Entregado')}>
-                Confirmar entrega
+                Entrega confirmada
               </button>
             </div>
           </div>
@@ -327,15 +342,17 @@ export default function Gestion() {
 
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
-  const updateEstado = async (orden, nuevoEstado) => {
+  const updateEstado = async (orden, nuevoEstado, guia) => {
     setUpdating(true);
     try {
+      const payload = { orden, estado: nuevoEstado };
+      if (guia) payload.guia = guia;
       await fetch('/api/gestion', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'updateEstado', orden, estado: nuevoEstado }),
+        body: JSON.stringify(payload),
       });
-      setPedidos(prev => prev.map(p => p.orden === orden ? { ...p, estado: nuevoEstado } : p));
+      setPedidos(prev => prev.map(p => p.orden === orden ? { ...p, estado: nuevoEstado, ...(guia ? { guia } : {}) } : p));
     } catch (err) {
       console.error('Error actualizando estado:', err);
     } finally {
@@ -413,7 +430,11 @@ export default function Gestion() {
         .g-prep-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 15px; }
         .g-prep-qty { font-size: 16px; padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid rgba(0,82,97,0.06); }
         .g-prep-label { color: #45564f; }
-        .g-prep-actions { padding: 12px 20px; border-top: 1px solid rgba(0,82,97,0.06); }
+        .g-prep-actions { padding: 12px 20px; border-top: 1px solid rgba(0,82,97,0.06); display: flex; flex-direction: column; gap: 10px; }
+        .g-guia-row { display: flex; align-items: center; gap: 10px; }
+        .g-guia-label { font-size: 14px; font-weight: 700; color: #005261; white-space: nowrap; }
+        .g-guia-input { flex: 1; width: auto; }
+        .g-guia-value { font-weight: 700; color: #005261; font-family: monospace; }
 
         .g-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 0.02em; text-transform: uppercase; }
 
