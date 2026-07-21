@@ -14,6 +14,24 @@ export async function GET() {
   }
 }
 
+export async function DELETE() {
+  if (!SHEET_URL) {
+    return Response.json({ error: 'GOOGLE_SHEET_URL no configurada' }, { status: 500 });
+  }
+  try {
+    const res = await fetch(SHEET_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'deleteAll' }),
+    });
+    const data = await res.text();
+    return Response.json({ ok: true, data });
+  } catch (err) {
+    console.error('[gestion] Error borrando datos:', err);
+    return Response.json({ error: 'Error borrando datos' }, { status: 500 });
+  }
+}
+
 export async function PUT(request) {
   if (!SHEET_URL) {
     return Response.json({ error: 'GOOGLE_SHEET_URL no configurada' }, { status: 500 });
