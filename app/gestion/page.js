@@ -14,7 +14,6 @@ const ESTADO_COLOR = {
 const SUB_TABS = [
   { estado: 'Aprobado', label: 'Empacar', next: 'Empacado', accion: 'Marcar como empacado', color: '#00AE84' },
   { estado: 'Empacado', label: 'Enviar', next: 'Enviado', accion: 'Marcar como enviado', color: '#27798F' },
-  { estado: 'Enviado', label: 'Confirmar entrega', next: 'Entregado', accion: 'Marcar como entregado', color: '#005261' },
 ];
 
 function formatoCOP(v) {
@@ -232,6 +231,37 @@ function TabClientes({ pedidos }) {
   );
 }
 
+function TabConfirmar({ pedidos, onUpdateEstado }) {
+  const lista = pedidos.filter(p => p.estado === 'Enviado');
+
+  return (
+    <div className="g-pendientes">
+      <div className="g-seccion-list">
+        {lista.length ? lista.map(p => (
+          <div key={p.orden} className="g-prep-card">
+            <div className="g-prep-header">
+              <span className="g-prep-orden">{p.orden}</span>
+              <EstadoBadge estado={p.estado} />
+            </div>
+            <div className="g-prep-body">
+              <div className="g-prep-row"><span className="g-prep-label">Cliente</span><span>{p.nombre || '—'}</span></div>
+              <div className="g-prep-row"><span className="g-prep-label">Ciudad</span><span>{p.ciudad || '—'}</span></div>
+              <div className="g-prep-row"><span className="g-prep-label">Teléfono</span><span>{p.telefono || '—'}</span></div>
+            </div>
+            <div className="g-prep-actions">
+              <button className="g-btn g-btn-primary" onClick={() => onUpdateEstado(p.orden, 'Entregado')}>
+                Confirmar entrega
+              </button>
+            </div>
+          </div>
+        )) : (
+          <div className="g-empty">No hay entregas por confirmar.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function TabInventario({ pedidos, inventario, onUpdateInventario }) {
   const vendidos = pedidos
     .filter(p => p.estado !== 'Iniciado')
@@ -331,12 +361,14 @@ export default function Gestion() {
 
   const tabs = [
     { id: 'pendientes', label: 'Pendientes' },
+    { id: 'confirmar', label: 'Confirmar entrega' },
     { id: 'pedidos', label: 'Pedidos' },
     { id: 'clientes', label: 'Clientes' },
     { id: 'inventario', label: 'Inventario' },
   ];
 
-  const totalPendientes = pedidos.filter(p => ['Aprobado', 'Empacado', 'Enviado'].includes(p.estado)).length;
+  const totalPendientes = pedidos.filter(p => ['Aprobado', 'Empacado'].includes(p.estado)).length;
+  const totalConfirmar = pedidos.filter(p => p.estado === 'Enviado').length;
 
   return (
     <>
@@ -442,6 +474,9 @@ export default function Gestion() {
                 {t.id === 'pendientes' && totalPendientes > 0 && (
                   <span className="g-nav-badge">{totalPendientes}</span>
                 )}
+                {t.id === 'confirmar' && totalConfirmar > 0 && (
+                  <span className="g-nav-badge">{totalConfirmar}</span>
+                )}
               </button>
             ))}
           </div>
@@ -455,6 +490,7 @@ export default function Gestion() {
           ) : (
             <>
               {tab === 'pendientes' && <TabPendientes pedidos={pedidos} onUpdateEstado={updateEstado} />}
+              {tab === 'confirmar' && <TabConfirmar pedidos={pedidos} onUpdateEstado={updateEstado} />}
               {tab === 'pedidos' && <TabPedidos pedidos={pedidos} onUpdateEstado={updateEstado} />}
               {tab === 'clientes' && <TabClientes pedidos={pedidos} />}
               {tab === 'inventario' && <TabInventario pedidos={pedidos} inventario={inventario} onUpdateInventario={updateInventario} />}
