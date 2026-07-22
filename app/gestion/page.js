@@ -55,9 +55,10 @@ function imprimirEtiquetas(pedidos) {
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html><head><title>Etiquetas de envío</title>
     <style>
+      @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap');
       @page { size: 50mm 50mm; margin: 0; }
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: -apple-system, Arial, sans-serif; }
+      body { font-family: 'Assistant', -apple-system, Arial, sans-serif; }
       .etiqueta { width: 50mm; height: 50mm; padding: 2.5mm 3mm; font-size: 7pt; line-height: 1.35; color: #000; display: flex; flex-direction: column; page-break-after: always; }
       .etiqueta:last-child { page-break-after: auto; }
       .et-brand { border-bottom: 0.5px solid #000; padding-bottom: 1.2mm; margin-bottom: 1.5mm; }
@@ -72,7 +73,7 @@ function imprimirEtiquetas(pedidos) {
       .et-notas-label { font-weight: 700; font-style: normal; font-size: 5.5pt; text-transform: uppercase; letter-spacing: 0.05em; }
     </style></head><body>${etiquetas}</body></html>`);
   win.document.close();
-  win.print();
+  win.document.fonts.ready.then(() => win.print());
 }
 
 function TabPendientes({ pedidos, onUpdateEstado }) {
