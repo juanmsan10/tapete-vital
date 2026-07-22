@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { PRODUCTOS, resumenProductos } from '@/lib/pricing';
 
 const ESTADOS = ['Iniciado', 'Aprobado', 'Empacado', 'Enviado', 'Entregado'];
 const ESTADO_COLOR = {
@@ -50,6 +51,7 @@ function imprimirEtiquetas(pedidos) {
     <div class="etiqueta">
       <div class="et-brand"><span class="et-brand-name">Polo a Tierra</span></div>
       <div class="et-orden">${p.orden}</div>
+      ${p.productos ? `<div class="et-campo"><span class="et-label">Contiene:</span> ${p.productos}</div>` : ''}
       <div class="et-campo"><span class="et-label">Para:</span> ${p.nombre || '—'}</div>
       <div class="et-campo"><span class="et-label">Tel:</span> ${p.telefono || '—'}</div>
       <div class="et-direccion">
@@ -82,6 +84,74 @@ function imprimirEtiquetas(pedidos) {
     </style></head><body>${etiquetas}</body></html>`);
   win.document.close();
   win.document.fonts.ready.then(() => win.print());
+}
+
+function FormPedidoManual({ onCrear, onCerrar, creando }) {
+  const [items, setItems] = useState({ tapete: 0, pad: 0, parches: 0 });
+  const [form, setForm] = useState({ nombre: '', telefono: '', email: '', ciudad: '', direccion: '', notas: '', estado: 'Aprobado' });
+  const [totalManual, setTotalManual] = useState('');
+
+  const subtotal = Object.entries(items).reduce((sum, [key, qty]) => sum + PRODUCTOS[key].precio * qty, 0);
+  const totalUnidades = Object.values(items).reduce((a, b) => a + b, 0);
+  const total = totalManual !== '' ? Number(totalManual) : subtotal;
+  const setItem = (key, val) => setItems(prev => ({ ...prev, [key]: Math.max(0, parseInt(val, 10) || 0) }));
+  const setCampo = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
+
+  const guardar = () => onCrear({
+    ...form,
+    cantidad: totalUnidades,
+    total,
+    productos: resumenProductos(items),
+  });
+
+  return (
+    <div className="g-modal-overlay" onClick={onCerrar}>
+      <div className="g-modal" onClick={e => e.stopPropagation()}>
+        <h3>Crear pedido manual</h3>
+        <p className="g-modal-sub">Para ventas cerradas por chat o pagadas por fuera del sistema.</p>
+
+        {Object.entries(PRODUCTOS).map(([key, prod]) => (
+          <div key={key} className="g-modal-prod">
+            <span>{prod.nombre} <small>({formatoCOP(prod.precio)})</small></span>
+            <input type="number" min="0" className="g-input g-modal-qty" value={items[key]} onChange={e => setItem(key, e.target.value)} />
+          </div>
+        ))}
+
+        <div className="g-modal-total">
+          <span>Total cobrado</span>
+          <input
+            type="number"
+            className="g-input"
+            value={totalManual !== '' ? totalManual : (subtotal || '')}
+            placeholder="0"
+            onChange={e => setTotalManual(e.target.value)}
+          />
+        </div>
+        <p className="g-modal-hint">Prellenado con la suma de productos ({formatoCOP(subtotal)}) — ajústalo si cobraste distinto (envío, descuento).</p>
+
+        <input className="g-input" placeholder="Nombre *" value={form.nombre} onChange={e => setCampo('nombre', e.target.value)} />
+        <input className="g-input" placeholder="Teléfono" value={form.telefono} onChange={e => setCampo('telefono', e.target.value)} />
+        <input className="g-input" placeholder="Email" value={form.email} onChange={e => setCampo('email', e.target.value)} />
+        <input className="g-input" placeholder="Ciudad" value={form.ciudad} onChange={e => setCampo('ciudad', e.target.value)} />
+        <input className="g-input" placeholder="Dirección" value={form.direccion} onChange={e => setCampo('direccion', e.target.value)} />
+        <input className="g-input" placeholder="Notas" value={form.notas} onChange={e => setCampo('notas', e.target.value)} />
+        <select className="g-input" value={form.estado} onChange={e => setCampo('estado', e.target.value)}>
+          {ESTADOS.map(est => <option key={est} value={est}>{est}</option>)}
+        </select>
+
+        <div className="g-modal-actions">
+          <button className="g-btn g-btn-outline" onClick={onCerrar}>Cancelar</button>
+          <button
+            className="g-btn g-btn-primary"
+            disabled={creando || !form.nombre || totalUnidades === 0 || !total}
+            onClick={guardar}
+          >
+            {creando ? 'Guardando…' : 'Crear pedido'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function TabPendientes({ pedidos, onUpdateEstado }) {
@@ -126,7 +196,7 @@ function TabPendientes({ pedidos, onUpdateEstado }) {
             </div>
             <div className="g-prep-body">
               {!current.compacto && (
-                <div className="g-prep-row g-prep-qty"><span className="g-prep-label">Cantidad</span><strong>{p.cantidad || '—'}</strong></div>
+                <div className="g-prep-row g-prep-qty"><span className="g-prep-label">Productos</span><strong>{p.productos || `${p.cantidad || '—'}× Tapete Vital`}</strong></div>
               )}
               <div className="g-prep-row"><span className="g-prep-label">Cliente</span><span>{p.nombre || '—'}</span></div>
               <div className="g-prep-row"><span className="g-prep-label">Teléfono</span><span>{p.telefono || '—'}</span></div>
@@ -190,7 +260,7 @@ function TabPedidos({ pedidos, onUpdateEstado }) {
               <th>Fecha</th>
               <th>Orden</th>
               <th>Cliente</th>
-              <th>Cantidad</th>
+              <th>Productos</th>
               <th>Total</th>
               <th>Estado</th>
               <th>Acción</th>
@@ -205,7 +275,7 @@ function TabPedidos({ pedidos, onUpdateEstado }) {
                   <td>{p.fecha}</td>
                   <td className="g-orden-cell">{p.orden}</td>
                   <td>{p.nombre}</td>
-                  <td>{p.cantidad}</td>
+                  <td>{p.productos || `${p.cantidad}× Tapete`}</td>
                   <td>{p.total ? formatoCOP(p.total) : '—'}</td>
                   <td><EstadoBadge estado={p.estado} /></td>
                   <td>
@@ -270,45 +340,61 @@ function TabClientes({ pedidos }) {
   );
 }
 
-function TabInventario({ pedidos, inventario, onUpdateInventario }) {
-  const vendidos = pedidos
-    .filter(p => p.estado !== 'Iniciado')
-    .reduce((sum, p) => sum + (Number(p.cantidad) || 0), 0);
+// Unidades vendidas por producto. Pedidos sin desglose (embudo) cuentan como tapetes.
+function vendidosPorProducto(pedidos) {
+  const vendidos = { tapete: 0, pad: 0, parches: 0 };
+  pedidos.filter(p => p.estado !== 'Iniciado').forEach(p => {
+    if (p.productos) {
+      Object.entries(PRODUCTOS).forEach(([key, prod]) => {
+        const m = String(p.productos).match(new RegExp(`(\\d+)×\\s*${prod.nombre}`));
+        if (m) vendidos[key] += Number(m[1]);
+      });
+    } else {
+      vendidos.tapete += Number(p.cantidad) || 0;
+    }
+  });
+  return vendidos;
+}
 
-  const disponible = inventario - vendidos;
-
-  const [nuevoStock, setNuevoStock] = useState('');
+function TabInventario({ pedidos, inventarios, onUpdateInventario }) {
+  const vendidos = vendidosPorProducto(pedidos);
+  const [nuevoStock, setNuevoStock] = useState({ tapete: '', pad: '', parches: '' });
 
   return (
     <div className="g-inventario">
-      <div className="g-inv-grid">
-        <StatCard label="Stock total registrado" value={inventario} />
-        <StatCard label="Unidades vendidas" value={vendidos} />
-        <StatCard label="Disponibles" value={disponible} sub={disponible <= 5 ? 'Stock bajo' : ''} />
-      </div>
-      <div className="g-inv-form">
-        <h3>Ajustar inventario</h3>
-        <p>Registra el stock total actual (ej: recibiste nueva mercancía).</p>
-        <div className="g-inv-input-row">
-          <input
-            type="number"
-            placeholder="Nuevo stock total"
-            value={nuevoStock}
-            onChange={e => setNuevoStock(e.target.value)}
-            className="g-input"
-          />
-          <button
-            className="g-btn g-btn-primary"
-            disabled={!nuevoStock}
-            onClick={() => {
-              onUpdateInventario(Number(nuevoStock));
-              setNuevoStock('');
-            }}
-          >
-            Actualizar stock
-          </button>
-        </div>
-      </div>
+      {Object.entries(PRODUCTOS).map(([key, prod]) => {
+        const stock = Number(inventarios[key]) || 0;
+        const disponible = stock - vendidos[key];
+        return (
+          <div key={key} className="g-inv-producto">
+            <h3>{prod.nombre}</h3>
+            <div className="g-inv-grid">
+              <StatCard label="Stock registrado" value={stock} />
+              <StatCard label="Vendidas" value={vendidos[key]} />
+              <StatCard label="Disponibles" value={disponible} sub={disponible <= 5 ? 'Stock bajo' : ''} />
+            </div>
+            <div className="g-inv-input-row">
+              <input
+                type="number"
+                placeholder="Nuevo stock total"
+                value={nuevoStock[key]}
+                onChange={e => setNuevoStock(prev => ({ ...prev, [key]: e.target.value }))}
+                className="g-input"
+              />
+              <button
+                className="g-btn g-btn-primary"
+                disabled={nuevoStock[key] === ''}
+                onClick={() => {
+                  onUpdateInventario(key, Number(nuevoStock[key]));
+                  setNuevoStock(prev => ({ ...prev, [key]: '' }));
+                }}
+              >
+                Actualizar
+              </button>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -316,16 +402,19 @@ function TabInventario({ pedidos, inventario, onUpdateInventario }) {
 export default function Gestion() {
   const [tab, setTab] = useState('pendientes');
   const [pedidos, setPedidos] = useState([]);
-  const [inventario, setInventario] = useState(0);
+  const [inventarios, setInventarios] = useState({ tapete: 0, pad: 0, parches: 0 });
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [showCrear, setShowCrear] = useState(false);
+  const [creando, setCreando] = useState(false);
 
   const cargarDatos = useCallback(async () => {
     try {
       const res = await fetch('/api/gestion');
       const data = await res.json();
       if (data.pedidos) setPedidos(data.pedidos);
-      if (data.inventario != null) setInventario(data.inventario);
+      if (data.inventarios) setInventarios(data.inventarios);
+      else if (data.inventario != null) setInventarios(prev => ({ ...prev, tapete: data.inventario }));
     } catch (err) {
       console.error('Error cargando datos:', err);
     } finally {
@@ -353,19 +442,41 @@ export default function Gestion() {
     }
   };
 
-  const updateInventario = async (stock) => {
+  const updateInventario = async (producto, stock) => {
     setUpdating(true);
     try {
       await fetch('/api/gestion', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'updateInventario', stock }),
+        body: JSON.stringify({ action: 'updateInventario', producto, stock }),
       });
-      setInventario(stock);
+      setInventarios(prev => ({ ...prev, [producto]: stock }));
     } catch (err) {
       console.error('Error actualizando inventario:', err);
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const crearPedido = async (pedido) => {
+    setCreando(true);
+    try {
+      const res = await fetch('/api/gestion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pedido),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setShowCrear(false);
+        await cargarDatos();
+      } else {
+        console.error('Error creando pedido:', data.error);
+      }
+    } catch (err) {
+      console.error('Error creando pedido:', err);
+    } finally {
+      setCreando(false);
     }
   };
 
@@ -464,6 +575,23 @@ export default function Gestion() {
         .g-input { padding: 10px 14px; border: 1px solid rgba(0,82,97,0.2); border-radius: 8px; font-size: 15px; font-family: inherit; outline: none; width: 200px; }
         .g-input:focus { border-color: #00ae84; box-shadow: 0 0 0 3px rgba(0,174,132,0.1); }
 
+        .g-nav-crear { margin-left: auto; white-space: nowrap; align-self: center; }
+        .g-inv-producto { background: #fff; border-radius: 12px; border: 1px solid rgba(0,82,97,0.08); padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+        .g-inv-producto h3 { font-size: 17px; color: #005261; }
+
+        .g-modal-overlay { position: fixed; inset: 0; background: rgba(0,40,45,0.5); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 20px; }
+        .g-modal { background: #fff; border-radius: 16px; padding: 28px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .g-modal h3 { font-size: 19px; color: #005261; }
+        .g-modal-sub { font-size: 14px; color: #45564f; margin-bottom: 6px; }
+        .g-modal .g-input { width: 100%; }
+        .g-modal-prod { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; }
+        .g-modal-prod small { color: #45564f; }
+        .g-modal-qty { width: 80px !important; text-align: center; }
+        .g-modal-total { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 700; color: #005261; margin-top: 6px; }
+        .g-modal-total .g-input { width: 160px; }
+        .g-modal-hint { font-size: 12px; color: #77857f; margin-bottom: 8px; }
+        .g-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+
         .g-loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; font-size: 17px; color: #45564f; }
         .g-updating { position: fixed; top: 70px; right: 24px; background: #005261; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; z-index: 200; animation: g-fade-in 0.2s; }
         @keyframes g-fade-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
@@ -490,6 +618,9 @@ export default function Gestion() {
                 )}
               </button>
             ))}
+            <button className="g-btn g-btn-outline g-nav-crear" onClick={() => setShowCrear(true)}>
+              + Pedido manual
+            </button>
           </div>
         </nav>
 
@@ -503,10 +634,14 @@ export default function Gestion() {
               {tab === 'pendientes' && <TabPendientes pedidos={pedidos} onUpdateEstado={updateEstado} />}
               {tab === 'pedidos' && <TabPedidos pedidos={pedidos} onUpdateEstado={updateEstado} />}
               {tab === 'clientes' && <TabClientes pedidos={pedidos} />}
-              {tab === 'inventario' && <TabInventario pedidos={pedidos} inventario={inventario} onUpdateInventario={updateInventario} />}
+              {tab === 'inventario' && <TabInventario pedidos={pedidos} inventarios={inventarios} onUpdateInventario={updateInventario} />}
             </>
           )}
         </main>
+
+        {showCrear && (
+          <FormPedidoManual onCrear={crearPedido} onCerrar={() => setShowCrear(false)} creando={creando} />
+        )}
       </div>
     </>
   );
