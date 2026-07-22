@@ -99,7 +99,10 @@ export async function POST(request) {
   const firma =
     request.headers.get('x-bold-signature') || request.headers.get('signature') || '';
 
-  const secret = process.env.BOLD_WEBHOOK_SECRET;
+  // Para integración "Botón de pagos", Bold firma el webhook con la misma
+  // llave secreta del botón (BOLD_SECRET_KEY) — no hay un secreto de webhook aparte.
+  // https://developers.bold.co/webhook
+  const secret = process.env.BOLD_SECRET_KEY;
   if (secret && !verificarFirma(rawBody, firma, secret)) {
     console.warn('[webhook/bold] Firma inválida. Evento descartado.');
     return Response.json({ error: 'Firma inválida' }, { status: 401 });
