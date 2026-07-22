@@ -7,13 +7,13 @@
 //    (sirve además para recuperar checkouts abandonados por WhatsApp)
 // ============================================================
 import crypto from 'crypto';
-import { calcularTotal, formatoCOP } from '@/lib/pricing';
+import { calcularTotal, calcularTotalCarrito, resumenProductos, formatoCOP } from '@/lib/pricing';
 import { enviarCorreo, htmlPedido, registrarSheet } from '@/lib/email';
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { cantidad, zona, nombre, cedula, telefono, email, ciudad, direccion, notas } = body;
+    const { cantidad, zona, items, nombre, cedula, telefono, email, ciudad, direccion, notas } = body;
 
     if (!nombre || !cedula || !telefono || !direccion || !ciudad) {
       return Response.json({ error: 'Faltan datos de envío obligatorios.' }, { status: 400 });
@@ -28,8 +28,16 @@ export async function POST(request) {
       );
     }
 
-    // Total calculado server-side con la matriz oficial
-    const totales = calcularTotal(cantidad, zona);
+    // Total calculado server-side con la matriz oficial.
+    // `items` (tienda multi-producto) tiene prioridad; sin items es el embudo clásico.
+    const esCarrito = items && typeof items === 'object';
+    const totales = esCarrito ? calcularTotalCarrito(items, zona) : calcularTotal(cantidad, zona);
+    if (esCarrito && totales.unidades === 0) {
+      return Response.json({ error: 'El carrito está vacío.' }, { status: 400 });
+    }
+    const productos = esCarrito ? resumenProductos(totales.items) : '';
+    const unidades = esCarrito ? totales.unidades : totales.cantidad;
+    const descripcion = esCarrito ? productos : `${totales.cantidad} tapete(s)`;
     const orderId = `TV-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
     const currency = 'COP';
 
@@ -46,7 +54,7 @@ export async function POST(request) {
       fecha: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
       orden: orderId,
       estado: 'Iniciado',
-      cantidad: totales.cantidad,
+      cantidad: unidades,
       total: totales.total,
       nombre,
       telefono,
@@ -54,12 +62,13 @@ export async function POST(request) {
       ciudad,
       direccion,
       notas: notas || '',
+      productos,
     });
 
     // Correo interno: pedido iniciado (recuperación de abandonos incluida)
     await enviarCorreo({
       to: process.env.EMAIL_INTERNO || 'pedidos@tapetevital.co',
-      subject: `🟡 Pedido iniciado ${orderId} — ${totales.cantidad} tapete(s) — ${formatoCOP(totales.total)}`,
+      subject: `🟡 Pedido iniciado ${orderId} — ${descripcion} — ${formatoCOP(totales.total)}`,
       html: htmlPedido({
         titulo: 'Pedido iniciado (esperando pago)',
         orden: orderId,
@@ -70,7 +79,7 @@ export async function POST(request) {
           Email: email || 'No indicado',
           Ciudad: ciudad,
           Dirección: direccion,
-          Cantidad: `${totales.cantidad} tapete(s)`,
+          Productos: descripcion,
           Envío: `${totales.zona === 'bogota' ? 'Bogotá' : 'Resto del país'} — ${formatoCOP(totales.envio)}`,
           Notas: notas || '—',
         },
