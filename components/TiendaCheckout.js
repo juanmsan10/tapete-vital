@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { PRODUCTOS, calcularTotalCarrito, resumenProductos, formatoCOP, CANTIDAD_MAXIMA } from '@/lib/pricing';
+import { PRODUCTOS, calcularTotalCarrito, formatoCOP, CANTIDAD_MAXIMA } from '@/lib/pricing';
 
 const DESCRIPCIONES = {
   tapete: 'El original. Terapia de grounding en casa mientras duermes o descansas.',
@@ -59,7 +59,8 @@ export default function TiendaCheckout() {
     script.setAttribute('data-currency', currency);
     script.setAttribute('data-integrity-signature', integrity);
     script.setAttribute('data-redirection-url', redirectUrl);
-    script.setAttribute('data-description', `${resumenProductos(items)} — Polo a Tierra`);
+    // Solo caracteres simples: descripciones con "×"/tildes disparan BTN-001 en Bold
+    script.setAttribute('data-description', `Pedido Polo a Tierra x${totales.unidades}`);
     script.setAttribute(
       'data-customer-data',
       JSON.stringify({
