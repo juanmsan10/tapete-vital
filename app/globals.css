@@ -681,6 +681,8 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .tienda-prod.activo { border-color: var(--verde); box-shadow: 0 8px 24px rgba(0, 174, 132, 0.12); }
+.tienda-prod-img { width: 84px; height: 84px; object-fit: cover; border-radius: 10px; flex-shrink: 0; background: #f4f7f5; }
+.tienda-prod-info { flex: 1; }
 .tienda-prod-nombre { font-weight: 700; font-size: 17px; color: var(--teal-oscuro); }
 .tienda-prod-desc { font-size: 13.5px; color: var(--gris-texto); margin: 2px 0 6px; }
 .tienda-prod-precio { font-weight: 700; font-size: 15.5px; }

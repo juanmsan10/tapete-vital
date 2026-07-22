@@ -9,6 +9,12 @@ const DESCRIPCIONES = {
   parches: 'Aplicación localizada para zonas de molestia puntual.',
 };
 
+const IMAGENES = {
+  tapete: 'https://assets.cdn.filesafe.space/TfH7DWHmeMH26MxEDE8t/media/5c73b7dc-5fb2-49cc-a3a4-c92d1f5d58be.png',
+  pad: '/pad.jpg',
+  parches: '/parches.jpg',
+};
+
 export default function TiendaCheckout() {
   const [items, setItems] = useState({ tapete: 0, pad: 0, parches: 0 });
   const [zona, setZona] = useState('bogota');
@@ -112,6 +118,7 @@ export default function TiendaCheckout() {
           <div className="tienda-productos">
             {Object.entries(PRODUCTOS).map(([key, prod]) => (
               <div key={key} className={`tienda-prod ${items[key] > 0 ? 'activo' : ''}`}>
+                <img className="tienda-prod-img" src={IMAGENES[key]} alt={prod.nombre} loading="lazy" />
                 <div className="tienda-prod-info">
                   <div className="tienda-prod-nombre">{prod.nombre}</div>
                   <div className="tienda-prod-desc">{DESCRIPCIONES[key]}</div>
