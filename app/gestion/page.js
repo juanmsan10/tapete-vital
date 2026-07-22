@@ -12,11 +12,19 @@ const ESTADO_COLOR = {
 };
 
 const SUB_TABS = [
-  { estado: 'Iniciado', label: 'Abandonado', next: 'Aprobado', accion: 'Marcar como aprobado', color: '#FFC272' },
+  { estado: 'Iniciado', label: 'Abandonado', next: 'Aprobado', accion: 'Marcar como aprobado', color: '#FFC272', whatsapp: true },
   { estado: 'Aprobado', label: 'Empacar', next: 'Empacado', accion: 'Marcar como empacado', color: '#00AE84' },
   { estado: 'Empacado', label: 'Enviar', next: 'Enviado', accion: 'Enviado', color: '#27798F', pideGuia: true },
   { estado: 'Enviado', label: 'Confirmar entrega', next: 'Entregado', accion: 'Entrega confirmada', color: '#005261', compacto: true },
 ];
+
+function whatsappHref(p) {
+  const digitos = String(p.telefono || '').replace(/\D/g, '');
+  if (!digitos) return null;
+  const numero = digitos.length === 10 ? `57${digitos}` : digitos;
+  const mensaje = `Hola ${p.nombre || ''}, vimos que estabas por completar tu compra del Tapete Vital (pedido ${p.orden}) pero no logramos confirmar el pago. ¿Te ayudamos a terminarla?`;
+  return `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+}
 
 function formatoCOP(v) {
   return '$' + Number(v).toLocaleString('es-CO');
@@ -130,6 +138,11 @@ function TabPendientes({ pedidos, onUpdateEstado }) {
               {current.compacto && p.guia && <div className="g-prep-row"><span className="g-prep-label">Guía #</span><span className="g-guia-value">{p.guia}</span></div>}
             </div>
             <div className="g-prep-actions">
+              {current.whatsapp && whatsappHref(p) && (
+                <a className="g-btn g-btn-whatsapp" href={whatsappHref(p)} target="_blank" rel="noopener noreferrer">
+                  Escribir por WhatsApp
+                </a>
+              )}
               {current.pideGuia && (
                 <div className="g-guia-row">
                   <label className="g-guia-label">Guía #</label>
@@ -434,6 +447,8 @@ export default function Gestion() {
         .g-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
         .g-btn-outline { background: #fff; color: #005261; border: 1.5px solid #005261; }
         .g-btn-outline:hover { background: #f0f7f4; }
+        .g-btn-whatsapp { background: #25D366; color: #fff; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; }
+        .g-btn-whatsapp:hover { opacity: 0.9; }
         .g-btn-small { padding: 5px 12px; font-size: 13px; background: #e8f5f0; color: #005261; }
         .g-btn-small:hover { background: #d0ece4; }
 
