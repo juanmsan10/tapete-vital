@@ -40,30 +40,36 @@ function EstadoBadge({ estado }) {
 function imprimirEtiquetas(pedidos) {
   const etiquetas = pedidos.map(p => `
     <div class="etiqueta">
-      <div class="et-marca">POLO A TIERRA</div>
+      <div class="et-brand"><span class="et-brand-name">Polo a Tierra</span></div>
       <div class="et-orden">${p.orden}</div>
       <div class="et-campo"><span class="et-label">Para:</span> ${p.nombre || '—'}</div>
       <div class="et-campo"><span class="et-label">Tel:</span> ${p.telefono || '—'}</div>
-      <div class="et-campo"><span class="et-label">Ciudad:</span> ${p.ciudad || '—'}</div>
-      <div class="et-campo"><span class="et-label">Dirección:</span> ${p.direccion || '—'}</div>
-      <div class="et-campo"><span class="et-label">Cantidad:</span> <strong>${p.cantidad || '—'}</strong></div>
-      ${p.notas ? `<div class="et-campo"><span class="et-label">Notas:</span> ${p.notas}</div>` : ''}
+      <div class="et-direccion">
+        <div class="et-ciudad">${p.ciudad || '—'}</div>
+        <div class="et-dir-texto">${p.direccion || '—'}</div>
+      </div>
+      <div class="et-notas">${p.notas ? `<span class="et-notas-label">Nota:</span> ${p.notas}` : ''}</div>
     </div>
   `).join('');
 
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html><head><title>Etiquetas de envío</title>
     <style>
+      @page { size: 50mm 50mm; margin: 0; }
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: Arial, sans-serif; }
-      .etiqueta { border: 2px solid #333; border-radius: 8px; padding: 20px; margin: 16px; page-break-inside: avoid; max-width: 400px; }
-      .et-marca { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #005261; text-transform: uppercase; margin-bottom: 4px; }
-      .et-orden { font-size: 18px; font-weight: 700; color: #00ae84; margin-bottom: 12px; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
-      .et-campo { font-size: 14px; padding: 3px 0; }
-      .et-label { font-weight: 700; color: #333; }
-      @media print {
-        .etiqueta { margin: 12px 0; border-width: 1.5px; }
-      }
+      body { font-family: -apple-system, Arial, sans-serif; }
+      .etiqueta { width: 50mm; height: 50mm; padding: 2.5mm 3mm; font-size: 7pt; line-height: 1.35; color: #000; display: flex; flex-direction: column; page-break-after: always; }
+      .etiqueta:last-child { page-break-after: auto; }
+      .et-brand { border-bottom: 0.5px solid #000; padding-bottom: 1.2mm; margin-bottom: 1.5mm; }
+      .et-brand-name { font-size: 5.5pt; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
+      .et-orden { font-size: 10pt; font-weight: 700; margin-bottom: 1.2mm; }
+      .et-campo { font-size: 7pt; padding: 0.2mm 0; }
+      .et-label { font-weight: 700; }
+      .et-direccion { margin-top: 1.2mm; padding-top: 1.2mm; border-top: 0.5px dashed #000; }
+      .et-direccion .et-ciudad { font-weight: 700; font-size: 7.5pt; margin-bottom: 0.3mm; }
+      .et-direccion .et-dir-texto { font-size: 7pt; line-height: 1.4; }
+      .et-notas { margin-top: auto; padding-top: 1mm; border-top: 0.5px dotted #000; font-size: 6.5pt; font-style: italic; min-height: 4mm; }
+      .et-notas-label { font-weight: 700; font-style: normal; font-size: 5.5pt; text-transform: uppercase; letter-spacing: 0.05em; }
     </style></head><body>${etiquetas}</body></html>`);
   win.document.close();
   win.print();
