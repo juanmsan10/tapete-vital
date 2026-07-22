@@ -10,7 +10,18 @@ const ESTADO_COLOR = {
   Empacado: '#27798F',
   Enviado: '#005261',
   Entregado: '#5B3623',
+  Descartado: '#999999',
 };
+
+// Desglose de productos, un renglón por producto
+function ListaProductos({ pedido }) {
+  const texto = pedido.productos || `${pedido.cantidad || '—'}× Tapete Vital`;
+  return (
+    <span className="g-prods">
+      {texto.split(', ').map((linea, i) => <span key={i}>{linea}</span>)}
+    </span>
+  );
+}
 
 const SUB_TABS = [
   { estado: 'Iniciado', label: 'Abandonado', next: 'Aprobado', accion: 'Marcar como aprobado', color: '#FFC272', whatsapp: true },
@@ -196,7 +207,7 @@ function TabPendientes({ pedidos, onUpdateEstado }) {
             </div>
             <div className="g-prep-body">
               {!current.compacto && (
-                <div className="g-prep-row g-prep-qty"><span className="g-prep-label">Productos</span><strong>{p.productos || `${p.cantidad || '—'}× Tapete Vital`}</strong></div>
+                <div className="g-prep-row g-prep-qty"><span className="g-prep-label">Productos</span><strong><ListaProductos pedido={p} /></strong></div>
               )}
               <div className="g-prep-row"><span className="g-prep-label">Cliente</span><span>{p.nombre || '—'}</span></div>
               <div className="g-prep-row"><span className="g-prep-label">Teléfono</span><span>{p.telefono || '—'}</span></div>
@@ -228,6 +239,18 @@ function TabPendientes({ pedidos, onUpdateEstado }) {
               <button className="g-btn g-btn-primary" onClick={() => onUpdateEstado(p.orden, current.next, current.pideGuia ? guias[p.orden] : undefined)}>
                 {current.accion}
               </button>
+              {current.whatsapp && (
+                <button
+                  className="g-btn g-btn-descartar"
+                  onClick={() => {
+                    if (window.confirm(`¿Descartar el pedido ${p.orden}? Saldrá de Pendientes (queda en el historial de Pedidos).`)) {
+                      onUpdateEstado(p.orden, 'Descartado');
+                    }
+                  }}
+                >
+                  Descartar — no va a comprar
+                </button>
+              )}
             </div>
           </div>
         )) : (
@@ -249,7 +272,7 @@ function TabPedidos({ pedidos, onUpdateEstado }) {
     <>
       <div className="g-filters">
         <button className={`g-filter ${!filtro ? 'active' : ''}`} onClick={() => setFiltro('')}>Todos</button>
-        {ESTADOS.map(e => (
+        {[...ESTADOS, 'Descartado'].map(e => (
           <button key={e} className={`g-filter ${filtro === e ? 'active' : ''}`} onClick={() => setFiltro(e)}>{e}</button>
         ))}
       </div>
@@ -269,13 +292,13 @@ function TabPedidos({ pedidos, onUpdateEstado }) {
           <tbody>
             {filtrados.map(p => {
               const idx = ESTADOS.indexOf(p.estado);
-              const next = idx < ESTADOS.length - 1 ? ESTADOS[idx + 1] : null;
+              const next = idx >= 0 && idx < ESTADOS.length - 1 ? ESTADOS[idx + 1] : null;
               return (
                 <tr key={p.orden + p.fecha}>
                   <td>{p.fecha}</td>
                   <td className="g-orden-cell">{p.orden}</td>
                   <td>{p.nombre}</td>
-                  <td>{p.productos || `${p.cantidad}× Tapete`}</td>
+                  <td><ListaProductos pedido={p} /></td>
                   <td>{p.total ? formatoCOP(p.total) : '—'}</td>
                   <td><EstadoBadge estado={p.estado} /></td>
                   <td>
@@ -343,7 +366,7 @@ function TabClientes({ pedidos }) {
 // Unidades vendidas por producto. Pedidos sin desglose (embudo) cuentan como tapetes.
 function vendidosPorProducto(pedidos) {
   const vendidos = { tapete: 0, pad: 0, parches: 0 };
-  pedidos.filter(p => p.estado !== 'Iniciado').forEach(p => {
+  pedidos.filter(p => !['Iniciado', 'Descartado'].includes(p.estado)).forEach(p => {
     if (p.productos) {
       Object.entries(PRODUCTOS).forEach(([key, prod]) => {
         const m = String(p.productos).match(new RegExp(`(\\d+)×\\s*${prod.nombre}`));
@@ -487,7 +510,7 @@ export default function Gestion() {
     { id: 'inventario', label: 'Inventario' },
   ];
 
-  const totalPendientes = pedidos.filter(p => ['Aprobado', 'Empacado', 'Enviado'].includes(p.estado)).length;
+  const totalPendientes = pedidos.filter(p => ['Iniciado', 'Aprobado', 'Empacado', 'Enviado'].includes(p.estado)).length;
 
   return (
     <>
@@ -560,6 +583,10 @@ export default function Gestion() {
         .g-btn-outline:hover { background: #f0f7f4; }
         .g-btn-whatsapp { background: #25D366; color: #fff; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; }
         .g-btn-whatsapp:hover { opacity: 0.9; }
+        .g-btn-descartar { background: none; color: #b3423a; border: 1.5px solid rgba(179,66,58,0.4); }
+        .g-btn-descartar:hover { background: #fdf1f0; border-color: #b3423a; }
+        .g-prods { display: inline-flex; flex-direction: column; gap: 2px; text-align: right; }
+        .g-table .g-prods { text-align: left; }
         .g-btn-small { padding: 5px 12px; font-size: 13px; background: #e8f5f0; color: #005261; }
         .g-btn-small:hover { background: #d0ece4; }
 
