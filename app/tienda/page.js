@@ -7,7 +7,7 @@ export const metadata = {
   description:
     'Tapete Vital, Pad Portátil y Parches Esenciales. Arma tu pedido y paga de forma segura con Bold.',
   openGraph: {
-    title: 'Polo a Tierra',
+    title: 'POLO A TIERRA',
     description: 'Terapia en casa que restaura tu equilibrio.',
     locale: 'es_CO',
     type: 'website',

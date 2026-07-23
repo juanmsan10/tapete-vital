@@ -4,9 +4,9 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { PRODUCTOS, calcularTotalCarrito, formatoCOP, CANTIDAD_MAXIMA } from '@/lib/pricing';
 
 const DESCRIPCIONES = {
-  tapete: 'El original. Terapia de grounding en casa mientras duermes o descansas.',
-  pad: 'Llévalo contigo: para el escritorio, el sofá o de viaje.',
-  parches: 'Aplicación localizada para zonas de molestia puntual.',
+  tapete: 'El más vendido. Te conecta con la tierra mientras duermes y trabajas.',
+  pad: 'Llévalo contigo: para el sofá, la sala de espera o de viaje.',
+  parches: 'Localizados para zonas con molestias puntuales.',
 };
 
 const IMAGENES = {
