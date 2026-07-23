@@ -15,7 +15,7 @@ export default function Tienda() {
       <main className="checkout">
         <div className="contenedor">
           <div className="centro">
-            <span className="eyebrow">Tienda Polo a Tierra</span>
+            <span className="eyebrow">Tienda</span>
             <h1 className="titulo-seccion">Arma tu pedido</h1>
             <p className="texto-grande" style={{ maxWidth: 560, margin: '12px auto 0' }}>
               Elige tus productos, dinos a dónde los enviamos y paga de forma segura.
