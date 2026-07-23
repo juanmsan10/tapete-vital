@@ -6,6 +6,13 @@ export const metadata = {
   title: 'Tienda — Polo a Tierra',
   description:
     'Tapete Vital, Pad Portátil y Parches Esenciales. Arma tu pedido y paga de forma segura con Bold.',
+  openGraph: {
+    title: 'Polo a Tierra',
+    description: 'Terapia en casa que restaura tu equilibrio.',
+    locale: 'es_CO',
+    type: 'website',
+    images: [{ url: 'https://poloatierra.co/share-image.png', width: 1080, height: 1080 }],
+  },
 };
 
 export default function Tienda() {
