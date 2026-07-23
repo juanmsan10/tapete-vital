@@ -20,7 +20,11 @@ export function middleware(request) {
   }
 
   // El resto del middleware solo aplica al panel de gestión
-  if (!pathname.startsWith('/gestion') && !pathname.startsWith('/api/gestion')) {
+  // (el favicon de esa ruta debe cargar sin pedir credenciales)
+  if (
+    pathname === '/gestion/icon.png' ||
+    (!pathname.startsWith('/gestion') && !pathname.startsWith('/api/gestion'))
+  ) {
     return NextResponse.next();
   }
 

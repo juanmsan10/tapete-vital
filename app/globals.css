@@ -699,3 +699,8 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
   .tienda-prod { flex-direction: column; align-items: stretch; }
   .tienda-prod-qty { justify-content: center; }
 }
+
+.tienda-subtitulo { white-space: nowrap; max-width: none !important; }
+@media (max-width: 640px) {
+  .tienda-subtitulo { white-space: normal; max-width: 560px !important; }
+}
