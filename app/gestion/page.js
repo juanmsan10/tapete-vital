@@ -552,9 +552,10 @@ export default function Gestion() {
         .g-prep-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(0,82,97,0.06); }
         .g-prep-orden { font-weight: 700; color: #00ae84; font-size: 16px; }
         .g-prep-body { padding: 16px 20px; }
-        .g-prep-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 15px; }
+        .g-prep-row { display: flex; justify-content: space-between; gap: 20px; padding: 4px 0; font-size: 15px; }
         .g-prep-qty { font-size: 16px; padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid rgba(0,82,97,0.06); }
-        .g-prep-label { color: #45564f; }
+        .g-prep-label { color: #45564f; flex-shrink: 0; }
+        .g-prep-row > span:last-child, .g-prep-row > strong { text-align: right; min-width: 0; overflow-wrap: break-word; }
         .g-prep-actions { padding: 12px 20px; border-top: 1px solid rgba(0,82,97,0.06); display: flex; flex-direction: column; gap: 10px; }
         .g-guia-row { display: flex; align-items: center; gap: 10px; }
         .g-guia-label { font-size: 14px; font-weight: 700; color: #005261; white-space: nowrap; }
