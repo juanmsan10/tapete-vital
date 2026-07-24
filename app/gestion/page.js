@@ -4,6 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { PRODUCTOS, resumenProductos } from '@/lib/pricing';
 
 const ESTADOS = ['Iniciado', 'Aprobado', 'Empacado', 'Enviado', 'Entregado'];
+
+function estadoAnterior(estado) {
+  const idx = ESTADOS.indexOf(estado);
+  return idx > 0 ? ESTADOS[idx - 1] : null;
+}
 const ESTADO_COLOR = {
   Iniciado: '#FFC272',
   Aprobado: '#00AE84',
@@ -239,6 +244,18 @@ function TabPendientes({ pedidos, onUpdateEstado }) {
               <button className="g-btn g-btn-primary" onClick={() => onUpdateEstado(p.orden, current.next, current.pideGuia ? guias[p.orden] : undefined)}>
                 {current.accion}
               </button>
+              {estadoAnterior(current.estado) && (
+                <button
+                  className="g-btn g-btn-outline"
+                  onClick={() => {
+                    if (window.confirm(`¿Regresar el pedido ${p.orden} a "${estadoAnterior(current.estado)}"?`)) {
+                      onUpdateEstado(p.orden, estadoAnterior(current.estado));
+                    }
+                  }}
+                >
+                  ← Regresar a {estadoAnterior(current.estado)}
+                </button>
+              )}
               {current.whatsapp && (
                 <button
                   className="g-btn g-btn-descartar"
@@ -302,6 +319,19 @@ function TabPedidos({ pedidos, onUpdateEstado }) {
                   <td>{p.total ? formatoCOP(p.total) : '—'}</td>
                   <td><EstadoBadge estado={p.estado} /></td>
                   <td>
+                    {estadoAnterior(p.estado) && (
+                      <button
+                        className="g-btn g-btn-small"
+                        style={{ marginRight: 6 }}
+                        onClick={() => {
+                          if (window.confirm(`¿Regresar el pedido ${p.orden} a "${estadoAnterior(p.estado)}"?`)) {
+                            onUpdateEstado(p.orden, estadoAnterior(p.estado));
+                          }
+                        }}
+                      >
+                        &larr; {estadoAnterior(p.estado)}
+                      </button>
+                    )}
                     {next && (
                       <button className="g-btn g-btn-small" onClick={() => onUpdateEstado(p.orden, next)}>
                         &rarr; {next}
