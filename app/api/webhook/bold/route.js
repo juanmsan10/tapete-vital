@@ -9,7 +9,7 @@
 // ============================================================
 import crypto from 'crypto';
 import { after } from 'next/server';
-import { enviarCorreo, htmlPedido, registrarSheet, leerPedidos } from '@/lib/email';
+import { enviarCorreo, htmlPedido, registrarSheet, leerPedidos, notificarGHL } from '@/lib/email';
 import { enviarPurchaseCAPI } from '@/lib/meta';
 import { formatoCOP } from '@/lib/pricing';
 
@@ -79,6 +79,9 @@ async function procesarEvento(tipo, orderId, total, emailCliente, data) {
 
     // 3. Purchase server-side a Meta (event_id = orderId para deduplicar)
     await enviarPurchaseCAPI({ orderId, total: Number(total), email: emailCliente });
+
+    // 4. Cancelar recuperación de carrito en GHL
+    notificarGHL({ event: 'pago_aprobado', orden: orderId, telefono: pedido?.telefono || '' });
   }
 
   if (tipo === 'SALE_REJECTED') {
