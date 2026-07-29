@@ -8,7 +8,7 @@
 // ============================================================
 import crypto from 'crypto';
 import { calcularTotal, calcularTotalCarrito, resumenProductos, formatoCOP } from '@/lib/pricing';
-import { enviarCorreo, htmlPedido, registrarSheet, notificarGHL } from '@/lib/email';
+import { enviarCorreo, htmlPedido, registrarSheet } from '@/lib/email';
 
 export async function POST(request) {
   try {
@@ -85,18 +85,6 @@ export async function POST(request) {
         },
         totales: formatoCOP(totales.total),
       }),
-    });
-
-    // Notificar a GHL para recuperación de carrito abandonado
-    notificarGHL({
-      event: 'checkout_iniciado',
-      orden: orderId,
-      nombre,
-      telefono,
-      email: email || '',
-      ciudad,
-      productos: descripcion,
-      total: totales.total,
     });
 
     return Response.json({
