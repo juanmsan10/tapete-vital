@@ -31,6 +31,15 @@ function edadMinutos(fecha) {
   return (Date.now() - epoch) / 60000;
 }
 
+// Normaliza teléfonos colombianos a E.164 (+57...) para que GHL
+// asocie el contacto correcto y el WhatsApp llegue de verdad.
+function telefonoE164(tel) {
+  const digitos = String(tel || '').replace(/\D/g, '');
+  if (!digitos) return '';
+  if (digitos.startsWith('57') && digitos.length > 10) return `+${digitos}`;
+  return `+57${digitos}`;
+}
+
 export async function GET(request) {
   const secret = process.env.CRON_SECRET;
   if (secret && request.headers.get('authorization') !== `Bearer ${secret}`) {
@@ -47,10 +56,15 @@ export async function GET(request) {
   await Promise.all(
     abandonados.map((p) =>
       notificarGHL({
+        // Campos estándar que GHL usa para crear/asociar el contacto
+        phone: telefonoE164(p.telefono),
+        first_name: String(p.nombre || '').trim().split(/\s+/)[0] || '',
+        full_name: String(p.nombre || '').trim(),
+        email: p.email || '',
+        // Datos del pedido para las variables del template
         orden: p.orden,
         nombre: p.nombre,
         telefono: p.telefono,
-        email: p.email || '',
         ciudad: p.ciudad,
         productos: p.productos,
         total: p.total,
