@@ -11,6 +11,7 @@ function estadoAnterior(estado) {
 }
 const ESTADO_COLOR = {
   Iniciado: '#FFC272',
+  Rechazado: '#D64541',
   Aprobado: '#00AE84',
   Empacado: '#27798F',
   Enviado: '#005261',
@@ -34,6 +35,24 @@ const SUB_TABS = [
   { estado: 'Empacado', label: 'Enviar', next: 'Enviado', accion: 'Enviado', color: '#27798F', pideGuia: true },
   { estado: 'Enviado', label: 'Confirmar entrega', next: 'Entregado', accion: 'Entrega confirmada', color: '#005261', compacto: true },
 ];
+
+// La pestaña Abandonado agrupa Iniciado + Rechazado (pago intentado y fallido)
+function perteneceATab(p, st) {
+  return p.estado === st.estado || (st.estado === 'Iniciado' && p.estado === 'Rechazado');
+}
+
+// "hace 20 min" / "hace 5 h" / "hace 3 días" desde la fecha es-CO de la Sheet
+function haceCuanto(fecha) {
+  const m = String(fecha || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4}),\s*(\d{1,2}):(\d{2}):(\d{2})\s*([ap])/i);
+  if (!m) return null;
+  const [, d, mon, y, hh, min, s, ap] = m;
+  let h = Number(hh) % 12;
+  if (/p/i.test(ap)) h += 12;
+  const mins = (Date.now() - Date.UTC(+y, +mon - 1, +d, h + 5, +min, +s)) / 60000;
+  if (mins < 60) return `hace ${Math.max(1, Math.round(mins))} min`;
+  if (mins < 24 * 60) return `hace ${Math.round(mins / 60)} h`;
+  return `hace ${Math.round(mins / 60 / 24)} días`;
+}
 
 function whatsappHref(p) {
   const digitos = String(p.telefono || '').replace(/\D/g, '');
@@ -174,10 +193,13 @@ function TabPendientes({ pedidos, onUpdateEstado }) {
   const [subTab, setSubTab] = useState(0);
   const [guias, setGuias] = useState({});
 
-  const counts = SUB_TABS.map(st => pedidos.filter(p => p.estado === st.estado).length);
+  const counts = SUB_TABS.map(st => pedidos.filter(p => perteneceATab(p, st)).length);
 
   const current = SUB_TABS[subTab];
-  const lista = pedidos.filter(p => p.estado === current.estado);
+  // Rechazados primero: pago intentado y fallido = contacto urgente
+  const lista = pedidos
+    .filter(p => perteneceATab(p, current))
+    .sort((a, b) => (b.estado === 'Rechazado' ? 1 : 0) - (a.estado === 'Rechazado' ? 1 : 0));
 
   return (
     <div className="g-pendientes">
@@ -211,6 +233,18 @@ function TabPendientes({ pedidos, onUpdateEstado }) {
               <EstadoBadge estado={p.estado} />
             </div>
             <div className="g-prep-body">
+              {p.estado === 'Rechazado' && (
+                <div className="g-prep-row" style={{ color: '#D64541', fontWeight: 700 }}>
+                  <span className="g-prep-label" style={{ color: '#D64541' }}>⚠ Urgente</span>
+                  <span>Intentó pagar y el pago fue rechazado — contactar ya</span>
+                </div>
+              )}
+              {current.whatsapp && p.fecha && (
+                <div className="g-prep-row">
+                  <span className="g-prep-label">Inició</span>
+                  <span>{p.fecha}{haceCuanto(p.fecha) ? ` (${haceCuanto(p.fecha)})` : ''}</span>
+                </div>
+              )}
               {!current.compacto && (
                 <div className="g-prep-row g-prep-qty"><span className="g-prep-label">Productos</span><strong><ListaProductos pedido={p} /></strong></div>
               )}
@@ -289,7 +323,7 @@ function TabPedidos({ pedidos, onUpdateEstado }) {
     <>
       <div className="g-filters">
         <button className={`g-filter ${!filtro ? 'active' : ''}`} onClick={() => setFiltro('')}>Todos</button>
-        {[...ESTADOS, 'Descartado'].map(e => (
+        {[...ESTADOS, 'Rechazado', 'Descartado'].map(e => (
           <button key={e} className={`g-filter ${filtro === e ? 'active' : ''}`} onClick={() => setFiltro(e)}>{e}</button>
         ))}
       </div>
@@ -396,7 +430,7 @@ function TabClientes({ pedidos }) {
 // Unidades vendidas por producto. Pedidos sin desglose (embudo) cuentan como tapetes.
 function vendidosPorProducto(pedidos) {
   const vendidos = { tapete: 0, pad: 0, parches: 0 };
-  pedidos.filter(p => !['Iniciado', 'Descartado'].includes(p.estado)).forEach(p => {
+  pedidos.filter(p => !['Iniciado', 'Rechazado', 'Descartado'].includes(p.estado)).forEach(p => {
     if (p.productos) {
       Object.entries(PRODUCTOS).forEach(([key, prod]) => {
         const m = String(p.productos).match(new RegExp(`(\\d+)×\\s*${prod.nombre}`));
@@ -540,7 +574,7 @@ export default function Gestion() {
     { id: 'inventario', label: 'Inventario' },
   ];
 
-  const totalPendientes = pedidos.filter(p => ['Iniciado', 'Aprobado', 'Empacado', 'Enviado'].includes(p.estado)).length;
+  const totalPendientes = pedidos.filter(p => ['Iniciado', 'Rechazado', 'Aprobado', 'Empacado', 'Enviado'].includes(p.estado)).length;
 
   return (
     <>

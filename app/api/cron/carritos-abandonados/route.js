@@ -79,7 +79,7 @@ export async function GET(request) {
   //    Desde los 10 min (antes la venta puede no estar consultable) para
   //    cubrir la ventana de GHL (30–45) sin mensajes a gente que ya pagó.
   const porConciliar = pedidos.filter((p) => {
-    if (p.estado !== 'Iniciado') return false;
+    if (!['Iniciado', 'Rechazado'].includes(p.estado)) return false;
     const edad = edadMinutos(p.fecha);
     return edad !== null && edad >= 10 && edad < 24 * 60;
   });
@@ -112,8 +112,9 @@ export async function GET(request) {
   );
 
   // 2. CARRITOS ABANDONADOS: ventana 30–45 min → notificar a GHL
+  //    (incluye Rechazado: intentó pagar y falló, el mensaje aplica igual)
   const abandonados = pedidos.filter((p) => {
-    if (p.estado !== 'Iniciado') return false;
+    if (!['Iniciado', 'Rechazado'].includes(p.estado)) return false;
     const edad = edadMinutos(p.fecha);
     return edad !== null && edad >= MIN_MIN && edad < MAX_MIN;
   });

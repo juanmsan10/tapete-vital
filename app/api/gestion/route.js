@@ -85,7 +85,7 @@ export async function PUT(request) {
     let confirmarA = null;
     if (body.estado === 'Aprobado' && body.orden) {
       const pedido = (await leerPedidos()).find((p) => p.orden === body.orden);
-      if (pedido?.estado === 'Iniciado' && pedido.email) confirmarA = pedido;
+      if (['Iniciado', 'Rechazado'].includes(pedido?.estado) && pedido.email) confirmarA = pedido;
     }
 
     const res = await fetch(SHEET_URL, {

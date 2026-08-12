@@ -69,6 +69,15 @@ async function procesarEvento(tipo, orderId, total, emailCliente, data) {
   }
 
   if (tipo === 'SALE_REJECTED') {
+    // Marcar en la Sheet para que el dashboard lo muestre como urgente.
+    // Solo desde "Iniciado": un reintento aprobado no debe degradarse,
+    // y un rechazo posterior a la aprobación tampoco la pisa.
+    const pedidos = await leerPedidos();
+    const pedido = pedidos.find((p) => p.orden === orderId);
+    if (pedido?.estado === 'Iniciado') {
+      await registrarSheet({ action: 'update', orden: orderId, estado: 'Rechazado' });
+    }
+
     await enviarCorreo({
       to: process.env.EMAIL_INTERNO || 'pedidos@tapetevital.co',
       subject: `🔴 Pago rechazado ${orderId}`,
