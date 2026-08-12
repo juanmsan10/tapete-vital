@@ -17,7 +17,7 @@
 //    La conciliación corre ANTES, así un pago con webhook
 //    caído nunca recibe el mensaje de carrito abandonado.
 // ============================================================
-import { leerPedidos, notificarGHL, registrarSheet, enviarCorreo, htmlPedido } from '@/lib/email';
+import { leerPedidos, notificarGHL, registrarSheet, enviarCorreo, htmlPedido, correoConfirmacionCompra } from '@/lib/email';
 import { enviarPurchaseCAPI } from '@/lib/meta';
 import { formatoCOP } from '@/lib/pricing';
 
@@ -106,6 +106,7 @@ export async function GET(request) {
           totales: formatoCOP(p.total),
         }),
       });
+      await correoConfirmacionCompra({ orden: p.orden, email: p.email, total: p.total });
       await enviarPurchaseCAPI({ orderId: p.orden, total: Number(p.total), email: p.email || null });
     })
   );

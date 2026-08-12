@@ -1,3 +1,5 @@
+import { leerPedidos, correoConfirmacionCompra } from '@/lib/email';
+
 const SHEET_URL = process.env.GOOGLE_SHEET_URL;
 
 export async function GET() {
@@ -76,12 +78,31 @@ export async function PUT(request) {
   }
   try {
     const body = await request.json();
+
+    // "Marcar como aprobado" manual sobre un pedido Iniciado = pago confirmado
+    // por fuera del webhook → el cliente aún no tiene su correo de confirmación.
+    // Solo en la transición Iniciado→Aprobado (no al "regresar" desde Empacado).
+    let confirmarA = null;
+    if (body.estado === 'Aprobado' && body.orden) {
+      const pedido = (await leerPedidos()).find((p) => p.orden === body.orden);
+      if (pedido?.estado === 'Iniciado' && pedido.email) confirmarA = pedido;
+    }
+
     const res = await fetch(SHEET_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'update', ...body }),
     });
     const data = await res.text();
+
+    if (confirmarA) {
+      await correoConfirmacionCompra({
+        orden: confirmarA.orden,
+        email: confirmarA.email,
+        total: confirmarA.total,
+      });
+    }
+
     return Response.json({ ok: true, data });
   } catch (err) {
     console.error('[gestion] Error actualizando sheet:', err);

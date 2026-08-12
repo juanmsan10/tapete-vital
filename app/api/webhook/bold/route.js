@@ -9,7 +9,7 @@
 // ============================================================
 import crypto from 'crypto';
 import { after } from 'next/server';
-import { enviarCorreo, htmlPedido, registrarSheet, leerPedidos } from '@/lib/email';
+import { enviarCorreo, htmlPedido, registrarSheet, leerPedidos, correoConfirmacionCompra } from '@/lib/email';
 import { enviarPurchaseCAPI } from '@/lib/meta';
 import { formatoCOP } from '@/lib/pricing';
 
@@ -59,26 +59,13 @@ async function procesarEvento(tipo, orderId, total, emailCliente, data) {
       }),
     });
 
-    // 2. Correo al cliente (si Bold entrega su email)
-    if (emailCliente) {
-      await enviarCorreo({
-        to: emailCliente,
-        subject: 'Acabas de comprar el Tapete Vital',
-        html: htmlPedido({
-          titulo: '¡Gracias por tu compra!',
-          orden: orderId,
-          datos: {
-            Estado: 'Pago confirmado',
-            'Siguiente paso': 'Prepararemos tu pedido y te contactaremos por WhatsApp con la guía de envío.',
-          },
-          totales: formatoCOP(total),
-          guiaUrl: 'https://drive.google.com/file/d/1yFV3aBrEuUjPDzpHI0YGOR1R6JAQHNHK/view?usp=sharing',
-        }),
-      });
-    }
+    // 2. Correo al cliente — el del formulario de checkout (Sheet) primero;
+    //    el de Bold como respaldo (Bold no siempre lo incluye en el payload)
+    const emailFinal = pedido?.email || emailCliente;
+    await correoConfirmacionCompra({ orden: orderId, email: emailFinal, total });
 
     // 3. Purchase server-side a Meta (event_id = orderId para deduplicar)
-    await enviarPurchaseCAPI({ orderId, total: Number(total), email: emailCliente });
+    await enviarPurchaseCAPI({ orderId, total: Number(total), email: emailFinal });
   }
 
   if (tipo === 'SALE_REJECTED') {
