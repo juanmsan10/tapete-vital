@@ -8,6 +8,7 @@
 //   GET  ?action=read            → { pedidos: [...] }
 //   POST { ...datos }            → agrega una fila (nuevo pedido)
 //   POST { action:'update', orden, ...campos } → edita campos de la fila
+//   POST { action:'delete', orden }            → borra LA fila de esa orden
 //   POST { action:'deleteAll' }  → borra todas las filas de datos
 //
 // El 'update' acepta CUALQUIER columna existente (estado, guia,
@@ -66,6 +67,23 @@ function doPost(e) {
       }
     }
     return json_({ error: 'Orden no encontrada: ' + body.orden });
+  }
+
+  // Borrado puntual: elimina las filas cuya columna "orden" coincida exacto.
+  // Nunca borra con orden vacío (protección contra borrados accidentales).
+  if (body.action === 'delete') {
+    if (!body.orden || !String(body.orden).trim()) return json_({ error: 'orden vacío' });
+    var colO = claves.indexOf('orden') + 1;
+    if (colO < 1) return json_({ error: 'No hay columna orden' });
+    var vals = hoja.getRange(2, colO, Math.max(hoja.getLastRow() - 1, 1), 1).getValues();
+    var borradas = 0;
+    for (var i = vals.length - 1; i >= 0; i--) { // de abajo hacia arriba
+      if (String(vals[i][0]).trim() === String(body.orden).trim()) {
+        hoja.deleteRow(i + 2);
+        borradas++;
+      }
+    }
+    return json_({ ok: true, borradas: borradas });
   }
 
   if (body.action === 'deleteAll') {
