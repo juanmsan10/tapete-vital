@@ -189,7 +189,50 @@ function FormPedidoManual({ onCrear, onCerrar, creando }) {
   );
 }
 
-function TabPendientes({ pedidos, onUpdateEstado }) {
+// Editar datos de un pedido (cliente reporta un error en dirección, teléfono, etc.)
+const CAMPOS_EDITABLES = [
+  { key: 'nombre', label: 'Nombre' },
+  { key: 'telefono', label: 'Teléfono' },
+  { key: 'email', label: 'Email' },
+  { key: 'ciudad', label: 'Ciudad' },
+  { key: 'direccion', label: 'Dirección' },
+  { key: 'notas', label: 'Notas' },
+];
+
+function ModalEditar({ pedido, onGuardar, onCerrar, guardando }) {
+  const [form, setForm] = useState(() =>
+    Object.fromEntries(CAMPOS_EDITABLES.map(c => [c.key, pedido[c.key] || '']))
+  );
+  const setCampo = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
+
+  return (
+    <div className="g-modal-overlay" onClick={onCerrar}>
+      <div className="g-modal" onClick={e => e.stopPropagation()}>
+        <h3>Editar pedido {pedido.orden}</h3>
+        <p className="g-modal-sub">Corrige los datos que el cliente reportó con error.</p>
+        {CAMPOS_EDITABLES.map(c => (
+          <label key={c.key} className="g-modal-campo">
+            <span>{c.label}</span>
+            <input
+              className="g-input"
+              type="text"
+              value={form[c.key]}
+              onChange={e => setCampo(c.key, e.target.value)}
+            />
+          </label>
+        ))}
+        <div className="g-modal-actions">
+          <button className="g-btn g-btn-outline" onClick={onCerrar}>Cancelar</button>
+          <button className="g-btn g-btn-primary" disabled={guardando} onClick={() => onGuardar(pedido.orden, form)}>
+            {guardando ? 'Guardando…' : 'Guardar cambios'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TabPendientes({ pedidos, onUpdateEstado, onEditar }) {
   const [subTab, setSubTab] = useState(0);
   const [guias, setGuias] = useState({});
 
@@ -230,7 +273,10 @@ function TabPendientes({ pedidos, onUpdateEstado }) {
           <div key={p.orden} className="g-prep-card">
             <div className="g-prep-header">
               <span className="g-prep-orden">{p.orden}</span>
-              <EstadoBadge estado={p.estado} />
+              <span className="g-prep-header-right">
+                <button className="g-btn-editar" title="Editar datos del pedido" onClick={() => onEditar(p)}>✎</button>
+                <EstadoBadge estado={p.estado} />
+              </span>
             </div>
             <div className="g-prep-body">
               {p.estado === 'Rechazado' && (
@@ -312,7 +358,7 @@ function TabPendientes({ pedidos, onUpdateEstado }) {
   );
 }
 
-function TabPedidos({ pedidos, onUpdateEstado }) {
+function TabPedidos({ pedidos, onUpdateEstado, onEditar }) {
   const [filtro, setFiltro] = useState('');
 
   const filtrados = pedidos.filter(p =>
@@ -353,6 +399,7 @@ function TabPedidos({ pedidos, onUpdateEstado }) {
                   <td>{p.total ? formatoCOP(p.total) : '—'}</td>
                   <td><EstadoBadge estado={p.estado} /></td>
                   <td>
+                    <button className="g-btn-editar" title="Editar datos del pedido" style={{ marginRight: 6 }} onClick={() => onEditar(p)}>✎</button>
                     {estadoAnterior(p.estado) && (
                       <button
                         className="g-btn g-btn-small"
@@ -511,6 +558,25 @@ export default function Gestion() {
 
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
+  const [editando, setEditando] = useState(null);
+
+  const editarPedido = async (orden, campos) => {
+    setUpdating(true);
+    try {
+      await fetch('/api/gestion', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orden, ...campos }),
+      });
+      setPedidos(prev => prev.map(p => p.orden === orden ? { ...p, ...campos } : p));
+      setEditando(null);
+    } catch (err) {
+      console.error('Error editando pedido:', err);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const updateEstado = async (orden, nuevoEstado, guia) => {
     setUpdating(true);
     try {
@@ -614,6 +680,10 @@ export default function Gestion() {
 
         .g-prep-card { background: #fff; border-radius: 12px; border: 1px solid rgba(0,82,97,0.08); overflow: hidden; }
         .g-prep-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(0,82,97,0.06); }
+        .g-prep-header-right { display: flex; align-items: center; gap: 8px; }
+        .g-btn-editar { border: 1px solid rgba(0,82,97,0.2); background: #fff; color: #005261; border-radius: 6px; padding: 2px 8px; font-size: 14px; cursor: pointer; line-height: 1.4; transition: all 0.2s; }
+        .g-btn-editar:hover { background: #e8f5f0; }
+        .g-modal-campo { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #45564f; font-weight: 600; }
         .g-prep-orden { font-weight: 700; color: #00ae84; font-size: 16px; }
         .g-prep-body { padding: 16px 20px; }
         .g-prep-row { display: flex; justify-content: space-between; gap: 20px; padding: 4px 0; font-size: 14px; }
@@ -723,8 +793,8 @@ export default function Gestion() {
             <div className="g-loading">Cargando datos...</div>
           ) : (
             <>
-              {tab === 'pendientes' && <TabPendientes pedidos={pedidos} onUpdateEstado={updateEstado} />}
-              {tab === 'pedidos' && <TabPedidos pedidos={pedidos} onUpdateEstado={updateEstado} />}
+              {tab === 'pendientes' && <TabPendientes pedidos={pedidos} onUpdateEstado={updateEstado} onEditar={setEditando} />}
+              {tab === 'pedidos' && <TabPedidos pedidos={pedidos} onUpdateEstado={updateEstado} onEditar={setEditando} />}
               {tab === 'clientes' && <TabClientes pedidos={pedidos} />}
               {tab === 'inventario' && <TabInventario pedidos={pedidos} inventarios={inventarios} onUpdateInventario={updateInventario} />}
             </>
@@ -733,6 +803,9 @@ export default function Gestion() {
 
         {showCrear && (
           <FormPedidoManual onCrear={crearPedido} onCerrar={() => setShowCrear(false)} creando={creando} />
+        )}
+        {editando && (
+          <ModalEditar pedido={editando} onGuardar={editarPedido} onCerrar={() => setEditando(null)} guardando={updating} />
         )}
       </div>
     </>
