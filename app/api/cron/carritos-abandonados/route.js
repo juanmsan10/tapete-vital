@@ -113,11 +113,24 @@ export async function GET(request) {
 
   // 2. CARRITOS ABANDONADOS: ventana 30–45 min → notificar a GHL
   //    (incluye Rechazado: intentó pagar y falló, el mensaje aplica igual)
-  const abandonados = pedidos.filter((p) => {
-    if (!['Iniciado', 'Rechazado'].includes(p.estado)) return false;
+  const telNorm = (t) => String(t || '').replace(/\D/g, '').slice(-10);
+  // Clientes que YA lograron pagar en algún intento: jamás escribirles por abandono
+  const compradores = new Set(
+    pedidos
+      .filter((p) => ['Aprobado', 'Empacado', 'Enviado', 'Entregado'].includes(p.estado))
+      .map((p) => telNorm(p.telefono))
+      .filter(Boolean)
+  );
+  // Varios intentos del mismo cliente → un solo webhook (el más reciente)
+  const porCliente = new Map();
+  pedidos.forEach((p) => {
+    if (!['Iniciado', 'Rechazado'].includes(p.estado)) return;
     const edad = edadMinutos(p.fecha);
-    return edad !== null && edad >= MIN_MIN && edad < MAX_MIN;
+    if (edad === null || edad < MIN_MIN || edad >= MAX_MIN) return;
+    if (compradores.has(telNorm(p.telefono))) return;
+    porCliente.set(telNorm(p.telefono) || p.orden, p);
   });
+  const abandonados = [...porCliente.values()];
 
   await Promise.all(
     abandonados.map((p) =>

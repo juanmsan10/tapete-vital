@@ -41,6 +41,29 @@ function perteneceATab(p, st) {
   return p.estado === st.estado || (st.estado === 'Iniciado' && p.estado === 'Rechazado');
 }
 
+// Mismo cliente = mismo teléfono (últimos 10 dígitos)
+function telNorm(t) {
+  return String(t || '').replace(/\D/g, '').slice(-10);
+}
+
+// Varios intentos de compra del mismo cliente → una sola tarjeta.
+// La tarjeta muestra el intento más reciente; si algún intento fue
+// Rechazado, toda la tarjeta hereda la urgencia.
+function agruparPorCliente(lista) {
+  const grupos = new Map();
+  lista.forEach(p => {
+    const k = telNorm(p.telefono) || p.orden;
+    if (!grupos.has(k)) grupos.set(k, []);
+    grupos.get(k).push(p);
+  });
+  return [...grupos.values()].map(g => ({
+    ...g[g.length - 1],
+    estado: g.some(o => o.estado === 'Rechazado') ? 'Rechazado' : g[g.length - 1].estado,
+    intentos: g.length,
+    grupo: g,
+  }));
+}
+
 // "hace 20 min" / "hace 5 h" / "hace 3 días" desde la fecha es-CO de la Sheet
 function haceCuanto(fecha) {
   const m = String(fecha || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4}),\s*(\d{1,2}):(\d{2}):(\d{2})\s*([ap])/i);
@@ -236,12 +259,16 @@ function TabPendientes({ pedidos, onUpdateEstado, onEditar }) {
   const [subTab, setSubTab] = useState(0);
   const [guias, setGuias] = useState({});
 
-  const counts = SUB_TABS.map(st => pedidos.filter(p => perteneceATab(p, st)).length);
+  const counts = SUB_TABS.map(st => {
+    const l = pedidos.filter(p => perteneceATab(p, st));
+    // En Abandonado se cuentan clientes, no intentos
+    return st.whatsapp ? new Set(l.map(p => telNorm(p.telefono) || p.orden)).size : l.length;
+  });
 
   const current = SUB_TABS[subTab];
+  const filtrada = pedidos.filter(p => perteneceATab(p, current));
   // Rechazados primero: pago intentado y fallido = contacto urgente
-  const lista = pedidos
-    .filter(p => perteneceATab(p, current))
+  const lista = (current.whatsapp ? agruparPorCliente(filtrada) : filtrada)
     .sort((a, b) => (b.estado === 'Rechazado' ? 1 : 0) - (a.estado === 'Rechazado' ? 1 : 0));
 
   return (
@@ -279,10 +306,20 @@ function TabPendientes({ pedidos, onUpdateEstado, onEditar }) {
               </span>
             </div>
             <div className="g-prep-body">
-              {p.estado === 'Rechazado' && (
+              {(p.intentos > 1 || p.estado === 'Rechazado') && (
                 <div className="g-prep-row" style={{ color: '#D64541', fontWeight: 700 }}>
                   <span className="g-prep-label" style={{ color: '#D64541' }}>⚠ Urgente</span>
-                  <span>Intentó pagar y el pago fue rechazado — contactar ya</span>
+                  <span>
+                    {p.intentos > 1
+                      ? `${p.intentos} intentos de compra sin lograr pagar — contactar ya`
+                      : 'Intentó pagar y el pago fue rechazado — contactar ya'}
+                  </span>
+                </div>
+              )}
+              {p.intentos > 1 && (
+                <div className="g-prep-row">
+                  <span className="g-prep-label">Intentos</span>
+                  <span>{p.grupo.map(o => o.orden).join(', ')}</span>
                 </div>
               )}
               {current.whatsapp && p.fecha && (
@@ -321,7 +358,18 @@ function TabPendientes({ pedidos, onUpdateEstado, onEditar }) {
                   />
                 </div>
               )}
-              <button className="g-btn g-btn-primary" onClick={() => onUpdateEstado(p.orden, current.next, current.pideGuia ? guias[p.orden] : undefined)}>
+              <button
+                className="g-btn g-btn-primary"
+                onClick={async () => {
+                  await onUpdateEstado(p.orden, current.next, current.pideGuia ? guias[p.orden] : undefined);
+                  // Al aprobar un intento, los demás intentos del cliente se descartan solos
+                  if (p.grupo?.length > 1) {
+                    for (const o of p.grupo) {
+                      if (o.orden !== p.orden) await onUpdateEstado(o.orden, 'Descartado');
+                    }
+                  }
+                }}
+              >
                 {current.accion}
               </button>
               {estadoAnterior(current.estado) && (
@@ -339,9 +387,13 @@ function TabPendientes({ pedidos, onUpdateEstado, onEditar }) {
               {current.whatsapp && (
                 <button
                   className="g-btn g-btn-descartar"
-                  onClick={() => {
-                    if (window.confirm(`¿Descartar el pedido ${p.orden}? Saldrá de Pendientes (queda en el historial de Pedidos).`)) {
-                      onUpdateEstado(p.orden, 'Descartado');
+                  onClick={async () => {
+                    const n = p.grupo?.length || 1;
+                    const msg = n > 1
+                      ? `¿Descartar los ${n} intentos de ${p.nombre || 'este cliente'}? Saldrán de Pendientes (quedan en el historial de Pedidos).`
+                      : `¿Descartar el pedido ${p.orden}? Saldrá de Pendientes (queda en el historial de Pedidos).`;
+                    if (window.confirm(msg)) {
+                      for (const o of (p.grupo || [p])) await onUpdateEstado(o.orden, 'Descartado');
                     }
                   }}
                 >
