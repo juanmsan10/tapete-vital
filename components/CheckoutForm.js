@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import {
   calcularTotal,
   formatoCOP,
+  PRECIO_LISTA,
   PRECIO_UNITARIO,
   PRECIO_UNITARIO_DESCUENTO,
 } from '@/lib/pricing';
@@ -15,7 +16,9 @@ const PAQUETES = [
 ];
 
 export default function CheckoutForm() {
-  const [cantidad, setCantidad] = useState(2);
+  // Default 1: casi todos los compradores reales llevan 1 tapete; preseleccionar 2
+  // hacía que el CTA mostrara $552.000 como primer número de compromiso
+  const [cantidad, setCantidad] = useState(1);
   const [zona, setZona] = useState('bogota');
   const [form, setForm] = useState({
     nombre: '',
@@ -80,6 +83,11 @@ export default function CheckoutForm() {
     );
     boldRef.current.appendChild(script);
 
+    // En móvil el botón de Bold aparece fuera de la vista: llevar al cliente hasta él
+    setTimeout(() => {
+      boldRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 400);
+
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'AddPaymentInfo', {
         currency: 'COP',
@@ -140,8 +148,13 @@ export default function CheckoutForm() {
                 >
                   {p.badge && <span className="badge">{p.badge}</span>}
                   <div className="cant">{p.etiqueta}</div>
+                  {p.qty === 1 && (
+                    <div style={{ fontSize: 13.5, color: 'var(--gris-texto)', textDecoration: 'line-through' }}>
+                      {formatoCOP(PRECIO_LISTA)}
+                    </div>
+                  )}
                   <div className="precio"><strong>{formatoCOP(unit)}</strong></div>
-                  <div className="unidad">{p.qty > 1 ? 'cada uno' : 'precio normal'}</div>
+                  <div className="unidad">{p.qty > 1 ? 'cada uno' : 'precio de oferta'}</div>
                   {ahorro > 0 && <div className="ahorro">Ahorras {formatoCOP(ahorro)}</div>}
                 </button>
               );
@@ -174,6 +187,7 @@ export default function CheckoutForm() {
             <div className="campo">
               <label htmlFor="cedula">Cédula / NIT *</label>
               <input id="cedula" value={form.cedula} onChange={(e) => actualizar('cedula', e.target.value)} inputMode="numeric" />
+              <p className="ayuda">La exige la transportadora para generar tu guía de envío.</p>
             </div>
           </div>
           <div className="campos-2">
@@ -210,16 +224,21 @@ export default function CheckoutForm() {
           </div>
 
           {!ordenLista && (
-            <button type="submit" className="boton boton--primario boton--bloque" disabled={cargando}>
-              {cargando ? 'Generando tu orden…' : `Continuar al pago seguro — ${formatoCOP(totales.total)}`}
-            </button>
+            <>
+              <p style={{ textAlign: 'center', fontSize: 13.5, color: 'var(--gris-texto)', margin: '0 0 10px' }}>
+                🔒 Pago 100% seguro con Bold · Garantía de 60 días o te devolvemos tu dinero
+              </p>
+              <button type="submit" className="boton boton--primario boton--bloque" disabled={cargando}>
+                {cargando ? 'Generando tu orden…' : `Continuar al pago seguro — ${formatoCOP(totales.total)}`}
+              </button>
+            </>
           )}
-          <div id="bold-boton-contenedor" ref={boldRef} />
           {ordenLista && (
-            <p className="ayuda" style={{ textAlign: 'center', marginTop: 10, fontSize: 13.5, color: 'var(--gris-texto)' }}>
-              Orden {ordenLista} lista. Pulsa el botón de Bold para pagar de forma segura.
+            <p style={{ textAlign: 'center', marginTop: 10, fontSize: 16, fontWeight: 700, color: 'var(--teal-oscuro)' }}>
+              👇 Último paso: completa tu pago aquí
             </p>
           )}
+          <div id="bold-boton-contenedor" ref={boldRef} />
         </form>
       </div>
 
