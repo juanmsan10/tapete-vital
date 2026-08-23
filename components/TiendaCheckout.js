@@ -76,6 +76,11 @@ export default function TiendaCheckout() {
       })
     );
     boldRef.current.appendChild(script);
+
+    // En móvil el botón de Bold aparece fuera de la vista: llevar al cliente hasta él
+    setTimeout(() => {
+      boldRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 400);
   }
 
   async function continuarAlPago(e) {
@@ -145,6 +150,7 @@ export default function TiendaCheckout() {
             <div className="campo">
               <label htmlFor="cedula">Cédula / NIT *</label>
               <input id="cedula" value={form.cedula} onChange={(e) => actualizar('cedula', e.target.value)} inputMode="numeric" />
+              <p className="ayuda">La exige la transportadora para generar tu guía de envío.</p>
             </div>
           </div>
           <div className="campos-2">
@@ -181,20 +187,25 @@ export default function TiendaCheckout() {
           </div>
 
           {!ordenLista && (
-            <button type="submit" className="boton boton--primario boton--bloque" disabled={cargando || totales.unidades === 0}>
-              {cargando
-                ? 'Generando tu orden…'
-                : totales.unidades === 0
-                  ? 'Agrega productos al carrito'
-                  : `Continuar al pago seguro — ${formatoCOP(totales.total)}`}
-            </button>
+            <>
+              <p style={{ textAlign: 'center', fontSize: 13.5, color: 'var(--gris-texto)', margin: '0 0 10px' }}>
+                🔒 Pago 100% seguro con Bold · Garantía de 60 días o te devolvemos tu dinero
+              </p>
+              <button type="submit" className="boton boton--primario boton--bloque" disabled={cargando || totales.unidades === 0}>
+                {cargando
+                  ? 'Generando tu orden…'
+                  : totales.unidades === 0
+                    ? 'Agrega productos al carrito'
+                    : `Continuar al pago seguro — ${formatoCOP(totales.total)}`}
+              </button>
+            </>
           )}
-          <div id="bold-boton-contenedor" ref={boldRef} />
           {ordenLista && (
-            <p className="ayuda" style={{ textAlign: 'center', marginTop: 10, fontSize: 13.5, color: 'var(--gris-texto)' }}>
-              Orden {ordenLista} lista. Pulsa el botón de Bold para pagar de forma segura.
+            <p style={{ textAlign: 'center', marginTop: 10, fontSize: 16, fontWeight: 700, color: 'var(--teal-oscuro)' }}>
+              👇 Último paso: completa tu pago aquí
             </p>
           )}
+          <div id="bold-boton-contenedor" ref={boldRef} />
         </form>
       </div>
 
