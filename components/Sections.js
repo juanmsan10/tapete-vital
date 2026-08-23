@@ -324,7 +324,7 @@ export function FAQ() {
     },
     {
       q: '¿Cuánto cuesta y cuánto tarda el envío?',
-      a: 'El envío cuesta desde $11.000 en Bogotá y desde $20.000 al resto del país (el valor exacto lo ves antes de pagar). Despachamos tu pedido y te contactamos por WhatsApp con la guía de seguimiento.',
+      a: 'El envío cuesta desde $11.000 en Bogotá y desde $20.000 al resto del país (el valor exacto lo ves antes de pagar). Despachamos de lunes a viernes con Interrapidísimo: en Bogotá llega normalmente 1 día hábil después del despacho y al resto del país entre 2 y 3 días hábiles. Los pedidos que llegan el fin de semana se despachan el lunes. Te contactamos por WhatsApp con la guía de seguimiento.',
     },
     {
       q: '¿Qué formas de pago aceptan?',
