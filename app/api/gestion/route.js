@@ -67,6 +67,7 @@ export async function POST(request) {
       cantidad: body.cantidad || 1,
       total: body.total,
       nombre: body.nombre,
+      cedula: body.cedula || '',
       telefono: body.telefono || '',
       email: body.email || '',
       ciudad: body.ciudad || '',

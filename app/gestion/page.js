@@ -112,6 +112,7 @@ function imprimirEtiquetas(pedidos) {
       ${p.productos ? `<div class="et-campo"><span class="et-label">Contiene:</span> ${p.productos}</div>` : ''}
       <div class="et-campo"><span class="et-label">Para:</span> ${p.nombre || '—'}</div>
       <div class="et-campo"><span class="et-label">Tel:</span> ${p.telefono || '—'}</div>
+      <div class="et-campo"><span class="et-label">CC/NIT:</span> ${p.cedula || '—'}</div>
       <div class="et-direccion">
         <div class="et-ciudad">${p.ciudad || '—'}</div>
         <div class="et-dir-texto">${p.direccion || '—'}</div>
@@ -146,7 +147,7 @@ function imprimirEtiquetas(pedidos) {
 
 function FormPedidoManual({ onCrear, onCerrar, creando }) {
   const [items, setItems] = useState({ tapete: 0, pad: 0, parches: 0 });
-  const [form, setForm] = useState({ nombre: '', telefono: '', email: '', ciudad: '', direccion: '', notas: '', estado: 'Aprobado' });
+  const [form, setForm] = useState({ nombre: '', cedula: '', telefono: '', email: '', ciudad: '', direccion: '', notas: '', estado: 'Aprobado' });
   const [totalManual, setTotalManual] = useState('');
 
   const subtotal = Object.entries(items).reduce((sum, [key, qty]) => sum + PRODUCTOS[key].precio * qty, 0);
@@ -188,6 +189,7 @@ function FormPedidoManual({ onCrear, onCerrar, creando }) {
         <p className="g-modal-hint">Prellenado con la suma de productos ({formatoCOP(subtotal)}) — ajústalo si cobraste distinto (envío, descuento).</p>
 
         <input className="g-input" placeholder="Nombre *" value={form.nombre} onChange={e => setCampo('nombre', e.target.value)} />
+        <input className="g-input" placeholder="Cédula / NIT" value={form.cedula} onChange={e => setCampo('cedula', e.target.value)} />
         <input className="g-input" placeholder="Teléfono" value={form.telefono} onChange={e => setCampo('telefono', e.target.value)} />
         <input className="g-input" placeholder="Email" value={form.email} onChange={e => setCampo('email', e.target.value)} />
         <input className="g-input" placeholder="Ciudad" value={form.ciudad} onChange={e => setCampo('ciudad', e.target.value)} />
@@ -215,6 +217,7 @@ function FormPedidoManual({ onCrear, onCerrar, creando }) {
 // Editar datos de un pedido (cliente reporta un error en dirección, teléfono, etc.)
 const CAMPOS_EDITABLES = [
   { key: 'nombre', label: 'Nombre' },
+  { key: 'cedula', label: 'Cédula / NIT' },
   { key: 'telefono', label: 'Teléfono' },
   { key: 'email', label: 'Email' },
   { key: 'ciudad', label: 'Ciudad' },
@@ -332,6 +335,7 @@ function TabPendientes({ pedidos, onUpdateEstado, onEditar }) {
                 <div className="g-prep-row g-prep-qty"><span className="g-prep-label">Productos</span><strong><ListaProductos pedido={p} /></strong></div>
               )}
               <div className="g-prep-row"><span className="g-prep-label">Cliente</span><span>{p.nombre || '—'}</span></div>
+              <div className="g-prep-row"><span className="g-prep-label">Cédula</span><span>{p.cedula || '—'}</span></div>
               <div className="g-prep-row"><span className="g-prep-label">Teléfono</span><span>{p.telefono || '—'}</span></div>
               <div className="g-prep-row"><span className="g-prep-label">Ciudad</span><span>{p.ciudad || '—'}</span></div>
               {!current.compacto && (

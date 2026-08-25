@@ -57,6 +57,7 @@ export async function POST(request) {
       cantidad: unidades,
       total: totales.total,
       nombre,
+      cedula,
       telefono,
       email: email || '',
       ciudad,
