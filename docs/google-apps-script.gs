@@ -11,6 +11,9 @@
 //   POST { action:'delete', orden }            → borra LA fila de esa orden
 //   POST { action:'deleteAll' }  → borra todas las filas de datos
 //
+// Además incluye aplicarFormatoDescartados(): función de un solo uso que
+// pinta en rojo las filas de pedidos Descartado (ver más abajo).
+//
 // El 'update' acepta CUALQUIER columna existente (estado, guia,
 // nombre, telefono, email, ciudad, direccion, notas, etc.):
 // busca la fila por 'orden' y solo pisa los campos enviados.
@@ -20,6 +23,49 @@
 
 function hoja_() {
   return SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+}
+
+// ============================================================
+// Pinta en rojo la fila completa de los pedidos "Descartado".
+// EJECUTAR UNA SOLA VEZ desde el editor: elegir esta función en el
+// selector de arriba y pulsar ▷ Ejecutar. Crea una regla de formato
+// condicional que queda guardada en la hoja, así que las filas nuevas
+// se pintan solas sin volver a ejecutar nada.
+// ============================================================
+function aplicarFormatoDescartados() {
+  var hoja = hoja_();
+  var ultimaCol = hoja.getLastColumn();
+  var claves = hoja.getRange(1, 1, 1, ultimaCol).getValues()[0].map(clave_);
+  var colEstado = claves.indexOf('estado') + 1;
+  if (colEstado < 1) throw new Error('No encontré la columna "Estado"');
+
+  var letra = letraColumna_(colEstado);
+  var rango = hoja.getRange(2, 1, hoja.getMaxRows() - 1, ultimaCol);
+  var regla = SpreadsheetApp.newConditionalFormatRule()
+    .whenFormulaSatisfied('=$' + letra + '2="Descartado"')
+    .setFontColor('#D64541')
+    .setRanges([rango])
+    .build();
+
+  // Conserva otras reglas que ya existan; solo reemplaza la de Descartado
+  var reglas = hoja.getConditionalFormatRules().filter(function (r) {
+    var c = r.getBooleanCondition();
+    if (!c) return true;
+    return c.getCriteriaValues().join(' ').indexOf('"Descartado"') === -1;
+  });
+  reglas.push(regla);
+  hoja.setConditionalFormatRules(reglas);
+  return 'Listo: las filas Descartado quedan en rojo (columna ' + letra + ').';
+}
+
+function letraColumna_(n) {
+  var s = '';
+  while (n > 0) {
+    var resto = (n - 1) % 26;
+    s = String.fromCharCode(65 + resto) + s;
+    n = (n - resto - 1) / 26;
+  }
+  return s;
 }
 
 // "Teléfono" → "telefono"
