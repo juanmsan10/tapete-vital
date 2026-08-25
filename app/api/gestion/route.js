@@ -2,16 +2,49 @@ import { leerPedidos, correoConfirmacionCompra } from '@/lib/email';
 
 const SHEET_URL = process.env.GOOGLE_SHEET_URL;
 
-export async function GET() {
+// La Sheet tarda ~2s por lectura. Caché en memoria para que abrir el dashboard
+// o cambiar de pestaña no dispare una lectura nueva cada vez.
+const CACHE_MS = 20_000;
+let cache = { data: null, ts: 0 };
+const invalidarCache = () => { cache = { data: null, ts: 0 }; };
+
+// Un intento suele bastar; el reintento cubre el fallo transitorio del
+// Apps Script que dejaba el dashboard en blanco.
+async function leerSheet(intentos = 2) {
+  for (let i = 1; i <= intentos; i++) {
+    try {
+      const res = await fetch(`${SHEET_URL}?action=read`, {
+        cache: 'no-store',
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.error(`[gestion] Lectura fallida (intento ${i}/${intentos}):`, err.message);
+      if (i === intentos) throw err;
+      await new Promise((r) => setTimeout(r, 600));
+    }
+  }
+}
+
+export async function GET(request) {
   if (!SHEET_URL) {
     return Response.json({ error: 'GOOGLE_SHEET_URL no configurada' }, { status: 500 });
   }
+  const forzar = new URL(request.url).searchParams.get('fresh') === '1';
+  if (!forzar && cache.data && Date.now() - cache.ts < CACHE_MS) {
+    return Response.json(cache.data);
+  }
   try {
-    const res = await fetch(`${SHEET_URL}?action=read`, { cache: 'no-store' });
-    const data = await res.json();
+    const data = await leerSheet();
+    cache = { data, ts: Date.now() };
     return Response.json(data);
   } catch (err) {
-    console.error('[gestion] Error leyendo sheet:', err);
+    // Antes que dejar el dashboard vacío, servir lo último bueno que tengamos
+    if (cache.data) {
+      console.warn('[gestion] Sirviendo caché tras fallo de lectura');
+      return Response.json({ ...cache.data, _cacheado: true });
+    }
     return Response.json({ error: 'Error leyendo datos' }, { status: 500 });
   }
 }
@@ -47,6 +80,7 @@ export async function POST(request) {
       body: JSON.stringify(fila),
     });
     const data = await res.text();
+    invalidarCache();
     return Response.json({ ok: true, orden, data });
   } catch (err) {
     console.error('[gestion] Error creando pedido:', err);
@@ -65,6 +99,7 @@ export async function DELETE() {
       body: JSON.stringify({ action: 'deleteAll' }),
     });
     const data = await res.text();
+    invalidarCache();
     return Response.json({ ok: true, data });
   } catch (err) {
     console.error('[gestion] Error borrando datos:', err);
@@ -94,6 +129,7 @@ export async function PUT(request) {
       body: JSON.stringify({ action: 'update', ...body }),
     });
     const data = await res.text();
+    invalidarCache();
 
     if (confirmarA) {
       await correoConfirmacionCompra({

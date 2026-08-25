@@ -594,18 +594,30 @@ export default function Gestion() {
   const [showCrear, setShowCrear] = useState(false);
   const [creando, setCreando] = useState(false);
 
-  const cargarDatos = useCallback(async () => {
-    try {
-      const res = await fetch('/api/gestion');
-      const data = await res.json();
-      if (data.pedidos) setPedidos(data.pedidos);
-      if (data.inventarios) setInventarios(data.inventarios);
-      else if (data.inventario != null) setInventarios(prev => ({ ...prev, tapete: data.inventario }));
-    } catch (err) {
-      console.error('Error cargando datos:', err);
-    } finally {
-      setLoading(false);
+  const [errorCarga, setErrorCarga] = useState('');
+
+  // La lectura puede fallar por un arranque en frío de Vercel: reintentar
+  // antes de rendirse, y si no hay datos avisarlo en pantalla (antes se
+  // quedaba en blanco sin explicación).
+  const cargarDatos = useCallback(async (fresh = false) => {
+    setErrorCarga('');
+    for (let intento = 1; intento <= 3; intento++) {
+      try {
+        const res = await fetch(`/api/gestion${fresh ? '?fresh=1' : ''}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.pedidos) setPedidos(data.pedidos);
+        if (data.inventarios) setInventarios(data.inventarios);
+        else if (data.inventario != null) setInventarios(prev => ({ ...prev, tapete: data.inventario }));
+        setLoading(false);
+        return;
+      } catch (err) {
+        console.error(`Error cargando datos (intento ${intento}/3):`, err);
+        if (intento < 3) await new Promise(r => setTimeout(r, intento * 800));
+      }
     }
+    setErrorCarga('No pudimos cargar los pedidos. Revisa tu conexión e inténtalo de nuevo.');
+    setLoading(false);
   }, []);
 
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
@@ -843,6 +855,13 @@ export default function Gestion() {
 
           {loading ? (
             <div className="g-loading">Cargando datos...</div>
+          ) : errorCarga ? (
+            <div className="g-loading" style={{ flexDirection: 'column', gap: 14 }}>
+              <span style={{ color: '#D64541', fontWeight: 600 }}>{errorCarga}</span>
+              <button className="g-btn g-btn-primary" onClick={() => { setLoading(true); cargarDatos(true); }}>
+                Reintentar
+              </button>
+            </div>
           ) : (
             <>
               {tab === 'pendientes' && <TabPendientes pedidos={pedidos} onUpdateEstado={updateEstado} onEditar={setEditando} />}
