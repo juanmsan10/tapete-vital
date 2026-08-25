@@ -95,6 +95,11 @@ export default function TiendaCheckout() {
       setError('Completa los campos obligatorios: nombre, cédula/NIT, teléfono, ciudad y dirección.');
       return;
     }
+    // Sin esto la gente escribía su correo en la cédula y el envío quedaba sin el dato
+    if (!/^\d[\d.-]{4,}$/.test(form.cedula.trim())) {
+      setError('La cédula o NIT debe ser un número (mínimo 5 dígitos, sin letras).');
+      return;
+    }
 
     setCargando(true);
     try {
@@ -149,7 +154,13 @@ export default function TiendaCheckout() {
             </div>
             <div className="campo">
               <label htmlFor="cedula">Cédula / NIT *</label>
-              <input id="cedula" value={form.cedula} onChange={(e) => actualizar('cedula', e.target.value)} inputMode="numeric" />
+              <input
+                id="cedula"
+                value={form.cedula}
+                onChange={(e) => actualizar('cedula', e.target.value.replace(/[^\d.-]/g, ''))}
+                inputMode="numeric"
+                placeholder="Solo números"
+              />
               <p className="ayuda">La exige la transportadora para generar tu guía de envío.</p>
             </div>
           </div>

@@ -18,6 +18,9 @@ export async function POST(request) {
     if (!nombre || !cedula || !telefono || !direccion || !ciudad) {
       return Response.json({ error: 'Faltan datos de envío obligatorios.' }, { status: 400 });
     }
+    if (!/^\d[\d.-]{4,}$/.test(String(cedula).trim())) {
+      return Response.json({ error: 'La cédula o NIT debe ser un número.' }, { status: 400 });
+    }
 
     const apiKey = process.env.BOLD_IDENTITY_KEY;
     const secretKey = process.env.BOLD_SECRET_KEY;
