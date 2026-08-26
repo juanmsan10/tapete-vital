@@ -800,6 +800,20 @@ export default function Gestion() {
       .catch(() => {});
   }, []);
 
+  // La autenticación del navegador no tiene "cerrar sesión": guarda las
+  // credenciales y las reenvía sola. El truco es mandar unas inválidas a una
+  // ruta protegida para que sobrescriba las guardadas, y salir del área
+  // protegida. Funciona en Chrome, Safari y Firefox.
+  const cerrarSesion = async () => {
+    try {
+      await fetch('/api/gestion/sesion', {
+        headers: { Authorization: 'Basic ' + btoa('salir:' + Date.now()) },
+        cache: 'no-store',
+      });
+    } catch { /* el 401 es justamente lo que buscamos */ }
+    window.location.replace('/gestion?salir=1');
+  };
+
   const [aviso, setAviso] = useState('');
   const mostrarAviso = useCallback((texto) => {
     setAviso(texto);
@@ -947,6 +961,8 @@ export default function Gestion() {
         .g-header-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; gap: 12px; }
         .g-header-title { color: #fff; font-size: 19px; font-weight: 700; letter-spacing: 0.02em; }
         .g-header-sub { color: rgba(255,255,255,0.7); font-size: 14px; margin-left: auto; }
+        .g-salir { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; font-size: 13px; font-weight: 600; font-family: inherit; padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .g-salir:hover { background: rgba(255,255,255,0.28); }
 
         .g-nav { background: #fff; border-bottom: 1px solid rgba(0,82,97,0.1); padding: 12px 0; }
         .g-nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; overflow-x: auto; }
@@ -1066,7 +1082,12 @@ export default function Gestion() {
         <header className="g-header">
           <div className="g-header-inner">
             <span className="g-header-title">POLO A TIERRA</span>
-            <span className="g-header-sub">Gestión</span>
+            <span className="g-header-sub">
+              {sesion.usuario ? `Gestión · ${sesion.usuario}` : 'Gestión'}
+            </span>
+            {sesion.usuario && (
+              <button className="g-salir" onClick={cerrarSesion}>Cerrar sesión</button>
+            )}
           </div>
         </header>
 

@@ -74,6 +74,9 @@ export async function middleware(request) {
   if (esPanel) {
     // el favicon del panel debe cargar sin pedir credenciales
     if (pathname === '/gestion/icon.png') return NextResponse.next();
+    // "Cerrar sesión": pedir credenciales aunque el navegador reenvíe las
+    // que tiene guardadas. Es la única forma de forzar el diálogo de acceso.
+    if (request.nextUrl.searchParams.get('salir') === '1') return pedirCredenciales();
     return protegerPanel(request);
   }
 
