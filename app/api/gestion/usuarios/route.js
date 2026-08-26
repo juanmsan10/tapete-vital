@@ -4,6 +4,7 @@
 // las cabeceras x-usuario / x-es-admin.
 // ============================================================
 import { listarUsuarios, crearUsuario, cambiarClave, borrarUsuario } from '@/lib/usuarios';
+import { registrar } from '@/lib/auditoria';
 
 const CLAVE_MINIMA = 8;
 
@@ -47,6 +48,7 @@ export async function POST(request) {
       );
     }
     await crearUsuario({ usuario, clave });
+    await registrar({ usuario: quien(request).usuario, accion: 'usuario_crear', objetivo: usuario });
     return Response.json({ ok: true, usuario });
   } catch (err) {
     const duplicado = /duplicate key|23505/.test(err.message);
@@ -73,6 +75,7 @@ export async function PUT(request) {
         );
       }
       await cambiarClave(usuario, clave);
+      await registrar({ usuario: quien(request).usuario, accion: 'usuario_clave', objetivo: usuario });
     }
 
     return Response.json({ ok: true });
@@ -92,6 +95,7 @@ export async function DELETE(request) {
       return Response.json({ error: 'No puedes eliminar tu propio usuario' }, { status: 400 });
     }
     await borrarUsuario(usuario);
+    await registrar({ usuario: yo, accion: 'usuario_eliminar', objetivo: usuario });
     return Response.json({ ok: true });
   } catch (err) {
     console.error('[usuarios] Error borrando:', err);

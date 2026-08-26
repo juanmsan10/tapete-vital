@@ -258,6 +258,85 @@ function ModalEditar({ pedido, onGuardar, onCerrar, guardando }) {
   );
 }
 
+// Cómo se lee cada acción del registro, en lenguaje de negocio
+function describirActividad(a) {
+  const d = a.detalle || {};
+  switch (a.accion) {
+    case 'estado':
+      return `movió ${a.objetivo} de "${d.de}" a "${d.a}"${d.cliente ? ` · ${d.cliente}` : ''}`;
+    case 'editar': {
+      const campos = Object.keys(d);
+      const detalle = campos
+        .map((c) => `${c}: "${d[c].antes || '—'}" → "${d[c].ahora || '—'}"`)
+        .join(' · ');
+      return `editó ${a.objetivo} — ${detalle}`;
+    }
+    case 'crear_pedido':
+      return `creó el pedido manual ${a.objetivo}${d.nombre ? ` para ${d.nombre}` : ''}`;
+    case 'usuario_crear':
+      return `creó al usuario "${a.objetivo}"`;
+    case 'usuario_clave':
+      return `cambió la contraseña de "${a.objetivo}"`;
+    case 'usuario_eliminar':
+      return `eliminó al usuario "${a.objetivo}"`;
+    default:
+      return `${a.accion} ${a.objetivo || ''}`;
+  }
+}
+
+function TabActividad() {
+  const [actividad, setActividad] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
+  const [filtro, setFiltro] = useState('');
+
+  useEffect(() => {
+    fetch('/api/gestion/actividad')
+      .then((r) => r.json())
+      .then((d) => (d.actividad ? setActividad(d.actividad) : setError(d.error || 'No se pudo cargar')))
+      .catch(() => setError('No se pudo cargar la actividad'))
+      .finally(() => setCargando(false));
+  }, []);
+
+  if (cargando) return <div className="g-loading">Cargando actividad...</div>;
+  if (error) return <div className="g-empty">{error}</div>;
+
+  const texto = filtro.trim().toLowerCase();
+  const lista = texto
+    ? actividad.filter((a) =>
+        `${a.usuario} ${a.objetivo || ''} ${describirActividad(a)}`.toLowerCase().includes(texto)
+      )
+    : actividad;
+
+  return (
+    <>
+      <div className="g-filters">
+        <input
+          className="g-input" style={{ width: 320 }}
+          placeholder="Buscar por pedido, usuario o acción…"
+          value={filtro} onChange={(e) => setFiltro(e.target.value)}
+        />
+        <span className="g-nota" style={{ padding: 0 }}>{lista.length} de {actividad.length} registros</span>
+      </div>
+      <div className="g-table-wrap">
+        <table className="g-table">
+          <thead><tr><th>Cuándo</th><th>Quién</th><th>Qué hizo</th></tr></thead>
+          <tbody>
+            {lista.map((a) => (
+              <tr key={a.id}>
+                <td style={{ whiteSpace: 'nowrap' }}>{new Date(a.creado_en).toLocaleString('es-CO')}</td>
+                <td><strong>{a.usuario}</strong></td>
+                <td>{describirActividad(a)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!lista.length && <div className="g-empty">Sin actividad registrada todavía.</div>}
+      </div>
+    </>
+  );
+}
+
 function TabUsuarios({ yo, mostrarAviso }) {
   const [usuarios, setUsuarios] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -854,7 +933,7 @@ export default function Gestion() {
     { id: 'clientes', label: 'Clientes' },
     { id: 'inventario', label: 'Inventario' },
     // La gestión de usuarios solo existe para administradores
-    ...(sesion.esAdmin ? [{ id: 'usuarios', label: 'Usuarios' }] : []),
+    ...(sesion.esAdmin ? [{ id: 'usuarios', label: 'Usuarios' }, { id: 'actividad', label: 'Actividad' }] : []),
   ];
 
   const totalPendientes = pedidos.filter(p => ['Iniciado', 'Rechazado', 'Aprobado', 'Empacado', 'Enviado'].includes(p.estado)).length;
@@ -1031,6 +1110,7 @@ export default function Gestion() {
               {tab === 'clientes' && <TabClientes pedidos={pedidos} />}
               {tab === 'inventario' && <TabInventario pedidos={pedidos} inventarios={inventarios} onUpdateInventario={updateInventario} />}
               {tab === 'usuarios' && sesion.esAdmin && <TabUsuarios yo={sesion.usuario} mostrarAviso={mostrarAviso} />}
+              {tab === 'actividad' && sesion.esAdmin && <TabActividad />}
             </>
           )}
         </main>

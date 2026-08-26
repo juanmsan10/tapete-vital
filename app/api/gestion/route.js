@@ -1,5 +1,6 @@
 import { leerPedidos, crearPedido, actualizarPedido, buscarPedido } from '@/lib/pedidos';
 import { correoConfirmacionCompra } from '@/lib/email';
+import { registrar, usuarioDe } from '@/lib/auditoria';
 
 // Postgres responde en ~50ms: ya no hace falta caché ni reintentos como
 // con la Google Sheet, y el equipo ve siempre el estado real.
@@ -21,6 +22,12 @@ export async function POST(request) {
       return Response.json({ error: 'Faltan nombre o total' }, { status: 400 });
     }
     const orden = 'TV-M' + crypto.randomUUID().replace(/-/g, '').slice(0, 5).toUpperCase();
+    await registrar({
+      usuario: usuarioDe(request),
+      accion: 'crear_pedido',
+      objetivo: orden,
+      detalle: { nombre: body.nombre, total: body.total, estado: body.estado || 'Aprobado' },
+    });
     await crearPedido({
       orden,
       fecha: new Date().toISOString(),
@@ -48,16 +55,42 @@ export async function PUT(request) {
     const { orden, ...campos } = await request.json();
     if (!orden) return Response.json({ error: 'Falta la orden' }, { status: 400 });
 
+    // Se lee el pedido antes de tocarlo: sirve para el correo de confirmación
+    // y para dejar en el registro de quién a qué cambió cada cosa.
+    const previo = await buscarPedido(orden);
+
     // "Marcar como aprobado" manual sobre un pedido Iniciado/Rechazado = pago
     // confirmado por fuera del webhook → el cliente aún no tiene su correo.
     // Solo en esa transición (no al "regresar" desde Empacado).
-    let confirmarA = null;
-    if (campos.estado === 'Aprobado') {
-      const previo = await buscarPedido(orden);
-      if (['Iniciado', 'Rechazado'].includes(previo?.estado) && previo.email) confirmarA = previo;
-    }
+    const confirmarA =
+      campos.estado === 'Aprobado' &&
+      ['Iniciado', 'Rechazado'].includes(previo?.estado) &&
+      previo.email
+        ? previo
+        : null;
 
     await actualizarPedido(orden, campos);
+
+    const usuario = usuarioDe(request);
+    if (campos.estado && previo && campos.estado !== previo.estado) {
+      await registrar({
+        usuario,
+        accion: 'estado',
+        objetivo: orden,
+        detalle: { de: previo.estado, a: campos.estado, cliente: previo.nombre },
+      });
+    }
+    const editados = Object.keys(campos).filter((c) => c !== 'estado');
+    if (editados.length) {
+      await registrar({
+        usuario,
+        accion: 'editar',
+        objetivo: orden,
+        detalle: Object.fromEntries(
+          editados.map((c) => [c, { antes: previo?.[c] ?? '', ahora: campos[c] }])
+        ),
+      });
+    }
 
     if (confirmarA) {
       await correoConfirmacionCompra({
