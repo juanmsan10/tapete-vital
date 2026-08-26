@@ -17,7 +17,8 @@
 //    La conciliación corre ANTES, así un pago con webhook
 //    caído nunca recibe el mensaje de carrito abandonado.
 // ============================================================
-import { leerPedidos, notificarGHL, registrarSheet, enviarCorreo, htmlPedido, correoConfirmacionCompra } from '@/lib/email';
+import { notificarGHL, enviarCorreo, htmlPedido, correoConfirmacionCompra } from '@/lib/email';
+import { leerPedidos, actualizarPedido } from '@/lib/pedidos';
 import { enviarPurchaseCAPI } from '@/lib/meta';
 import { formatoCOP } from '@/lib/pricing';
 
@@ -90,7 +91,7 @@ export async function GET(request) {
       if (status !== 'APPROVED') return; // REJECTED/FAILED/etc. siguen siendo abandono genuino
       p.estado = 'Aprobado'; // excluirlo de la ventana de GHL en este mismo pase
       recuperados.push(p.orden);
-      await registrarSheet({ action: 'update', orden: p.orden, estado: 'Aprobado' });
+      await actualizarPedido(p.orden, { estado: 'Aprobado' });
       await enviarCorreo({
         to: process.env.EMAIL_INTERNO || 'pedidos@tapetevital.co',
         subject: `✅ Pago confirmado ${p.orden} (recuperado por conciliación)`,

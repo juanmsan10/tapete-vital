@@ -8,7 +8,8 @@
 // ============================================================
 import crypto from 'crypto';
 import { calcularTotal, calcularTotalCarrito, resumenProductos, formatoCOP } from '@/lib/pricing';
-import { enviarCorreo, htmlPedido, registrarSheet } from '@/lib/email';
+import { enviarCorreo, htmlPedido } from '@/lib/email';
+import { crearPedido } from '@/lib/pedidos';
 
 export async function POST(request) {
   try {
@@ -52,9 +53,9 @@ export async function POST(request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || new URL(request.url).origin;
 
-    // Registrar en Google Sheet
-    await registrarSheet({
-      fecha: new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }),
+    // Registrar el pedido
+    await crearPedido({
+      fecha: new Date().toISOString(),
       orden: orderId,
       estado: 'Iniciado',
       cantidad: unidades,

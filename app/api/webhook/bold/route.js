@@ -9,7 +9,8 @@
 // ============================================================
 import crypto from 'crypto';
 import { after } from 'next/server';
-import { enviarCorreo, htmlPedido, registrarSheet, leerPedidos, correoConfirmacionCompra } from '@/lib/email';
+import { enviarCorreo, htmlPedido, correoConfirmacionCompra } from '@/lib/email';
+import { buscarPedido, actualizarPedido } from '@/lib/pedidos';
 import { enviarPurchaseCAPI } from '@/lib/meta';
 import { formatoCOP } from '@/lib/pricing';
 
@@ -32,15 +33,14 @@ async function procesarEvento(tipo, orderId, total, emailCliente, data) {
 
   if (tipo === 'SALE_APPROVED') {
     // Bold puede reenviar el mismo evento varias veces (reintentos): evita correos duplicados
-    const pedidos = await leerPedidos();
-    const pedido = pedidos.find((p) => p.orden === orderId);
+    const pedido = await buscarPedido(orderId);
     if (pedido?.estado === 'Aprobado') {
       console.log(`[webhook/bold] Orden ${orderId} ya estaba aprobada, evento duplicado ignorado.`);
       return;
     }
 
     // Actualizar estado de la fila existente (no crear duplicado)
-    await registrarSheet({ action: 'update', orden: orderId, estado: 'Aprobado' });
+    await actualizarPedido(orderId, { estado: 'Aprobado' });
 
     // 1. Correo interno de confirmación
     await enviarCorreo({
@@ -72,10 +72,9 @@ async function procesarEvento(tipo, orderId, total, emailCliente, data) {
     // Marcar en la Sheet para que el dashboard lo muestre como urgente.
     // Solo desde "Iniciado": un reintento aprobado no debe degradarse,
     // y un rechazo posterior a la aprobación tampoco la pisa.
-    const pedidos = await leerPedidos();
-    const pedido = pedidos.find((p) => p.orden === orderId);
+    const pedido = await buscarPedido(orderId);
     if (pedido?.estado === 'Iniciado') {
-      await registrarSheet({ action: 'update', orden: orderId, estado: 'Rechazado' });
+      await actualizarPedido(orderId, { estado: 'Rechazado' });
     }
 
     await enviarCorreo({
