@@ -4,23 +4,30 @@
 //    Credenciales en ADMIN_USER / ADMIN_PASSWORD (Vercel → Environment Variables).
 // ============================================================
 import { NextResponse } from 'next/server';
+import { verificarAcceso } from '@/lib/usuarios';
 
-// Cada persona entra con su propio usuario, para saber quién hace qué y poder
-// revocar a uno solo sin cambiarle la clave a todo el equipo.
-//   ADMIN_USER / ADMIN_PASSWORD  -> el acceso de Juan
-//   ACCESOS_EXTRA                -> "usuario:clave,otro:clave" para el resto
-function accesoValido(usuario, clave) {
-  if (usuario === process.env.ADMIN_USER && clave === process.env.ADMIN_PASSWORD) return true;
-  return (process.env.ACCESOS_EXTRA || '')
-    .split(',')
-    .some((par) => {
-      const i = par.indexOf(':');
-      if (i < 1) return false;
-      return par.slice(0, i).trim() === usuario && par.slice(i + 1).trim() === clave;
-    });
+// Dos niveles de acceso, a propósito:
+//
+// 1. EL DUEÑO — ADMIN_USER / ADMIN_PASSWORD, que viven solo en Vercel.
+//    Es el ÚNICO que puede crear, editar y eliminar usuarios. Como no está
+//    en la base, nadie puede otorgarse ese poder desde el panel, ni por
+//    error ni a propósito. Y si la base falla, este acceso sigue entrando.
+//
+// 2. EL EQUIPO — usuarios de la tabla `usuarios`, con contraseña cifrada.
+//    Usan el panel de pedidos; jamás pueden tocar usuarios.
+async function identificar(usuario, clave) {
+  if (
+    process.env.ADMIN_USER &&
+    usuario === process.env.ADMIN_USER &&
+    clave === process.env.ADMIN_PASSWORD
+  ) {
+    return { usuario, es_admin: true };
+  }
+  const acceso = await verificarAcceso(usuario, clave);
+  return acceso ? { usuario: acceso.usuario, es_admin: false } : null;
 }
 
-export function middleware(request) {
+export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
   // Dominio de la tienda: poloatierra.co → /tienda
@@ -51,10 +58,14 @@ export function middleware(request) {
   if (auth?.startsWith('Basic ')) {
     const credenciales = atob(auth.slice(6));
     const i = credenciales.indexOf(':');
-    const usuario = credenciales.slice(0, i);
-    const clave = credenciales.slice(i + 1);
-    if (accesoValido(usuario, clave)) {
-      return NextResponse.next();
+    const identidad = await identificar(credenciales.slice(0, i), credenciales.slice(i + 1));
+    if (identidad) {
+      // Quién entró viaja al servidor: las rutas de usuarios lo usan para
+      // exigir permiso de administrador.
+      const cabeceras = new Headers(request.headers);
+      cabeceras.set('x-usuario', identidad.usuario);
+      cabeceras.set('x-es-admin', identidad.es_admin ? '1' : '0');
+      return NextResponse.next({ request: { headers: cabeceras } });
     }
   }
 

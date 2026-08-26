@@ -258,6 +258,120 @@ function ModalEditar({ pedido, onGuardar, onCerrar, guardando }) {
   );
 }
 
+function TabUsuarios({ yo, mostrarAviso }) {
+  const [usuarios, setUsuarios] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
+  const [nuevo, setNuevo] = useState({ usuario: '', clave: '' });
+  const [claveNueva, setClaveNueva] = useState({});
+
+  const cargar = useCallback(async () => {
+    try {
+      const res = await fetch('/api/gestion/usuarios');
+      const data = await res.json();
+      if (data.usuarios) setUsuarios(data.usuarios);
+      else setError(data.error || 'No se pudieron cargar los usuarios');
+    } catch {
+      setError('No se pudieron cargar los usuarios');
+    } finally {
+      setCargando(false);
+    }
+  }, []);
+  useEffect(() => { cargar(); }, [cargar]);
+
+  const llamar = async (metodo, cuerpo, exito) => {
+    setError('');
+    const res = await fetch('/api/gestion/usuarios', {
+      method: metodo,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cuerpo),
+    });
+    const data = await res.json();
+    if (!res.ok) { setError(data.error || 'Algo salió mal'); return false; }
+    mostrarAviso(exito);
+    await cargar();
+    return true;
+  };
+
+  const crear = async (e) => {
+    e.preventDefault();
+    if (await llamar('POST', nuevo, `Usuario "${nuevo.usuario}" creado`)) {
+      setNuevo({ usuario: '', clave: '' });
+    }
+  };
+
+  if (cargando) return <div className="g-loading">Cargando usuarios...</div>;
+
+  return (
+    <div className="g-usuarios">
+      {error && <div className="error-msg" role="alert">{error}</div>}
+
+      <div className="g-prep-card">
+        <div className="g-prep-header"><span className="g-prep-orden">Crear usuario</span></div>
+        <form className="g-prep-body g-form-usuario" onSubmit={crear}>
+          <input
+            className="g-input" placeholder="Usuario (ej: logistica)" value={nuevo.usuario}
+            onChange={(e) => setNuevo({ ...nuevo, usuario: e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, '') })}
+          />
+          <input
+            className="g-input" type="text" placeholder="Contraseña (mínimo 8)" value={nuevo.clave}
+            onChange={(e) => setNuevo({ ...nuevo, clave: e.target.value })}
+          />
+          <button className="g-btn g-btn-primary" type="submit">Crear</button>
+        </form>
+        <p className="g-nota">Estos usuarios entran al panel de pedidos. Solo tú, desde tu acceso de administrador, puedes crearlos o cambiarles la contraseña.</p>
+      </div>
+
+      <div className="g-table-wrap">
+        <table className="g-table">
+          <thead>
+            <tr><th>Usuario</th><th>Creado</th><th>Último acceso</th><th>Cambiar contraseña</th><th></th></tr>
+          </thead>
+          <tbody>
+            {usuarios.map((u) => (
+              <tr key={u.usuario}>
+                <td><strong>{u.usuario}</strong>{u.usuario === yo && <span className="g-yo"> (tú)</span>}</td>
+                <td>{u.creado_en ? new Date(u.creado_en).toLocaleDateString('es-CO') : '—'}</td>
+                <td>{u.ultimo_acceso ? new Date(u.ultimo_acceso).toLocaleString('es-CO') : 'Nunca'}</td>
+                <td>
+                  <div className="g-guia-row">
+                    <input
+                      className="g-input" style={{ width: 170 }} placeholder="Nueva contraseña"
+                      value={claveNueva[u.usuario] || ''}
+                      onChange={(e) => setClaveNueva({ ...claveNueva, [u.usuario]: e.target.value })}
+                    />
+                    <button
+                      className="g-btn g-btn-small"
+                      onClick={async () => {
+                        if (await llamar('PUT', { usuario: u.usuario, clave: claveNueva[u.usuario] }, `Contraseña de "${u.usuario}" actualizada`)) {
+                          setClaveNueva({ ...claveNueva, [u.usuario]: '' });
+                        }
+                      }}
+                    >Guardar</button>
+                  </div>
+                </td>
+                <td>
+                  {u.usuario !== yo && (
+                    <button
+                      className="g-btn g-btn-descartar g-btn-small"
+                      onClick={() => {
+                        if (window.confirm(`¿Eliminar al usuario "${u.usuario}"? Perderá el acceso al sistema.`)) {
+                          llamar('DELETE', { usuario: u.usuario }, `Usuario "${u.usuario}" eliminado`);
+                        }
+                      }}
+                    >Eliminar</button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!usuarios.length && <div className="g-empty">Todavía no hay usuarios creados.</div>}
+      </div>
+    </div>
+  );
+}
+
 function TabPendientes({ pedidos, onUpdateEstado, onEditar }) {
   const [subTab, setSubTab] = useState(0);
   const [guias, setGuias] = useState({});
@@ -599,6 +713,14 @@ export default function Gestion() {
   const [creando, setCreando] = useState(false);
 
   const [errorCarga, setErrorCarga] = useState('');
+  const [sesion, setSesion] = useState({ usuario: '', esAdmin: false });
+  useEffect(() => {
+    fetch('/api/gestion/sesion')
+      .then((r) => r.json())
+      .then(setSesion)
+      .catch(() => {});
+  }, []);
+
   const [aviso, setAviso] = useState('');
   const mostrarAviso = useCallback((texto) => {
     setAviso(texto);
@@ -731,6 +853,8 @@ export default function Gestion() {
     { id: 'pedidos', label: 'Pedidos' },
     { id: 'clientes', label: 'Clientes' },
     { id: 'inventario', label: 'Inventario' },
+    // La gestión de usuarios solo existe para administradores
+    ...(sesion.esAdmin ? [{ id: 'usuarios', label: 'Usuarios' }] : []),
   ];
 
   const totalPendientes = pedidos.filter(p => ['Iniciado', 'Rechazado', 'Aprobado', 'Empacado', 'Enviado'].includes(p.estado)).length;
@@ -848,6 +972,13 @@ export default function Gestion() {
         .g-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
 
         .g-loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; font-size: 17px; color: #45564f; }
+        .g-usuarios { display: flex; flex-direction: column; gap: 20px; }
+        .g-form-usuario { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+        .g-form-usuario .g-input { width: 230px; }
+        .g-check { display: flex; align-items: center; gap: 7px; font-size: 14px; color: #45564f; font-weight: 600; cursor: pointer; }
+        .g-nota { padding: 0 20px 16px; font-size: 13.5px; color: #45564f; }
+        .g-yo { color: #00ae84; font-weight: 700; font-size: 13px; }
+        .g-btn-small { padding: 6px 12px; font-size: 13px; }
         .g-aviso { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 400; background: #005261; color: #fff; padding: 12px 22px; border-radius: 10px; font-size: 15px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,0.18); max-width: 90vw; text-align: center; }
         .g-updating { position: fixed; top: 70px; right: 24px; background: #005261; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; z-index: 200; animation: g-fade-in 0.2s; }
         @keyframes g-fade-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
@@ -899,6 +1030,7 @@ export default function Gestion() {
               {tab === 'pedidos' && <TabPedidos pedidos={pedidos} onUpdateEstado={updateEstado} onEditar={setEditando} />}
               {tab === 'clientes' && <TabClientes pedidos={pedidos} />}
               {tab === 'inventario' && <TabInventario pedidos={pedidos} inventarios={inventarios} onUpdateInventario={updateInventario} />}
+              {tab === 'usuarios' && sesion.esAdmin && <TabUsuarios yo={sesion.usuario} mostrarAviso={mostrarAviso} />}
             </>
           )}
         </main>
