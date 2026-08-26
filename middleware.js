@@ -5,6 +5,21 @@
 // ============================================================
 import { NextResponse } from 'next/server';
 
+// Cada persona entra con su propio usuario, para saber quién hace qué y poder
+// revocar a uno solo sin cambiarle la clave a todo el equipo.
+//   ADMIN_USER / ADMIN_PASSWORD  -> el acceso de Juan
+//   ACCESOS_EXTRA                -> "usuario:clave,otro:clave" para el resto
+function accesoValido(usuario, clave) {
+  if (usuario === process.env.ADMIN_USER && clave === process.env.ADMIN_PASSWORD) return true;
+  return (process.env.ACCESOS_EXTRA || '')
+    .split(',')
+    .some((par) => {
+      const i = par.indexOf(':');
+      if (i < 1) return false;
+      return par.slice(0, i).trim() === usuario && par.slice(i + 1).trim() === clave;
+    });
+}
+
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 
@@ -28,17 +43,17 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  const user = process.env.ADMIN_USER;
-  const pass = process.env.ADMIN_PASSWORD;
-
-  if (!user || !pass) {
+  if (!process.env.ADMIN_USER || !process.env.ADMIN_PASSWORD) {
     return new NextResponse('Acceso no configurado (falta ADMIN_USER / ADMIN_PASSWORD)', { status: 500 });
   }
 
   const auth = request.headers.get('authorization');
   if (auth?.startsWith('Basic ')) {
-    const [u, p] = atob(auth.slice(6)).split(':');
-    if (u === user && p === pass) {
+    const credenciales = atob(auth.slice(6));
+    const i = credenciales.indexOf(':');
+    const usuario = credenciales.slice(0, i);
+    const clave = credenciales.slice(i + 1);
+    if (accesoValido(usuario, clave)) {
       return NextResponse.next();
     }
   }
