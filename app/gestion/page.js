@@ -599,6 +599,11 @@ export default function Gestion() {
   const [creando, setCreando] = useState(false);
 
   const [errorCarga, setErrorCarga] = useState('');
+  const [aviso, setAviso] = useState('');
+  const mostrarAviso = useCallback((texto) => {
+    setAviso(texto);
+    setTimeout(() => setAviso(''), 4000);
+  }, []);
 
   // La lectura puede fallar por un arranque en frío de Vercel: reintentar
   // antes de rendirse, y si no hay datos avisarlo en pantalla (antes se
@@ -625,6 +630,16 @@ export default function Gestion() {
   }, []);
 
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
+
+  // Varias personas trabajan el mismo tablero a la vez: refrescar solo
+  // mientras la pestaña está visible, y sin forzar lectura de la Sheet
+  // (el caché del servidor absorbe el polling de todo el equipo).
+  useEffect(() => {
+    const id = setInterval(() => { if (!document.hidden) cargarDatos(); }, 25000);
+    const alVolver = () => { if (!document.hidden) cargarDatos(); };
+    document.addEventListener('visibilitychange', alVolver);
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', alVolver); };
+  }, [cargarDatos]);
 
   const [editando, setEditando] = useState(null);
 
@@ -656,6 +671,16 @@ export default function Gestion() {
         body: JSON.stringify(payload),
       });
       setPedidos(prev => prev.map(p => p.orden === orden ? { ...p, estado: nuevoEstado, ...(guia ? { guia } : {}) } : p));
+      // El pedido sale de la pestaña actual: decir a dónde fue, si no
+      // parece que se hubiera borrado
+      const destino = SUB_TABS.find(t => t.estado === nuevoEstado);
+      mostrarAviso(
+        nuevoEstado === 'Descartado'
+          ? `${orden} descartado — queda en el historial de Pedidos`
+          : destino
+            ? `${orden} → ahora está en "${destino.label}"`
+            : `${orden} actualizado a ${nuevoEstado}`
+      );
     } catch (err) {
       console.error('Error actualizando estado:', err);
     } finally {
@@ -823,6 +848,7 @@ export default function Gestion() {
         .g-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
 
         .g-loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; font-size: 17px; color: #45564f; }
+        .g-aviso { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 400; background: #005261; color: #fff; padding: 12px 22px; border-radius: 10px; font-size: 15px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,0.18); max-width: 90vw; text-align: center; }
         .g-updating { position: fixed; top: 70px; right: 24px; background: #005261; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; z-index: 200; animation: g-fade-in 0.2s; }
         @keyframes g-fade-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
@@ -856,6 +882,7 @@ export default function Gestion() {
 
         <main className="g-main">
           {updating && <div className="g-updating">Actualizando...</div>}
+          {aviso && <div className="g-aviso" role="status">{aviso}</div>}
 
           {loading ? (
             <div className="g-loading">Cargando datos...</div>
