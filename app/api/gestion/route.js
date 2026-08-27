@@ -1,9 +1,10 @@
 import { leerPedidos, crearPedido, actualizarPedido, buscarPedido } from '@/lib/pedidos';
 import { correoConfirmacionCompra } from '@/lib/email';
 import { registrar, usuarioDe } from '@/lib/auditoria';
+import { after } from 'next/server';
 
-// Postgres responde en ~50ms: ya no hace falta caché ni reintentos como
-// con la Google Sheet, y el equipo ve siempre el estado real.
+// El caché corto y los reintentos viven en lib/hoja.js, porque la Sheet
+// tarda ~2s por lectura y falla de vez en cuando.
 export async function GET() {
   try {
     const pedidos = await leerPedidos();
@@ -22,12 +23,12 @@ export async function POST(request) {
       return Response.json({ error: 'Faltan nombre o total' }, { status: 400 });
     }
     const orden = 'TV-M' + crypto.randomUUID().replace(/-/g, '').slice(0, 5).toUpperCase();
-    await registrar({
+    after(() => registrar({
       usuario: usuarioDe(request),
       accion: 'crear_pedido',
       objetivo: orden,
       detalle: { nombre: body.nombre, total: body.total, estado: body.estado || 'Aprobado' },
-    });
+    }));
     await crearPedido({
       orden,
       fecha: new Date().toISOString(),
@@ -73,23 +74,23 @@ export async function PUT(request) {
 
     const usuario = usuarioDe(request);
     if (campos.estado && previo && campos.estado !== previo.estado) {
-      await registrar({
+      after(() => registrar({
         usuario,
         accion: 'estado',
         objetivo: orden,
         detalle: { de: previo.estado, a: campos.estado, cliente: previo.nombre },
-      });
+      }));
     }
     const editados = Object.keys(campos).filter((c) => c !== 'estado');
     if (editados.length) {
-      await registrar({
+      after(() => registrar({
         usuario,
         accion: 'editar',
         objetivo: orden,
         detalle: Object.fromEntries(
           editados.map((c) => [c, { antes: previo?.[c] ?? '', ahora: campos[c] }])
         ),
-      });
+      }));
     }
 
     if (confirmarA) {

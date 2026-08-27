@@ -324,7 +324,7 @@ function TabActividad() {
           <tbody>
             {lista.map((a) => (
               <tr key={a.id}>
-                <td style={{ whiteSpace: 'nowrap' }}>{new Date(a.creado_en).toLocaleString('es-CO')}</td>
+                <td style={{ whiteSpace: 'nowrap' }}>{a.creado_en}</td>
                 <td><strong>{a.usuario}</strong></td>
                 <td>{describirActividad(a)}</td>
               </tr>
@@ -374,7 +374,7 @@ function TabUsuarios({ yo, mostrarAviso }) {
 
   const crear = async (e) => {
     e.preventDefault();
-    if (await llamar('POST', nuevo, `Usuario "${nuevo.usuario}" creado`)) {
+    if (await llamar('POST', nuevo, `Usuario "${nuevo.usuario}" creado · puede tardar unos segundos en poder entrar`)) {
       setNuevo({ usuario: '', clave: '' });
     }
   };
@@ -410,8 +410,8 @@ function TabUsuarios({ yo, mostrarAviso }) {
             {usuarios.map((u) => (
               <tr key={u.usuario}>
                 <td><strong>{u.usuario}</strong>{u.usuario === yo && <span className="g-yo"> (tú)</span>}</td>
-                <td>{u.creado_en ? new Date(u.creado_en).toLocaleDateString('es-CO') : '—'}</td>
-                <td>{u.ultimo_acceso ? new Date(u.ultimo_acceso).toLocaleString('es-CO') : 'Nunca'}</td>
+                <td>{u.creado_en ? String(u.creado_en).split(',')[0] : '—'}</td>
+                <td>{u.ultimo_acceso || 'Nunca'}</td>
                 <td>
                   <div className="g-guia-row">
                     <input
@@ -422,7 +422,7 @@ function TabUsuarios({ yo, mostrarAviso }) {
                     <button
                       className="g-btn g-btn-small"
                       onClick={async () => {
-                        if (await llamar('PUT', { usuario: u.usuario, clave: claveNueva[u.usuario] }, `Contraseña de "${u.usuario}" actualizada`)) {
+                        if (await llamar('PUT', { usuario: u.usuario, clave: claveNueva[u.usuario] }, `Contraseña de "${u.usuario}" actualizada · puede tardar unos segundos en aplicarse`)) {
                           setClaveNueva({ ...claveNueva, [u.usuario]: '' });
                         }
                       }}
