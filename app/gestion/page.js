@@ -404,14 +404,13 @@ function TabUsuarios({ yo, mostrarAviso }) {
       <div className="g-table-wrap">
         <table className="g-table">
           <thead>
-            <tr><th>Usuario</th><th>Creado</th><th>Último acceso</th><th>Cambiar contraseña</th><th></th></tr>
+            <tr><th>Usuario</th><th>Creado</th><th>Cambiar contraseña</th><th></th></tr>
           </thead>
           <tbody>
             {usuarios.map((u) => (
               <tr key={u.usuario}>
                 <td><strong>{u.usuario}</strong>{u.usuario === yo && <span className="g-yo"> (tú)</span>}</td>
                 <td>{u.creado_en ? String(u.creado_en).split(',')[0] : '—'}</td>
-                <td>{u.ultimo_acceso || 'Nunca'}</td>
                 <td>
                   <div className="g-guia-row">
                     <input
