@@ -94,7 +94,10 @@ export default function CheckoutForm() {
     // que también sirve para reabrir la misma orden si cierran la pasarela.
     const inicio = Date.now();
     (function abrirPasarela() {
-      const boton = boldRef.current?.querySelector('button');
+      // La librería renderiza <bold-payment-button> con el botón real en shadow DOM
+      const boton = boldRef.current
+        ?.querySelector('bold-payment-button')
+        ?.shadowRoot?.querySelector('button');
       if (boton) {
         try {
           boton.click();
