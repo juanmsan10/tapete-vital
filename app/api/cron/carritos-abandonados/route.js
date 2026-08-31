@@ -25,7 +25,8 @@ import { formatoCOP } from '@/lib/pricing';
 export const dynamic = 'force-dynamic';
 
 const MIN_MIN = 30; // no escribir antes de 30 min
-const MAX_MIN = 45; // ancho de ventana = intervalo del cron (15 min)
+const MAX_MIN = 60; // ancho de ventana = intervalo del cron (30 min desde sep-2026,
+                    // espaciado para cuidar las horas de cómputo del plan Free de Neon)
 
 // Parsea "24/7/2026, 11:26:32 a. m." (es-CO, America/Bogota, UTC-5 sin DST)
 function edadMinutos(fecha) {
