@@ -40,6 +40,16 @@ export default function TiendaCheckout() {
     if (boldRef.current) boldRef.current.innerHTML = '';
   }, [items, zona]);
 
+  // Precalentar la librería de Bold mientras el cliente llena el formulario:
+  // al montar el botón sale de caché y la pasarela abre ~1-2s antes
+  useEffect(() => {
+    const preload = document.createElement('link');
+    preload.rel = 'preload';
+    preload.as = 'script';
+    preload.href = 'https://checkout.bold.co/library/boldPaymentButton.js';
+    document.head.appendChild(preload);
+  }, []);
+
   function setItem(key, delta) {
     setItems((prev) => ({
       ...prev,

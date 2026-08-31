@@ -45,6 +45,13 @@ export default function CheckoutForm() {
         num_items: cantidad,
       });
     }
+    // Precalentar la librería de Bold mientras el cliente llena el formulario:
+    // al montar el botón sale de caché y la pasarela abre ~1-2s antes
+    const preload = document.createElement('link');
+    preload.rel = 'preload';
+    preload.as = 'script';
+    preload.href = 'https://checkout.bold.co/library/boldPaymentButton.js';
+    document.head.appendChild(preload);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
