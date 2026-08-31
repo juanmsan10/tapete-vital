@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { PRODUCTOS, calcularTotalCarrito, formatoCOP, CANTIDAD_MAXIMA } from '@/lib/pricing';
+import { PRODUCTOS, calcularTotalCarrito, precioProducto, formatoCOP, CANTIDAD_MAXIMA } from '@/lib/pricing';
 
 const DESCRIPCIONES = {
   tapete: 'El más vendido. Te conecta con la tierra mientras duermes y trabajas.',
@@ -261,7 +261,7 @@ export default function TiendaCheckout() {
           {Object.entries(totales.items).map(([key, qty]) => (
             <div className="resumen-linea" key={key}>
               <span>{PRODUCTOS[key].nombre} × {qty}</span>
-              <span>{formatoCOP(PRODUCTOS[key].precio * qty)}</span>
+              <span>{formatoCOP(precioProducto(key, qty) * qty)}</span>
             </div>
           ))}
           {totales.unidades > 0 && (
