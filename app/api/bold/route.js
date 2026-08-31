@@ -7,6 +7,7 @@
 //    (sirve además para recuperar checkouts abandonados por WhatsApp)
 // ============================================================
 import crypto from 'crypto';
+import { after } from 'next/server';
 import { calcularTotal, calcularTotalCarrito, resumenProductos, formatoCOP } from '@/lib/pricing';
 import { enviarCorreo, htmlPedido } from '@/lib/email';
 import { crearPedido } from '@/lib/pedidos';
@@ -70,8 +71,10 @@ export async function POST(request) {
       productos,
     });
 
-    // Correo interno: pedido iniciado (recuperación de abandonos incluida)
-    await enviarCorreo({
+    // Correo interno: pedido iniciado (recuperación de abandonos incluida).
+    // Fuera del camino crítico: el cliente no debe esperar ~1,5s por un correo
+    // interno. La Sheet sí queda await arriba: sin fila no hay recuperación.
+    after(() => enviarCorreo({
       to: process.env.EMAIL_INTERNO || 'pedidos@tapetevital.co',
       subject: `🟡 Pedido iniciado ${orderId} — ${descripcion} — ${formatoCOP(totales.total)}`,
       html: htmlPedido({
@@ -90,7 +93,7 @@ export async function POST(request) {
         },
         totales: formatoCOP(totales.total),
       }),
-    });
+    }));
 
     return Response.json({
       orderId,

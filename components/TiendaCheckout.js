@@ -81,6 +81,24 @@ export default function TiendaCheckout() {
     setTimeout(() => {
       boldRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 400);
+
+    // Un solo gesto: cuando la librería de Bold pinte su botón, tocarlo por el
+    // cliente para abrir la pasarela de una vez. Si en 3s no aparece o el click
+    // falla, no se hace nada: queda el flujo de siempre (botón + "Último paso"),
+    // que también sirve para reabrir la misma orden si cierran la pasarela.
+    const inicio = Date.now();
+    (function abrirPasarela() {
+      const boton = boldRef.current?.querySelector('button');
+      if (boton) {
+        try {
+          boton.click();
+        } catch {
+          /* fallback: flujo actual */
+        }
+        return;
+      }
+      if (Date.now() - inicio < 3000) setTimeout(abrirPasarela, 150);
+    })();
   }
 
   async function continuarAlPago(e) {
