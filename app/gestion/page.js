@@ -857,10 +857,11 @@ export default function Gestion() {
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
   // Varias personas trabajan el mismo tablero a la vez: refrescar solo
-  // mientras la pestaña está visible, y sin forzar lectura de la Sheet
-  // (el caché del servidor absorbe el polling de todo el equipo).
+  // mientras la pestaña está visible. 7s para que un cambio hecho en otro
+  // PC se sienta inmediato en bodega (los pedidos salen de Neon, una
+  // consulta barata; push real por WebSockets no cuadra con serverless).
   useEffect(() => {
-    const id = setInterval(() => { if (!document.hidden) cargarDatos(); }, 25000);
+    const id = setInterval(() => { if (!document.hidden) cargarDatos(); }, 7000);
     const alVolver = () => { if (!document.hidden) cargarDatos(); };
     document.addEventListener('visibilitychange', alVolver);
     return () => { clearInterval(id); document.removeEventListener('visibilitychange', alVolver); };
