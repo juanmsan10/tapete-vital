@@ -21,8 +21,17 @@ export async function POST(request) {
     return Response.json({ error: 'No autorizado' }, { status: 401 });
   }
 
-  const { orden } = await request.json().catch(() => ({}));
-  if (!orden) return Response.json({ error: 'Falta la orden' }, { status: 400 });
+  const cuerpo = await request.json().catch(() => ({}));
+  const { orden } = cuerpo;
+  // GHL manda sus propios campos del contacto junto a los nuestros y no
+  // documenta bien dónde caen: si falta la orden, el error dice qué llegó
+  // de verdad, que es lo único que hace falta para arreglar el mapeo.
+  if (!orden) {
+    return Response.json(
+      { error: 'Falta la orden', recibido: Object.keys(cuerpo) },
+      { status: 400 }
+    );
+  }
 
   const pedido = await buscarPedido(orden);
   if (!pedido) return Response.json({ error: `No encontrado: ${orden}` }, { status: 404 });
