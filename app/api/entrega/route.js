@@ -23,11 +23,22 @@ export async function POST(request) {
     console.error('[entrega] ENTREGA_SECRET no está configurado en este entorno.');
     return Response.json({ error: 'Endpoint sin configurar' }, { status: 503 });
   }
-  if (request.headers.get('authorization') !== `Bearer ${secret}`) {
+  const cuerpo = await request.json().catch(() => ({}));
+
+  // El secreto vale en el header o en el cuerpo. GHL debería mandar el header
+  // y no lo hizo (2026-09-01), y su "custom data" es el mecanismo nativo que
+  // sí funciona seguro. El log dice por cuál de los dos vino, para no volver
+  // a adivinar si algún día falla.
+  const conHeader = request.headers.get('authorization') === `Bearer ${secret}`;
+  if (!conHeader && cuerpo.secreto !== secret) {
+    console.warn(
+      '[entrega] Rechazado — header %s, secreto en cuerpo %s',
+      request.headers.get('authorization') ? 'presente pero inválido' : 'ausente',
+      cuerpo.secreto ? 'presente pero inválido' : 'ausente'
+    );
     return Response.json({ error: 'Token inválido' }, { status: 401 });
   }
 
-  const cuerpo = await request.json().catch(() => ({}));
   const { orden } = cuerpo;
   // GHL manda sus propios campos del contacto junto a los nuestros y no
   // documenta bien dónde caen: si falta la orden, el error dice qué llegó
