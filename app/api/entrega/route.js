@@ -16,9 +16,15 @@ import { buscarPedido, actualizarPedido } from '@/lib/pedidos';
 import { registrar } from '@/lib/auditoria';
 
 export async function POST(request) {
+  // Falta el secreto y token equivocado son fallas distintas: verlas iguales
+  // costó una tarde de "¿es Vercel o es GHL?".
   const secret = process.env.ENTREGA_SECRET;
-  if (!secret || request.headers.get('authorization') !== `Bearer ${secret}`) {
-    return Response.json({ error: 'No autorizado' }, { status: 401 });
+  if (!secret) {
+    console.error('[entrega] ENTREGA_SECRET no está configurado en este entorno.');
+    return Response.json({ error: 'Endpoint sin configurar' }, { status: 503 });
+  }
+  if (request.headers.get('authorization') !== `Bearer ${secret}`) {
+    return Response.json({ error: 'Token inválido' }, { status: 401 });
   }
 
   const cuerpo = await request.json().catch(() => ({}));
