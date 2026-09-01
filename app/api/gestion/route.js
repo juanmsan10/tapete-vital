@@ -1,5 +1,5 @@
 import { leerPedidos, crearPedido, actualizarPedido, buscarPedido } from '@/lib/pedidos';
-import { correoConfirmacionCompra } from '@/lib/email';
+import { correoConfirmacionCompra, correoEnvioDespachado } from '@/lib/email';
 import { registrar, usuarioDe } from '@/lib/auditoria';
 import { after } from 'next/server';
 
@@ -70,6 +70,15 @@ export async function PUT(request) {
         ? previo
         : null;
 
+    // Guía recién asignada (o corregida): el cliente todavía no sabe con qué
+    // número rastrear. Se compara contra la anterior para no reenviar el mismo
+    // correo cuando el panel guarda otros campos del pedido.
+    const guiaNueva = String(campos.guia || '').trim();
+    const avisarEnvio =
+      guiaNueva && guiaNueva !== String(previo?.guia || '').trim() && previo?.email
+        ? { ...previo, guia: guiaNueva }
+        : null;
+
     await actualizarPedido(orden, campos);
 
     const usuario = usuarioDe(request);
@@ -98,6 +107,15 @@ export async function PUT(request) {
         orden: confirmarA.orden,
         email: confirmarA.email,
         total: confirmarA.total,
+      });
+    }
+
+    if (avisarEnvio) {
+      await correoEnvioDespachado({
+        orden: avisarEnvio.orden,
+        email: avisarEnvio.email,
+        guia: avisarEnvio.guia,
+        ciudad: avisarEnvio.ciudad,
       });
     }
 
