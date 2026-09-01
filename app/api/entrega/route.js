@@ -25,19 +25,20 @@ export async function POST(request) {
   }
   const cuerpo = await request.json().catch(() => ({}));
 
-  // El secreto vale en el header o en el cuerpo. GHL debería mandar el header
-  // y no lo hizo (2026-09-01), y su "custom data" es el mecanismo nativo que
-  // sí funciona seguro. El log dice por cuál de los dos vino, para no volver
-  // a adivinar si algún día falla.
-  const conHeader = request.headers.get('authorization') === `Bearer ${secret}`;
-  if (!conHeader && cuerpo.secreto !== secret) {
-    // La forma del cuerpo con los valores vaciados: dice dónde mete GHL sus
-    // custom data sin escribir un secreto ni un dato de cliente en los logs.
-    const forma = JSON.stringify(cuerpo, (k, v) => (typeof v === 'string' ? '' : v));
+  // El secreto vale en el header o en el cuerpo, con o sin el prefijo Bearer:
+  // quien configura esto pega el valor en un campo de GHL, y un prefijo de más
+  // o de menos no es motivo para dejar un pedido sin cerrar.
+  const enviado = (
+    request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
+    cuerpo.secreto ||
+    ''
+  ).trim();
+
+  if (enviado !== secret) {
     console.warn(
-      '[entrega] Rechazado — header %s. Forma del cuerpo: %s',
-      request.headers.get('authorization') ? 'presente pero inválido' : 'ausente',
-      forma.slice(0, 1500)
+      '[entrega] Rechazado — llegaron %d caracteres, esperaba %d.',
+      enviado.length,
+      secret.length
     );
     return Response.json({ error: 'Token inválido' }, { status: 401 });
   }
