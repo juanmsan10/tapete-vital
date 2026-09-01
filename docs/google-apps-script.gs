@@ -57,7 +57,20 @@ function doGet(e) {
   return json_({ ok: true });
 }
 
+// Cualquier excepción aquí adentro (la validación de datos de la hoja que
+// rechaza un valor, una hoja que no existe) hace que Apps Script conteste con
+// SU página HTML de error, y al otro lado eso llega como un blob ilegible: el
+// espejo de pedidos estuvo semanas roto porque el log de Vercel solo decía
+// "<!DOCTYPE html>...". Devolver el motivo en JSON lo habría dicho el día uno.
 function doPost(e) {
+  try {
+    return doPost_(e);
+  } catch (err) {
+    return json_({ error: String((err && err.message) || err) });
+  }
+}
+
+function doPost_(e) {
   var body = JSON.parse(e.postData.contents);
   var hoja = hojaPorNombre_(body.hoja);
   var ultimaCol = hoja.getLastColumn();
@@ -145,6 +158,38 @@ function letraColumna_(n) {
     n = (n - resto - 1) / 26;
   }
   return s;
+}
+
+// ============================================================
+// Pone la lista desplegable de "Estado" al día y, sobre todo, en modo
+// AVISO en vez de RECHAZO.
+// EJECUTAR UNA SOLA VEZ desde el editor (selector de función → ▷).
+//
+// La lista se había quedado en cuatro estados (Enviado, Descartado,
+// Iniciado, Aprobado). Como estaba en "rechazar entrada", setValue()
+// lanzaba excepción al escribir Empacado, Entregado o Rechazado, y el
+// espejo de esas filas moría en silencio: 14 pedidos quedaron con el
+// estado viejo en la hoja mientras Neon ya tenía el bueno.
+//
+// Queda en allowInvalid para que la hoja NO vuelva a bloquear un espejo:
+// el estado válido lo decide el CHECK de la tabla en Neon (ver
+// scripts/migrar-pedidos.mjs), que es la fuente de verdad. Aquí la lista
+// es solo la comodidad del desplegable para quien lee la hoja.
+// ============================================================
+function sincronizarEstadosValidos() {
+  var ESTADOS = ['Iniciado', 'Rechazado', 'Aprobado', 'Empacado', 'Enviado', 'Entregado', 'Descartado'];
+  var hoja = hojaPorNombre_();
+  var ultimaCol = hoja.getLastColumn();
+  var claves = hoja.getRange(1, 1, 1, ultimaCol).getValues()[0].map(clave_);
+  var col = claves.indexOf('estado') + 1;
+  if (col < 1) throw new Error('No encontré la columna "Estado"');
+
+  var regla = SpreadsheetApp.newDataValidation()
+    .requireValueInList(ESTADOS, true)
+    .setAllowInvalid(true)
+    .build();
+  hoja.getRange(2, col, hoja.getMaxRows() - 1, 1).setDataValidation(regla);
+  return 'Listo: columna ' + letraColumna_(col) + ' acepta ' + ESTADOS.join(', ') + ' (en modo aviso).';
 }
 
 // ============================================================
