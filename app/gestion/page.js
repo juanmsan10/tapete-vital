@@ -29,16 +29,26 @@ function ListaProductos({ pedido }) {
   );
 }
 
+// La guía llega después de despachar: la transportadora la entrega cuando ya
+// recogió. Por eso "Enviar" no la pide, y los enviados esperan en "Asignar
+// guía" hasta que se registra. El número es el que separa las dos pestañas,
+// así que no hace falta un estado extra para saber en cuál va cada pedido.
 const SUB_TABS = [
-  { estado: 'Iniciado', label: 'Abandonado', next: 'Aprobado', accion: 'Marcar como aprobado', color: '#FFC272', whatsapp: true },
-  { estado: 'Aprobado', label: 'Empacar', next: 'Empacado', accion: 'Marcar como empacado', color: '#00AE84' },
-  { estado: 'Empacado', label: 'Enviar', next: 'Enviado', accion: 'Enviado', color: '#27798F', pideGuia: true },
-  { estado: 'Enviado', label: 'Confirmar entrega', next: 'Entregado', accion: 'Entrega confirmada', color: '#005261', compacto: true },
+  { id: 'abandonado', estado: 'Iniciado', label: 'Abandonado', next: 'Aprobado', accion: 'Marcar como aprobado', color: '#FFC272', whatsapp: true },
+  { id: 'empacar', estado: 'Aprobado', label: 'Empacar', next: 'Empacado', accion: 'Marcar como empacado', color: '#00AE84' },
+  { id: 'enviar', estado: 'Empacado', label: 'Enviar', next: 'Enviado', accion: 'Marcar como enviado', color: '#27798F' },
+  { id: 'guia', estado: 'Enviado', label: 'Asignar guía', accion: 'Guardar guía', color: '#7A4EAB', pideGuia: true, sinGuia: true },
+  { id: 'entrega', estado: 'Enviado', label: 'Confirmar entrega', next: 'Entregado', accion: 'Entrega confirmada', color: '#005261', compacto: true, conGuia: true },
 ];
 
 // La pestaña Abandonado agrupa Iniciado + Rechazado (pago intentado y fallido)
 function perteneceATab(p, st) {
-  return p.estado === st.estado || (st.estado === 'Iniciado' && p.estado === 'Rechazado');
+  if (st.estado === 'Iniciado') return p.estado === 'Iniciado' || p.estado === 'Rechazado';
+  if (p.estado !== st.estado) return false;
+  const tieneGuia = Boolean(String(p.guia || '').trim());
+  if (st.sinGuia) return !tieneGuia;
+  if (st.conGuia) return tieneGuia;
+  return true;
 }
 
 // Mismo cliente = mismo teléfono (últimos 10 dígitos)
@@ -471,7 +481,7 @@ function TabPendientes({ pedidos, onUpdateEstado, onEditar }) {
       <div className="g-sub-tabs">
         {SUB_TABS.map((st, i) => (
           <button
-            key={st.estado}
+            key={st.id}
             className={`g-sub-tab ${subTab === i ? 'active' : ''}`}
             style={subTab === i ? { borderColor: st.color, color: st.color } : {}}
             onClick={() => setSubTab(i)}
@@ -556,6 +566,7 @@ function TabPendientes({ pedidos, onUpdateEstado, onEditar }) {
               )}
               <button
                 className="g-btn g-btn-primary"
+                disabled={current.pideGuia && !String(guias[p.orden] || '').trim()}
                 onClick={async () => {
                   await onUpdateEstado(p.orden, current.next, current.pideGuia ? guias[p.orden] : undefined);
                   // Al aprobar un intento, los demás intentos del cliente se descartan solos
@@ -877,23 +888,28 @@ export default function Gestion() {
   const updateEstado = async (orden, nuevoEstado, guia) => {
     setUpdating(true);
     try {
-      const payload = { orden, estado: nuevoEstado };
+      // Asignar guía no mueve de estado: solo guarda el número
+      const payload = { orden, ...(nuevoEstado ? { estado: nuevoEstado } : {}) };
       if (guia) payload.guia = guia;
       await fetch('/api/gestion', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      setPedidos(prev => prev.map(p => p.orden === orden ? { ...p, estado: nuevoEstado, ...(guia ? { guia } : {}) } : p));
+      setPedidos(prev => prev.map(p => p.orden === orden
+        ? { ...p, ...(nuevoEstado ? { estado: nuevoEstado } : {}), ...(guia ? { guia } : {}) }
+        : p));
       // El pedido sale de la pestaña actual: decir a dónde fue, si no
       // parece que se hubiera borrado
-      const destino = SUB_TABS.find(t => t.estado === nuevoEstado);
+      const estadoFinal = nuevoEstado || pedidos.find(p => p.orden === orden)?.estado;
+      const destino = SUB_TABS.find(t => t.estado === estadoFinal
+        && (t.conGuia ? Boolean(guia) : t.sinGuia ? !guia : true));
       mostrarAviso(
         nuevoEstado === 'Descartado'
           ? `${orden} descartado — queda en el historial de Pedidos`
           : destino
             ? `${orden} → ahora está en "${destino.label}"`
-            : `${orden} actualizado a ${nuevoEstado}`
+            : `${orden} actualizado`
       );
     } catch (err) {
       console.error('Error actualizando estado:', err);
