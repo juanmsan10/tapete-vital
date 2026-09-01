@@ -1,6 +1,7 @@
 import { leerPedidos, crearPedido, actualizarPedido, buscarPedido } from '@/lib/pedidos';
 import { correoConfirmacionCompra, correoEnvioDespachado } from '@/lib/email';
 import { registrar, usuarioDe } from '@/lib/auditoria';
+import { registrarGuia } from '@/lib/track17';
 import { after } from 'next/server';
 
 // El caché corto y los reintentos viven en lib/hoja.js, porque la Sheet
@@ -117,6 +118,8 @@ export async function PUT(request) {
         guia: avisarEnvio.guia,
         ciudad: avisarEnvio.ciudad,
       });
+      // Fuera del camino crítico: 17track no debe hacer esperar al panel.
+      after(() => registrarGuia(avisarEnvio.guia));
     }
 
     return Response.json({ ok: true });

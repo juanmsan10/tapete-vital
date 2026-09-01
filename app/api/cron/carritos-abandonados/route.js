@@ -18,7 +18,7 @@
 //    caído nunca recibe el mensaje de carrito abandonado.
 // ============================================================
 import { notificarGHL, enviarCorreo, htmlPedido, correoConfirmacionCompra } from '@/lib/email';
-import { leerPedidos, actualizarPedido } from '@/lib/pedidos';
+import { leerPedidos, actualizarPedido, telefonoE164 } from '@/lib/pedidos';
 import { enviarPurchaseCAPI } from '@/lib/meta';
 import { formatoCOP } from '@/lib/pricing';
 
@@ -58,15 +58,6 @@ async function estadoBold(orden) {
     console.error(`[cron/abandonados] Error consultando Bold ${orden}:`, err);
     return null;
   }
-}
-
-// Normaliza teléfonos colombianos a E.164 (+57...) para que GHL
-// asocie el contacto correcto y el WhatsApp llegue de verdad.
-function telefonoE164(tel) {
-  const digitos = String(tel || '').replace(/\D/g, '');
-  if (!digitos) return '';
-  if (digitos.startsWith('57') && digitos.length > 10) return `+${digitos}`;
-  return `+57${digitos}`;
 }
 
 export async function GET(request) {
