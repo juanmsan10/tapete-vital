@@ -466,7 +466,7 @@ function TabUsuarios({ yo, mostrarAviso }) {
   );
 }
 
-function TabPendientes({ pedidos, pasos, onUpdateEstado, onEditar }) {
+function TabPendientes({ pedidos, pasos, historico, onUpdateEstado, onEditar }) {
   const [subTab, setSubTab] = useState(0);
   const [guias, setGuias] = useState({});
 
@@ -476,10 +476,12 @@ function TabPendientes({ pedidos, pasos, onUpdateEstado, onEditar }) {
     return st.whatsapp ? new Set(l.map(p => telNorm(p.telefono) || p.orden)).size : l.length;
   });
 
-  const current = pasos[subTab];
-  const filtrada = pedidos.filter(p => perteneceATab(p, current));
+  // El histórico (la tabla completa de siempre) vive como último paso
+  const esHistorico = historico && subTab >= pasos.length;
+  const current = esHistorico ? null : pasos[subTab];
+  const filtrada = current ? pedidos.filter(p => perteneceATab(p, current)) : [];
   // Rechazados primero: pago intentado y fallido = contacto urgente
-  const lista = (current.whatsapp ? agruparPorCliente(filtrada) : filtrada)
+  const lista = (current?.whatsapp ? agruparPorCliente(filtrada) : filtrada)
     .sort((a, b) => (b.estado === 'Rechazado' ? 1 : 0) - (a.estado === 'Rechazado' ? 1 : 0));
 
   return (
@@ -496,9 +498,18 @@ function TabPendientes({ pedidos, pasos, onUpdateEstado, onEditar }) {
             {counts[i] > 0 && <span className="g-sub-count" style={subTab === i ? { background: st.color } : {}}>{counts[i]}</span>}
           </button>
         ))}
+        {historico && (
+          <button
+            className={`g-sub-tab ${esHistorico ? 'active' : ''}`}
+            style={esHistorico ? { borderColor: '#5B3623', color: '#5B3623' } : {}}
+            onClick={() => setSubTab(pasos.length)}
+          >
+            Histórico
+          </button>
+        )}
       </div>
 
-      {current.estado === 'Aprobado' && lista.length > 0 && (
+      {current?.estado === 'Aprobado' && lista.length > 0 && (
         <div className="g-print-bar">
           <button className="g-btn g-btn-outline" onClick={() => imprimirEtiquetas(lista)}>
             Imprimir etiquetas ({lista.length})
@@ -506,6 +517,9 @@ function TabPendientes({ pedidos, pasos, onUpdateEstado, onEditar }) {
         </div>
       )}
 
+      {esHistorico ? (
+        <TabPedidos pedidos={pedidos} onUpdateEstado={onUpdateEstado} onEditar={onEditar} />
+      ) : (
       <div className="g-seccion-list">
         {lista.length ? lista.map(p => (
           <div key={p.orden} className="g-prep-card">
@@ -603,8 +617,8 @@ function TabPendientes({ pedidos, pasos, onUpdateEstado, onEditar }) {
                   onClick={async () => {
                     const n = p.grupo?.length || 1;
                     const msg = n > 1
-                      ? `¿Descartar los ${n} intentos de ${p.nombre || 'este cliente'}? Saldrán de Pendientes (quedan en el historial de Pedidos).`
-                      : `¿Descartar el pedido ${p.orden}? Saldrá de Pendientes (queda en el historial de Pedidos).`;
+                      ? `¿Descartar los ${n} intentos de ${p.nombre || 'este cliente'}? Salen de los pasos de trabajo (quedan en el Histórico).`
+                      : `¿Descartar el pedido ${p.orden}? Sale de los pasos de trabajo (queda en el Histórico).`;
                     if (window.confirm(msg)) {
                       for (const o of (p.grupo || [p])) await onUpdateEstado(o.orden, 'Descartado');
                     }
@@ -619,6 +633,7 @@ function TabPendientes({ pedidos, pasos, onUpdateEstado, onEditar }) {
           <div className="g-empty">No hay pedidos en este paso.</div>
         )}
       </div>
+      )}
     </div>
   );
 }
@@ -902,7 +917,7 @@ export default function Gestion() {
         && (t.conGuia ? Boolean(guia) : t.sinGuia ? !guia : true));
       mostrarAviso(
         nuevoEstado === 'Descartado'
-          ? `${orden} descartado — queda en el historial de Pedidos`
+          ? `${orden} descartado — queda en el Histórico`
           : destino
             ? `${orden} → ahora está en "${destino.label}"`
             : `${orden} actualizado`
@@ -955,13 +970,13 @@ export default function Gestion() {
   const esBodega = USUARIOS_BODEGA.has(sesion.usuario);
   const pasosVisibles = esBodega ? SUB_TABS.filter(st => PASOS_BODEGA.has(st.id)) : SUB_TABS;
 
+  // La pestaña de trabajo se llama "Pedidos" para todos; el historial (la
+  // tabla completa de siempre) vive adentro como último paso, "Histórico" —
+  // salvo en bodega, que solo ve sus tres pasos. El id no cambia.
   const tabs = esBodega
-    // Para bodega la pestaña se llama "Pedidos": sin historial a la vista,
-    // "Pendientes" no se distingue de nada. El id no cambia.
     ? [{ id: 'pendientes', label: 'Pedidos' }, { id: 'inventario', label: 'Inventario' }]
     : [
-        { id: 'pendientes', label: 'Pendientes' },
-        { id: 'pedidos', label: 'Pedidos' },
+        { id: 'pendientes', label: 'Pedidos' },
         { id: 'clientes', label: 'Clientes' },
         { id: 'inventario', label: 'Inventario' },
         // La gestión de usuarios solo existe para administradores
@@ -1147,8 +1162,7 @@ export default function Gestion() {
             </div>
           ) : (
             <>
-              {tab === 'pendientes' && <TabPendientes pedidos={pedidos} pasos={pasosVisibles} onUpdateEstado={updateEstado} onEditar={setEditando} />}
-              {tab === 'pedidos' && <TabPedidos pedidos={pedidos} onUpdateEstado={updateEstado} onEditar={setEditando} />}
+              {tab === 'pendientes' && <TabPendientes pedidos={pedidos} pasos={pasosVisibles} historico={!esBodega} onUpdateEstado={updateEstado} onEditar={setEditando} />}
               {tab === 'clientes' && <TabClientes pedidos={pedidos} />}
               {tab === 'inventario' && <TabInventario pedidos={pedidos} inventarios={inventarios} onUpdateInventario={updateInventario} />}
               {tab === 'usuarios' && sesion.esAdmin && <TabUsuarios yo={sesion.usuario} mostrarAviso={mostrarAviso} />}
