@@ -956,7 +956,9 @@ export default function Gestion() {
   const pasosVisibles = esBodega ? SUB_TABS.filter(st => PASOS_BODEGA.has(st.id)) : SUB_TABS;
 
   const tabs = esBodega
-    ? [{ id: 'pendientes', label: 'Pendientes' }, { id: 'inventario', label: 'Inventario' }]
+    // Para bodega la pestaña se llama "Pedidos": sin historial a la vista,
+    // "Pendientes" no se distingue de nada. El id no cambia.
+    ? [{ id: 'pendientes', label: 'Pedidos' }, { id: 'inventario', label: 'Inventario' }]
     : [
         { id: 'pendientes', label: 'Pendientes' },
         { id: 'pedidos', label: 'Pedidos' },
