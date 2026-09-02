@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
+
+<title>Manual de Bodega Polo a Tierra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Documento de una sola cara visual (para imprimir): claro a propósito,
+     con la paleta del landing tapetevital.co */
+  :root {
+    --verde: #00ae84;
+    --teal: #27798f;
+    --teal-oscuro: #005261;
+    --morado: #7a4eab;
+    --tierra: #5b3623;
+    --arena: #ffc272;
+    --arena-suave: #fff3e0;
+    --crema: #f5faf8;
+    --tinta: #16302a;
+    --gris-texto: #45564f;
+    --borde: rgba(0, 82, 97, 0.14);
+    --radio: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    background: var(--crema);
+    color: var(--tinta);
+    font-family: 'Assistant', system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+  }
+  .hoja { max-width: 820px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  .no-imprimir {
+    background: #fff; border: 1px solid var(--borde); border-radius: var(--radio);
+    padding: 12px 18px; margin-bottom: 20px; font-size: 15px; color: var(--gris-texto);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .no-imprimir strong { color: var(--teal-oscuro); }
+
+  header.banda {
+    background: linear-gradient(135deg, #00ae84 0%, #005261 100%);
+    border-radius: var(--radio);
+    color: #fff;
+    padding: 30px 34px;
+  }
+  .marca { font-size: 15px; font-weight: 700; letter-spacing: 0.14em; opacity: 0.9; }
+  header.banda h1 { margin: 6px 0 4px; font-size: 34px; font-weight: 800; line-height: 1.15; text-wrap: balance; }
+  .banda-sub { margin: 0; font-size: 18px; opacity: 0.92; }
+
+  .promesa {
+    background: #fff; border: 1px solid var(--borde); border-radius: var(--radio);
+    padding: 18px 24px; margin: 20px 0 28px; font-size: 18px;
+  }
+  .promesa strong { color: var(--teal-oscuro); }
+
+  h2.seccion { font-size: 22px; font-weight: 800; color: var(--teal-oscuro); margin: 34px 0 14px; }
+
+  .pantalla {
+    background: #fff; border: 1px solid var(--borde); border-radius: var(--radio);
+    padding: 20px 24px; margin-bottom: 8px;
+  }
+  .pantalla p { margin: 8px 0; }
+
+  /* Réplicas visuales de lo que ve en pantalla */
+  .chip-tab {
+    display: inline-block; background: #e8f5f0; color: var(--teal-oscuro);
+    font-weight: 700; padding: 4px 14px; border-radius: 8px; font-size: 16px;
+  }
+  .burbuja {
+    display: inline-block; background: var(--verde); color: #fff; font-weight: 700;
+    font-size: 13px; padding: 0 8px; border-radius: 10px; vertical-align: 2px;
+  }
+  .boton {
+    display: inline-block; color: #fff; font-weight: 700; font-size: 15px;
+    padding: 6px 16px; border-radius: 10px; white-space: nowrap;
+  }
+  .boton.borde {
+    color: var(--teal-oscuro); background: #fff; border: 2px solid var(--teal-oscuro);
+    padding: 4px 14px;
+  }
+  .casilla {
+    display: inline-block; background: #f5faf8; border: 2px solid var(--borde);
+    color: #8aa39a; border-radius: 10px; padding: 4px 14px; font-size: 15px; white-space: nowrap;
+  }
+
+  .paso {
+    background: #fff; border: 1px solid var(--borde); border-left: 6px solid var(--paso-color, var(--verde));
+    border-radius: var(--radio); padding: 22px 26px; margin: 14px 0;
+    break-inside: avoid;
+  }
+  .paso-cabeza { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+  .paso-numero {
+    flex: none; width: 44px; height: 44px; border-radius: 50%;
+    background: var(--paso-color, var(--verde)); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 800;
+  }
+  .paso-titulo { font-size: 22px; font-weight: 800; color: var(--paso-color, var(--verde)); }
+  .paso-cuando { font-size: 15px; color: var(--gris-texto); margin-top: -2px; }
+  .paso ol { margin: 10px 0 4px; padding-left: 24px; }
+  .paso ol li { margin: 10px 0; }
+  .paso .nota { font-size: 15.5px; color: var(--gris-texto); margin: 10px 0 0; }
+
+  .ojo {
+    background: var(--arena-suave); border: 1px solid rgba(255, 194, 114, 0.8);
+    border-radius: 10px; padding: 10px 16px; margin-top: 12px; font-size: 16px;
+  }
+  .ojo strong { color: var(--tierra); }
+
+  .dos-columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+  @media (max-width: 640px) { .dos-columnas { grid-template-columns: 1fr; } }
+  .tarjeta-info {
+    background: #fff; border: 1px solid var(--borde); border-radius: var(--radio);
+    padding: 20px 24px; break-inside: avoid;
+  }
+  .tarjeta-info.solo { background: #e8f5f0; border-color: rgba(0, 174, 132, 0.3); }
+  .tarjeta-info h3 { margin: 0 0 10px; font-size: 19px; font-weight: 800; color: var(--teal-oscuro); }
+  .tarjeta-info ul { margin: 0; padding-left: 20px; }
+  .tarjeta-info li { margin: 8px 0; }
+
+  footer.cierre {
+    margin-top: 30px; text-align: center; color: var(--gris-texto); font-size: 16px;
+  }
+  footer.cierre .linea { color: var(--teal-oscuro); font-weight: 700; font-size: 18px; }
+
+  @page { size: A4; margin: 14mm 12mm; }
+  @media print {
+    body { background: #fff; font-size: 15.5px; }
+    .hoja { max-width: none; padding: 0; }
+    .no-imprimir { display: none; }
+    header.banda { padding: 24px 30px; border-radius: 12px; }
+    header.banda h1 { font-size: 30px; }
+    .paso, .tarjeta-info, .pantalla { break-inside: avoid; }
+    h2.seccion { margin-top: 24px; }
+    .salto { break-before: page; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hoja">
+  <div class="no-imprimir">
+    🖨️ <span>Para imprimirlo: <strong>Ctrl + P</strong> (o Archivo → Imprimir). Sale en dos hojas tamaño carta o A4, mejor a color.</span>
+  </div>
+
+  <header class="banda">
+    <div class="marca">POLO A TIERRA · TAPETE VITAL</div>
+    <h1>Manual de bodega</h1>
+    <p class="banda-sub">Los pedidos del día, paso a paso</p>
+  </header>
+
+  <div class="promesa">
+    <strong>La pantalla trabaja contigo:</strong> se actualiza sola cada pocos segundos.
+    No hay que refrescar, ni cerrar Chrome, ni volver a entrar. Los pedidos nuevos
+    aparecen solos, y tu sesión queda abierta por meses.
+  </div>
+
+  <h2 class="seccion">Al llegar</h2>
+  <div class="pantalla">
+    <p>Haz clic en el icono <strong>Polo a Tierra</strong> del escritorio. La pantalla de pedidos abre de una.</p>
+    <p>Muy de vez en cuando (una vez cada tres meses, más o menos) te pedirá
+    <strong>Usuario</strong> y <strong>Contraseña</strong>: escríbelos y toca
+    <span class="boton" style="background: linear-gradient(135deg, #00ae84, #005261);">Entrar</span>.
+    Chrome puede recordarte la contraseña; dile que sí.</p>
+  </div>
+
+  <h2 class="seccion">Tu pantalla</h2>
+  <div class="pantalla">
+    <p>Arriba hay dos pestañas: <span class="chip-tab">Pendientes <span class="burbuja">3</span></span>
+    y <span class="chip-tab">Inventario</span>.</p>
+    <p>La burbuja verde de <strong>Pendientes</strong> dice cuántos pedidos esperan trabajo tuyo.
+    Si está en cero, no hay nada pendiente.</p>
+    <p>Dentro de Pendientes hay tres pasos, en orden: <strong style="color: #00ae84;">Empacar</strong> →
+    <strong style="color: #27798f;">Enviar</strong> → <strong style="color: #7a4eab;">Asignar guía</strong>.
+    Cada pedido es una tarjeta que va pasando sola de un paso al siguiente cuando tocas su botón.</p>
+  </div>
+
+  <div class="paso" style="--paso-color: #00ae84;">
+    <div class="paso-cabeza">
+      <div class="paso-numero">1</div>
+      <div>
+        <div class="paso-titulo">Empacar</div>
+        <div class="paso-cuando">Aquí llegan los pedidos ya pagados, listos para armar</div>
+      </div>
+    </div>
+    <ol>
+      <li>Si hay varias tarjetas, toca <span class="boton borde">Imprimir etiquetas</span> y salen las etiquetas de todos los pedidos de una vez.</li>
+      <li>Arma cada paquete con <strong>exactamente</strong> lo que dice su tarjeta: producto y cantidad (por ejemplo «2× Tapete Vital»).</li>
+      <li>Pega la etiqueta con los datos del cliente.</li>
+      <li>Toca <span class="boton" style="background: #00ae84;">Marcar como empacado</span>. La tarjeta pasa sola al paso Enviar.</li>
+    </ol>
+  </div>
+
+  <div class="paso" style="--paso-color: #27798f;">
+    <div class="paso-cabeza">
+      <div class="paso-numero">2</div>
+      <div>
+        <div class="paso-titulo">Enviar</div>
+        <div class="paso-cuando">Paquetes armados, esperando salir con Interrapidísimo</div>
+      </div>
+    </div>
+    <ol>
+      <li>Cuando el paquete salga con la transportadora, toca
+      <span class="boton" style="background: #27798f;">Marcar como enviado</span>.</li>
+    </ol>
+    <p class="nota">Solo eso: este paso es avisar que el paquete ya no está en la bodega.</p>
+  </div>
+
+  <div class="paso" style="--paso-color: #7a4eab;">
+    <div class="paso-cabeza">
+      <div class="paso-numero">3</div>
+      <div>
+        <div class="paso-titulo">Asignar guía</div>
+        <div class="paso-cuando">Cuando Interrapidísimo te entregue el número de guía</div>
+      </div>
+    </div>
+    <ol>
+      <li>Busca la tarjeta del pedido y escribe el número en la casilla <span class="casilla">Número de guía</span>.</li>
+      <li>Revísalo dos veces: con ese número el cliente rastrea su paquete.</li>
+      <li>Toca <span class="boton" style="background: #7a4eab;">Guardar guía</span>.</li>
+    </ol>
+    <div class="ojo"><strong>Y ya:</strong> al guardar, el sistema le manda solo el correo al cliente
+    con su número de guía. No tienes que avisarle nada a nadie.</div>
+  </div>
+
+  <h2 class="seccion salto">Inventario</h2>
+  <div class="pantalla">
+    <p>La pestaña <span class="chip-tab">Inventario</span> lleva la cuenta de
+    <strong>Tapete Vital</strong>, <strong>Pad Portátil</strong> y <strong>Parches Esenciales</strong>:
+    cuántos hay registrados, cuántos se han vendido y cuántos quedan disponibles.
+    Cuando quedan 5 o menos, avisa «Stock bajo».</p>
+    <p>Cuando llegue mercancía nueva (o el conteo no cuadre con lo que hay en los estantes):
+    cuenta lo que hay de verdad, escribe ese total en la casilla
+    <span class="casilla">Nuevo stock total</span> y toca
+    <span class="boton" style="background: #00ae84;">Actualizar</span>.</p>
+  </div>
+
+  <div class="dos-columnas">
+    <div class="tarjeta-info solo">
+      <h3>Esto se hace solo — tú no haces nada</h3>
+      <ul>
+        <li>La pantalla se actualiza sola, cada pocos segundos.</li>
+        <li>Los pedidos nuevos aparecen solos en <strong>Empacar</strong> cuando el pago se aprueba.</li>
+        <li>El correo con la guía le llega solo al cliente.</li>
+        <li>El cliente confirma por WhatsApp que recibió, y el pedido se cierra solo.</li>
+      </ul>
+    </div>
+    <div class="tarjeta-info">
+      <h3>Si algo no cuadra</h3>
+      <ul>
+        <li>No adivines ni inventes: <strong>escríbele a Juan por WhatsApp</strong> y sigue con los demás pedidos. Nada se daña por esperar.</li>
+        <li>Si sale «No pudimos cargar los pedidos», toca <strong>Reintentar</strong>. Si sigue igual, avísale a Juan.</li>
+        <li>¿Una tarjeta con datos raros (dirección a medias, teléfono corto)? No la trabajes todavía: pregunta primero.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer class="cierre">
+    <p class="linea">Cada tarjeta es un cliente esperando su tapete.</p>
+    <p>Gracias por cuidar cada paquete — Polo a Tierra</p>
+  </footer>
+</div>
+</body></html>
