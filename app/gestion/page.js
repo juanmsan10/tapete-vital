@@ -34,7 +34,8 @@ function ListaProductos({ pedido }) {
 // guía" hasta que se registra. El número es el que separa las dos pestañas,
 // así que no hace falta un estado extra para saber en cuál va cada pedido.
 const SUB_TABS = [
-  { id: 'abandonado', estado: 'Iniciado', label: 'Abandonado', next: 'Aprobado', accion: 'Marcar como aprobado', color: '#FFC272', whatsapp: true },
+  // Rojo (el mismo de Rechazado) y con la burbuja SIEMPRE roja: son ventas escapándose
+  { id: 'abandonado', estado: 'Iniciado', label: 'Abandonado', next: 'Aprobado', accion: 'Marcar como aprobado', color: '#D64541', urgente: true, whatsapp: true },
   { id: 'empacar', estado: 'Aprobado', label: 'Empacar', next: 'Empacado', accion: 'Marcar como empacado', color: '#00AE84' },
   { id: 'enviar', estado: 'Empacado', label: 'Enviar', next: 'Enviado', accion: 'Marcar como enviado', color: '#27798F' },
   { id: 'guia', estado: 'Enviado', label: 'Asignar guía', accion: 'Guardar guía', color: '#7A4EAB', pideGuia: true, sinGuia: true },
@@ -495,7 +496,7 @@ function TabPendientes({ pedidos, pasos, historico, onUpdateEstado, onEditar }) 
             onClick={() => setSubTab(i)}
           >
             {st.label}
-            {counts[i] > 0 && <span className="g-sub-count" style={subTab === i ? { background: st.color } : {}}>{counts[i]}</span>}
+            {counts[i] > 0 && <span className="g-sub-count" style={subTab === i || st.urgente ? { background: st.color } : {}}>{counts[i]}</span>}
           </button>
         ))}
         {historico && (
