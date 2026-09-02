@@ -6,34 +6,19 @@
 // 2. poloatierra.co muestra la tienda en su raíz (rewrite, URL limpia).
 // ============================================================
 import { NextResponse } from 'next/server';
-import { verificarAcceso } from '@/lib/usuarios';
+import { identificar, leerCookieSesion } from '@/lib/sesion';
 
-// Dos niveles de acceso, a propósito:
-//
-// 1. EL DUEÑO — ADMIN_USER / ADMIN_PASSWORD, que viven solo en Vercel.
-//    Es el ÚNICO que puede crear, editar y eliminar usuarios. Como no está
-//    en la base, nadie puede otorgarse ese poder desde el panel. Y si la
-//    base falla, este acceso sigue entrando.
-//
-// 2. EL EQUIPO — usuarios de la tabla `usuarios`, con contraseña cifrada.
-//    Usan el panel de pedidos; jamás pueden tocar usuarios.
-async function identificar(usuario, clave) {
-  if (
-    process.env.ADMIN_USER &&
-    usuario === process.env.ADMIN_USER &&
-    clave === process.env.ADMIN_PASSWORD
-  ) {
-    return { usuario, es_admin: true };
-  }
-  const acceso = await verificarAcceso(usuario, clave);
-  return acceso ? { usuario: acceso.usuario, es_admin: false } : null;
-}
+// La identidad (dueño por env vars, equipo por tabla de usuarios) vive en
+// lib/sesion.js: la comparten este middleware y POST /api/gestion/entrar.
 
-const pedirCredenciales = () =>
-  new NextResponse('Acceso restringido', {
-    status: 401,
-    headers: { 'WWW-Authenticate': 'Basic realm="Gestión"' },
-  });
+// Quién entró viaja al servidor: las rutas de usuarios lo usan para
+// exigir permiso de administrador.
+const conIdentidad = (request, identidad) => {
+  const cabeceras = new Headers(request.headers);
+  cabeceras.set('x-usuario', identidad.usuario);
+  cabeceras.set('x-es-admin', identidad.es_admin ? '1' : '0');
+  return NextResponse.next({ request: { headers: cabeceras } });
+};
 
 async function protegerPanel(request) {
   if (!process.env.ADMIN_USER || !process.env.ADMIN_PASSWORD) {
@@ -42,28 +27,32 @@ async function protegerPanel(request) {
     });
   }
 
+  // 1. La cookie de sesión (el camino normal desde la página de entrada)
+  const sesion = await leerCookieSesion(request.cookies.get('sesion')?.value);
+  if (sesion) return conIdentidad(request, sesion);
+
+  // 2. Basic de respaldo: curl, scripts, y si Neon/hoja fallara el dueño
+  //    sigue entrando con -u. Solo se acepta si viene; ya no se solicita
+  //    (sin WWW-Authenticate no existe el diálogo gris del navegador).
   const auth = request.headers.get('authorization');
   if (auth?.startsWith('Basic ')) {
-    let credenciales;
+    let credenciales = '';
     try {
       credenciales = atob(auth.slice(6));
-    } catch {
-      return pedirCredenciales();
-    }
+    } catch {}
     const i = credenciales.indexOf(':');
     if (i > 0) {
       const identidad = await identificar(credenciales.slice(0, i), credenciales.slice(i + 1));
-      if (identidad) {
-        // Quién entró viaja al servidor: las rutas de usuarios lo usan para
-        // exigir permiso de administrador.
-        const cabeceras = new Headers(request.headers);
-        cabeceras.set('x-usuario', identidad.usuario);
-        cabeceras.set('x-es-admin', identidad.es_admin ? '1' : '0');
-        return NextResponse.next({ request: { headers: cabeceras } });
-      }
+      if (identidad) return conIdentidad(request, identidad);
     }
   }
-  return pedirCredenciales();
+
+  // 3. Nada válido: las páginas van a la puerta; la API responde 401 pelado
+  //    (si saliera el diálogo gris aquí, el polling del panel lo dispararía).
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  }
+  return NextResponse.redirect(new URL('/gestion/entrar', request.url));
 }
 
 export async function middleware(request) {
@@ -74,9 +63,22 @@ export async function middleware(request) {
   if (esPanel) {
     // el favicon del panel debe cargar sin pedir credenciales
     if (pathname === '/gestion/icon.png') return NextResponse.next();
-    // "Cerrar sesión": pedir credenciales aunque el navegador reenvíe las
-    // que tiene guardadas. Es la única forma de forzar el diálogo de acceso.
-    if (request.nextUrl.searchParams.get('salir') === '1') return pedirCredenciales();
+    // La puerta queda fuera de la protección; con sesión vigente, sobra.
+    if (pathname === '/gestion/entrar' || pathname === '/api/gestion/entrar') {
+      if (
+        pathname === '/gestion/entrar' &&
+        (await leerCookieSesion(request.cookies.get('sesion')?.value))
+      ) {
+        return NextResponse.redirect(new URL('/gestion', request.url));
+      }
+      return NextResponse.next();
+    }
+    // "Cerrar sesión": borrar la cookie y volver a la puerta.
+    if (request.nextUrl.searchParams.get('salir') === '1') {
+      const res = NextResponse.redirect(new URL('/gestion/entrar', request.url));
+      res.cookies.delete('sesion');
+      return res;
+    }
     return protegerPanel(request);
   }
 

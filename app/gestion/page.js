@@ -41,6 +41,12 @@ const SUB_TABS = [
   { id: 'entrega', estado: 'Enviado', label: 'Confirmar entrega', next: 'Entregado', accion: 'Entrega confirmada', color: '#005261', compacto: true, conGuia: true },
 ];
 
+// La operaria de bodega solo ve su trabajo: empacar, enviar y registrar la
+// guía. Ni los abandonados (eso es ventas) ni confirmar entrega (la cierra
+// el cliente por WhatsApp o un admin). Aplica también a la burbuja de arriba.
+const USUARIOS_BODEGA = new Set(['logistica']);
+const PASOS_BODEGA = new Set(['empacar', 'enviar', 'guia']);
+
 // La pestaña Abandonado agrupa Iniciado + Rechazado (pago intentado y fallido)
 function perteneceATab(p, st) {
   if (st.estado === 'Iniciado') return p.estado === 'Iniciado' || p.estado === 'Rechazado';
@@ -460,17 +466,17 @@ function TabUsuarios({ yo, mostrarAviso }) {
   );
 }
 
-function TabPendientes({ pedidos, onUpdateEstado, onEditar }) {
+function TabPendientes({ pedidos, pasos, onUpdateEstado, onEditar }) {
   const [subTab, setSubTab] = useState(0);
   const [guias, setGuias] = useState({});
 
-  const counts = SUB_TABS.map(st => {
+  const counts = pasos.map(st => {
     const l = pedidos.filter(p => perteneceATab(p, st));
     // En Abandonado se cuentan clientes, no intentos
     return st.whatsapp ? new Set(l.map(p => telNorm(p.telefono) || p.orden)).size : l.length;
   });
 
-  const current = SUB_TABS[subTab];
+  const current = pasos[subTab];
   const filtrada = pedidos.filter(p => perteneceATab(p, current));
   // Rechazados primero: pago intentado y fallido = contacto urgente
   const lista = (current.whatsapp ? agruparPorCliente(filtrada) : filtrada)
@@ -479,7 +485,7 @@ function TabPendientes({ pedidos, onUpdateEstado, onEditar }) {
   return (
     <div className="g-pendientes">
       <div className="g-sub-tabs">
-        {SUB_TABS.map((st, i) => (
+        {pasos.map((st, i) => (
           <button
             key={st.id}
             className={`g-sub-tab ${subTab === i ? 'active' : ''}`}
@@ -810,19 +816,8 @@ export default function Gestion() {
       .catch(() => {});
   }, []);
 
-  // La autenticación del navegador no tiene "cerrar sesión": guarda las
-  // credenciales y las reenvía sola. El truco es mandar unas inválidas a una
-  // ruta protegida para que sobrescriba las guardadas, y salir del área
-  // protegida. Funciona en Chrome, Safari y Firefox.
-  const cerrarSesion = async () => {
-    try {
-      await fetch('/api/gestion/sesion', {
-        headers: { Authorization: 'Basic ' + btoa('salir:' + Date.now()) },
-        cache: 'no-store',
-      });
-    } catch { /* el 401 es justamente lo que buscamos */ }
-    window.location.replace('/gestion?salir=1');
-  };
+  // El middleware borra la cookie de sesión y devuelve a la puerta.
+  const cerrarSesion = () => window.location.replace('/gestion?salir=1');
 
   const [aviso, setAviso] = useState('');
   const mostrarAviso = useCallback((texto) => {
@@ -957,16 +952,22 @@ export default function Gestion() {
     }
   };
 
-  const tabs = [
-    { id: 'pendientes', label: 'Pendientes' },
-    { id: 'pedidos', label: 'Pedidos' },
-    { id: 'clientes', label: 'Clientes' },
-    { id: 'inventario', label: 'Inventario' },
-    // La gestión de usuarios solo existe para administradores
-    ...(sesion.esAdmin ? [{ id: 'usuarios', label: 'Usuarios' }, { id: 'actividad', label: 'Actividad' }] : []),
-  ];
+  const esBodega = USUARIOS_BODEGA.has(sesion.usuario);
+  const pasosVisibles = esBodega ? SUB_TABS.filter(st => PASOS_BODEGA.has(st.id)) : SUB_TABS;
 
-  const totalPendientes = pedidos.filter(p => ['Iniciado', 'Rechazado', 'Aprobado', 'Empacado', 'Enviado'].includes(p.estado)).length;
+  const tabs = esBodega
+    ? [{ id: 'pendientes', label: 'Pendientes' }, { id: 'inventario', label: 'Inventario' }]
+    : [
+        { id: 'pendientes', label: 'Pendientes' },
+        { id: 'pedidos', label: 'Pedidos' },
+        { id: 'clientes', label: 'Clientes' },
+        { id: 'inventario', label: 'Inventario' },
+        // La gestión de usuarios solo existe para administradores
+        ...(sesion.esAdmin ? [{ id: 'usuarios', label: 'Usuarios' }, { id: 'actividad', label: 'Actividad' }] : []),
+      ];
+
+  // La burbuja suma solo los pasos que ese usuario ve
+  const totalPendientes = pedidos.filter(p => pasosVisibles.some(st => perteneceATab(p, st))).length;
 
   return (
     <>
@@ -1121,9 +1122,11 @@ export default function Gestion() {
                 )}
               </button>
             ))}
-            <button className="g-btn g-btn-outline g-nav-crear" onClick={() => setShowCrear(true)}>
-              + Pedido manual
-            </button>
+            {!esBodega && (
+              <button className="g-btn g-btn-outline g-nav-crear" onClick={() => setShowCrear(true)}>
+                + Pedido manual
+              </button>
+            )}
           </div>
         </nav>
 
@@ -1142,7 +1145,7 @@ export default function Gestion() {
             </div>
           ) : (
             <>
-              {tab === 'pendientes' && <TabPendientes pedidos={pedidos} onUpdateEstado={updateEstado} onEditar={setEditando} />}
+              {tab === 'pendientes' && <TabPendientes pedidos={pedidos} pasos={pasosVisibles} onUpdateEstado={updateEstado} onEditar={setEditando} />}
               {tab === 'pedidos' && <TabPedidos pedidos={pedidos} onUpdateEstado={updateEstado} onEditar={setEditando} />}
               {tab === 'clientes' && <TabClientes pedidos={pedidos} />}
               {tab === 'inventario' && <TabInventario pedidos={pedidos} inventarios={inventarios} onUpdateInventario={updateInventario} />}
