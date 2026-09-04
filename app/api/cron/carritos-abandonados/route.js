@@ -1,6 +1,6 @@
 // ============================================================
-// GET /api/cron/carritos-abandonados — recuperación de carritos
-// Un pinger externo lo llama cada 15 min. Hace DOS cosas:
+// GET /api/cron/carritos-abandonados — el barrendero de cada 30 min.
+// Un pinger externo lo llama. Hace TRES cosas:
 //
 // 1. CONCILIACIÓN con Bold (red de seguridad del webhook):
 //    para cada pedido "Iniciado" de las últimas 24h consulta
@@ -19,6 +19,7 @@
 // ============================================================
 import { notificarGHL, enviarCorreo, htmlPedido, correoConfirmacionCompra } from '@/lib/email';
 import { leerPedidos, actualizarPedido, telefonoE164 } from '@/lib/pedidos';
+import { registrarGuia } from '@/lib/track17';
 import { enviarPurchaseCAPI } from '@/lib/meta';
 import { formatoCOP } from '@/lib/pricing';
 
@@ -144,12 +145,27 @@ export async function GET(request) {
     )
   );
 
+  // 3. VIGILANCIA DE ENVÍOS: toda guía despachada tiene que estar registrada
+  //    en 17track. Registrar solo en el instante de guardar la guía era un
+  //    intento único sin red: el 3-sep-2026 aparecieron 8 pedidos invisibles
+  //    porque cuando les pusieron la guía la llave de 17track aún no estaba
+  //    en Vercel, y nadie se enteró hasta que Juan preguntó.
+  //    Reintentar es gratis: una guía ya registrada responde -18019901 sin
+  //    descontar cuota, así que el barrido no necesita recordar qué hizo.
+  const guias = [
+    ...new Set(
+      pedidos.filter((p) => p.estado === 'Enviado').map((p) => String(p.guia || '').trim()).filter(Boolean)
+    ),
+  ];
+  await Promise.all(guias.map(registrarGuia));
+
   console.log(
-    `[cron/abandonados] revisados=${pedidos.length} recuperados=${recuperados.length} notificados=${abandonados.length}`
+    `[cron/abandonados] revisados=${pedidos.length} recuperados=${recuperados.length} notificados=${abandonados.length} vigiladas=${guias.length}`
   );
   return Response.json({
     revisados: pedidos.length,
     recuperados: recuperados.length,
     notificados: abandonados.length,
+    vigiladas: guias.length,
   });
 }

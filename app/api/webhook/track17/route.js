@@ -47,11 +47,13 @@ async function procesar(estados) {
     const entregado = clave === 'delivered';
     if (!entregado && !PROBLEMAS.has(clave)) continue;
 
-    const pedido = await buscarPorGuia(guia);
-    if (!pedido) {
+    const pedidos = await buscarPorGuia(guia);
+    if (!pedidos.length) {
       console.warn(`[17track] La guía ${guia} no corresponde a ningún pedido.`);
       continue;
     }
+
+    for (const pedido of pedidos) {
     if (pedido.estado !== 'Enviado') {
       console.log(`[17track] ${pedido.orden} está en "${pedido.estado}": se ignora ${estado}.`);
       continue;
@@ -93,6 +95,7 @@ async function procesar(estados) {
         }),
       });
       console.log(`[17track] ${pedido.orden} con problema (${estado}) → correo interno enviado.`);
+    }
     }
   }
 }
