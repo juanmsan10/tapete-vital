@@ -19,7 +19,7 @@
 // ============================================================
 import { notificarGHL, enviarCorreo, htmlPedido, correoConfirmacionCompra } from '@/lib/email';
 import { leerPedidos, actualizarPedido, telefonoE164 } from '@/lib/pedidos';
-import { registrarGuia } from '@/lib/track17';
+import { registrarGuias } from '@/lib/track17';
 import { enviarPurchaseCAPI } from '@/lib/meta';
 import { formatoCOP } from '@/lib/pricing';
 
@@ -157,7 +157,7 @@ export async function GET(request) {
       pedidos.filter((p) => p.estado === 'Enviado').map((p) => String(p.guia || '').trim()).filter(Boolean)
     ),
   ];
-  await Promise.all(guias.map(registrarGuia));
+  await registrarGuias(guias);
 
   console.log(
     `[cron/abandonados] revisados=${pedidos.length} recuperados=${recuperados.length} notificados=${abandonados.length} vigiladas=${guias.length}`
