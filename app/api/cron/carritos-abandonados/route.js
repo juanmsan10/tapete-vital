@@ -141,7 +141,7 @@ export async function GET(request) {
         ciudad: p.ciudad,
         productos: p.productos,
         total: p.total,
-      })
+      }, process.env.GHL_WEBHOOK_URL)
     )
   );
 
