@@ -129,6 +129,9 @@ export async function GET(request) {
   await Promise.all(
     abandonados.map((p) =>
       notificarGHL({
+        // Los Inbound Webhook de GHL no filtran por sí solos: este campo es
+        // lo que deja al workflow reconocer lo suyo y descartar el resto.
+        evento: 'carrito_abandonado',
         // Campos estándar que GHL usa para crear/asociar el contacto
         phone: telefonoE164(p.telefono),
         first_name: String(p.nombre || '').trim().split(/\s+/)[0] || '',

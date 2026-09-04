@@ -63,6 +63,9 @@ async function procesar(estados) {
       const nombre = String(pedido.nombre || '').trim();
       await notificarGHL(
         {
+          // Ver el comentario del cron: sin esto los dos flujos de GHL son
+          // indistinguibles para quien los recibe.
+          evento: 'entrega',
           phone: telefonoE164(pedido.telefono),
           first_name: nombre.split(/\s+/)[0] || '',
           full_name: nombre,
