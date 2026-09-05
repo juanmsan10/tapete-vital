@@ -623,8 +623,10 @@ function TabPendientes({ pedidos, pasos, historico, onUpdateEstado, onEditar }) 
                 {current.accion}
               </button>
               {estadoAnterior(current.estado) && (
-                <button
-                  className="g-btn g-btn-outline"
+                <span
+                  className="g-volver"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => {
                     if (window.confirm(`¿Regresar el pedido ${p.orden} a "${estadoAnterior(current.estado)}"?`)) {
                       onUpdateEstado(p.orden, estadoAnterior(current.estado));
@@ -632,7 +634,7 @@ function TabPendientes({ pedidos, pasos, historico, onUpdateEstado, onEditar }) 
                   }}
                 >
                   ← Regresar a {estadoAnterior(current.estado)}
-                </button>
+                </span>
               )}
               {current.whatsapp && (
                 <button
@@ -1075,7 +1077,8 @@ export default function Gestion() {
         .g-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(0,82,97,0.08); background: #fff; }
         .g-table { width: 100%; border-collapse: collapse; font-size: 15px; }
         .g-table th { text-align: left; padding: 7px 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #45564f; background: #f8fbf9; border-bottom: 1px solid rgba(0,82,97,0.08); white-space: nowrap; }
-        .g-table td { padding: 5px 12px; border-bottom: 1px solid rgba(0,82,97,0.05); white-space: nowrap; }
+        .g-table td { padding: 6px 12px; border-bottom: 1px solid rgba(0,82,97,0.05); white-space: nowrap; }
+        .g-table tbody tr:nth-child(even) { background: #fafbfa; }
         .g-table tbody tr:hover { background: #f5faf8; }
         .g-orden-cell { font-weight: 700; color: #00ae84; }
 
@@ -1091,6 +1094,8 @@ export default function Gestion() {
         .g-btn-descartar:hover { background: #fdf1f0; border-color: #b3423a; }
         .g-prods { display: inline-flex; flex-direction: column; gap: 2px; text-align: right; }
         .g-table .g-prods { text-align: left; }
+        .g-volver { align-self: flex-start; font-size: 13px; color: #45564f; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+        .g-volver:hover { color: #005261; }
         .g-btn-small { padding: 5px 12px; font-size: 13px; background: #e8f5f0; color: #005261; }
         .g-btn-small:hover { background: #d0ece4; }
 
