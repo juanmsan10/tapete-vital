@@ -1058,12 +1058,17 @@ export default function Gestion() {
         .g-btn-editar:hover { background: #e8f5f0; }
         .g-modal-campo { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #45564f; font-weight: 600; }
         .g-prep-orden { font-weight: 700; color: #00ae84; font-size: 16px; }
-        .g-prep-body { padding: 8px 14px; }
-        .g-prep-row { display: flex; justify-content: space-between; gap: 16px; padding: 2px 14px; margin: 0 -14px; font-size: 14px; line-height: 1.3; }
-        .g-prep-body .g-prep-row:nth-child(even) { background: #f1f5f3; }
+        .g-prep-body { padding: 4px 14px 6px; }
+        /* Sin franjas: en una tarjeta angosta el ojo no viaja lo suficiente como
+           para necesitar riel, y al pintar el fondo se hacía evidente que los
+           renglones miden distinto (Dirección parte en dos líneas, Productos
+           ocupa una por producto). Lo que sí ordena a esta escala es que todos
+           arranquen a la misma altura y que etiqueta y valor contrasten. */
+        .g-prep-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; min-height: 25px; padding: 3px 0; font-size: 14px; line-height: 1.35; border-bottom: 1px solid rgba(0,82,97,0.05); }
+        .g-prep-row:last-child { border-bottom: none; }
         .g-prep-qty { font-size: 14px; }
-        .g-prep-label { color: #45564f; flex-shrink: 0; }
-        .g-prep-row > span:last-child, .g-prep-row > strong { text-align: right; min-width: 0; overflow-wrap: break-word; }
+        .g-prep-label { color: #7b8884; flex-shrink: 0; font-size: 13px; padding-top: 1px; }
+        .g-prep-row > span:last-child, .g-prep-row > strong { text-align: right; min-width: 0; overflow-wrap: break-word; color: #1f2d28; font-weight: 500; }
         .g-prep-actions { padding: 8px 14px; border-top: 1px solid rgba(0,82,97,0.06); display: flex; flex-direction: column; gap: 7px; }
         .g-guia-row { display: flex; align-items: center; gap: 10px; }
         .g-guia-label { font-size: 14px; font-weight: 700; color: #005261; white-space: nowrap; }
