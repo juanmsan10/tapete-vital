@@ -1102,7 +1102,7 @@ export default function Gestion() {
         .g-btn-descartar:hover { background: #fdf1f0; border-color: #b3423a; }
         .g-prods { display: inline-flex; flex-direction: column; gap: 2px; text-align: right; }
         .g-table .g-prods { text-align: left; }
-        .g-volver { align-self: flex-start; font-size: 13px; color: #45564f; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+        .g-volver { align-self: center; font-size: 13px; color: #45564f; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
         .g-volver:hover { color: #005261; }
         .g-volver-rojo { color: #b3423a; }
         .g-volver-rojo:hover { color: #8f322b; }
