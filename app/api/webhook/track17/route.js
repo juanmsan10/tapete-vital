@@ -15,7 +15,7 @@
 import { after } from 'next/server';
 import { buscarPorGuia, telefonoE164 } from '@/lib/pedidos';
 import { notificarGHL, enviarCorreo, htmlPedido } from '@/lib/email';
-import { estadosPorGuia } from '@/lib/track17';
+import { estadosPorGuia, esRuido } from '@/lib/track17';
 
 // Nombres de estado de 17track v2.4 (los checkboxes del panel en español:
 // No entregado = DeliveryFailure, Alerta = Exception, Caducado = Expired)
@@ -42,10 +42,16 @@ export async function POST(request) {
 // nuestro y que además siga en "Enviado". Lo peor que consigue un push falso
 // es una pregunta de más al cliente o un correo de más al equipo.
 async function procesar(estados) {
-  for (const [guia, { estado, detalle }] of estados) {
+  for (const [guia, { estado, detalle, evento }] of estados) {
     const clave = estado.toLowerCase();
     const entregado = clave === 'delivered';
     if (!entregado && !PROBLEMAS.has(clave)) continue;
+    // Un "problema" cuyo último evento es un movimiento interno de Inter no es
+    // un problema: avisar de eso entrena al equipo a ignorar estos correos.
+    if (!entregado && esRuido(evento)) {
+      console.log(`[17track] ${guia}: ${estado} por "${evento}" — movimiento normal, no se avisa.`);
+      continue;
+    }
 
     const pedidos = await buscarPorGuia(guia);
     if (!pedidos.length) {
@@ -89,6 +95,7 @@ async function procesar(estados) {
           orden: pedido.orden,
           datos: {
             Estado: detalle ? `${estado} (${detalle})` : estado,
+            'Último movimiento': evento || 'no reportado',
             Cliente: pedido.nombre,
             Teléfono: pedido.telefono,
             Ciudad: pedido.ciudad,
