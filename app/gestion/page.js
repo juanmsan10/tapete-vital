@@ -637,8 +637,10 @@ function TabPendientes({ pedidos, pasos, historico, onUpdateEstado, onEditar }) 
                 </span>
               )}
               {current.whatsapp && (
-                <button
-                  className="g-btn g-btn-descartar"
+                <span
+                  className="g-volver g-volver-rojo"
+                  role="button"
+                  tabIndex={0}
                   onClick={async () => {
                     const n = p.grupo?.length || 1;
                     const msg = n > 1
@@ -650,7 +652,7 @@ function TabPendientes({ pedidos, pasos, historico, onUpdateEstado, onEditar }) 
                   }}
                 >
                   Descartar — no va a comprar
-                </button>
+                </span>
               )}
             </div>
           </div>
@@ -1057,9 +1059,9 @@ export default function Gestion() {
         .g-modal-campo { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #45564f; font-weight: 600; }
         .g-prep-orden { font-weight: 700; color: #00ae84; font-size: 16px; }
         .g-prep-body { padding: 8px 14px; }
-        .g-prep-row { display: flex; justify-content: space-between; gap: 16px; padding: 1px 14px; margin: 0 -14px; font-size: 14px; line-height: 1.3; }
+        .g-prep-row { display: flex; justify-content: space-between; gap: 16px; padding: 2px 14px; margin: 0 -14px; font-size: 14px; line-height: 1.3; }
         .g-prep-body .g-prep-row:nth-child(even) { background: #f1f5f3; }
-        .g-prep-qty { font-size: 14px; padding-bottom: 5px; margin-bottom: 3px; }
+        .g-prep-qty { font-size: 14px; }
         .g-prep-label { color: #45564f; flex-shrink: 0; }
         .g-prep-row > span:last-child, .g-prep-row > strong { text-align: right; min-width: 0; overflow-wrap: break-word; }
         .g-prep-actions { padding: 8px 14px; border-top: 1px solid rgba(0,82,97,0.06); display: flex; flex-direction: column; gap: 7px; }
@@ -1097,6 +1099,8 @@ export default function Gestion() {
         .g-table .g-prods { text-align: left; }
         .g-volver { align-self: flex-start; font-size: 13px; color: #45564f; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
         .g-volver:hover { color: #005261; }
+        .g-volver-rojo { color: #b3423a; }
+        .g-volver-rojo:hover { color: #8f322b; }
         .g-btn-small { padding: 5px 12px; font-size: 13px; background: #e8f5f0; color: #005261; }
         .g-btn-small:hover { background: #d0ece4; }
 
