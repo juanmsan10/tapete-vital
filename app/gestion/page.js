@@ -1057,8 +1057,9 @@ export default function Gestion() {
         .g-modal-campo { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #45564f; font-weight: 600; }
         .g-prep-orden { font-weight: 700; color: #00ae84; font-size: 16px; }
         .g-prep-body { padding: 8px 14px; }
-        .g-prep-row { display: flex; justify-content: space-between; gap: 16px; padding: 1px 0; font-size: 14px; line-height: 1.3; }
-        .g-prep-qty { font-size: 14px; padding-bottom: 5px; margin-bottom: 3px; border-bottom: 1px solid rgba(0,82,97,0.06); }
+        .g-prep-row { display: flex; justify-content: space-between; gap: 16px; padding: 1px 14px; margin: 0 -14px; font-size: 14px; line-height: 1.3; }
+        .g-prep-body .g-prep-row:nth-child(even) { background: #f1f5f3; }
+        .g-prep-qty { font-size: 14px; padding-bottom: 5px; margin-bottom: 3px; }
         .g-prep-label { color: #45564f; flex-shrink: 0; }
         .g-prep-row > span:last-child, .g-prep-row > strong { text-align: right; min-width: 0; overflow-wrap: break-word; }
         .g-prep-actions { padding: 8px 14px; border-top: 1px solid rgba(0,82,97,0.06); display: flex; flex-direction: column; gap: 7px; }
