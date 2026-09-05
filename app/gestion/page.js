@@ -1067,7 +1067,7 @@ export default function Gestion() {
         .g-prep-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; min-height: 25px; padding: 3px 0; font-size: 14px; line-height: 1.35; border-bottom: 1px solid rgba(0,82,97,0.05); }
         .g-prep-row:last-child { border-bottom: none; }
         .g-prep-qty { font-size: 14px; }
-        .g-prep-label { color: #45564f; flex-shrink: 0; }
+        .g-prep-label { color: #7b8884; flex-shrink: 0; }
         .g-prep-row > span:last-child, .g-prep-row > strong { text-align: right; min-width: 0; overflow-wrap: break-word; }
         .g-prep-actions { padding: 8px 14px; border-top: 1px solid rgba(0,82,97,0.06); display: flex; flex-direction: column; gap: 7px; }
         .g-guia-row { display: flex; align-items: center; gap: 10px; }
