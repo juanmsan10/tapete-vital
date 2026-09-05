@@ -35,11 +35,11 @@ function ListaProductos({ pedido }) {
 // así que no hace falta un estado extra para saber en cuál va cada pedido.
 const SUB_TABS = [
   // Rojo (el mismo de Rechazado) y con la burbuja SIEMPRE roja: son ventas escapándose
-  { id: 'abandonado', estado: 'Iniciado', label: 'Abandonado', next: 'Aprobado', accion: 'Marcar como aprobado', color: '#D64541', urgente: true, whatsapp: true },
+  { id: 'abandonado', estado: 'Iniciado', label: 'Abandonado', next: 'Aprobado', accion: 'Marcar como aprobado', color: '#D64541', urgente: true, whatsapp: true, wa: 'abandono' },
   { id: 'empacar', estado: 'Aprobado', label: 'Empacar', next: 'Empacado', accion: 'Marcar como empacado', color: '#00AE84' },
   { id: 'enviar', estado: 'Empacado', label: 'Enviar', next: 'Enviado', accion: 'Marcar como enviado', color: '#27798F' },
   { id: 'guia', estado: 'Enviado', label: 'Asignar guía', accion: 'Guardar guía', color: '#7A4EAB', pideGuia: true, sinGuia: true },
-  { id: 'entrega', estado: 'Enviado', label: 'Confirmar entrega', next: 'Entregado', accion: 'Entrega confirmada', color: '#005261', compacto: true, conGuia: true },
+  { id: 'entrega', estado: 'Enviado', label: 'Confirmar entrega', next: 'Entregado', accion: 'Entrega confirmada', color: '#005261', compacto: true, conGuia: true, wa: 'entrega' },
 ];
 
 // La operaria de bodega solo ve su trabajo: empacar, enviar y registrar la
@@ -94,12 +94,26 @@ function haceCuanto(fecha) {
   return `hace ${Math.round(mins / 60 / 24)} días`;
 }
 
-function whatsappHref(p) {
+// web.whatsapp.com en vez de wa.me: wa.me mete una página intermedia de
+// "Continuar al chat" que en escritorio sobra. Un número de más de 10 dígitos
+// ya trae indicativo de país y se respeta (hay clientes fuera de Colombia).
+const MENSAJES = {
+  abandono: (p) =>
+    `Hola ${p.nombre || ''}, vimos que estabas por completar tu compra del Tapete Vital (pedido ${p.orden}) pero no logramos confirmar el pago. ¿Te ayudamos a terminarla?`,
+  entrega: (p) =>
+    `Hola ${String(p.nombre || '').trim().split(/\s+/)[0]}, te escribimos de POLO A TIERRA. Tu pedido salió con Interrapidísimo, guía ${p.guia}. ¿Ya lo tienes en tus manos?`,
+};
+
+function whatsappHref(p, tipo = 'abandono') {
   const digitos = String(p.telefono || '').replace(/\D/g, '');
   if (!digitos) return null;
-  const numero = digitos.length === 10 ? `57${digitos}` : digitos;
-  const mensaje = `Hola ${p.nombre || ''}, vimos que estabas por completar tu compra del Tapete Vital (pedido ${p.orden}) pero no logramos confirmar el pago. ¿Te ayudamos a terminarla?`;
-  return `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+  const numero = digitos.length > 10 ? digitos : `57${digitos}`;
+  return `https://web.whatsapp.com/send?phone=${numero}&text=${encodeURIComponent(MENSAJES[tipo](p))}`;
+}
+
+// "1/9/2026, 4:22:54 p. m." → "1/9/2026"
+function soloFecha(f) {
+  return String(f || '').split(',')[0] || '';
 }
 
 function formatoCOP(v) {
@@ -558,7 +572,9 @@ function TabPendientes({ pedidos, pasos, historico, onUpdateEstado, onEditar }) 
                 <div className="g-prep-row g-prep-qty"><span className="g-prep-label">Productos</span><strong><ListaProductos pedido={p} /></strong></div>
               )}
               <div className="g-prep-row"><span className="g-prep-label">Cliente</span><span>{p.nombre || '—'}</span></div>
-              <div className="g-prep-row"><span className="g-prep-label">Cédula</span><span>{p.cedula || '—'}</span></div>
+              {!current.compacto && (
+                <div className="g-prep-row"><span className="g-prep-label">Cédula</span><span>{p.cedula || '—'}</span></div>
+              )}
               <div className="g-prep-row"><span className="g-prep-label">Teléfono</span><span>{p.telefono || '—'}</span></div>
               <div className="g-prep-row"><span className="g-prep-label">Ciudad</span><span>{p.ciudad || '—'}</span></div>
               {!current.compacto && (
@@ -566,10 +582,16 @@ function TabPendientes({ pedidos, pasos, historico, onUpdateEstado, onEditar }) 
               )}
               {!current.compacto && p.notas && <div className="g-prep-row"><span className="g-prep-label">Notas</span><span>{p.notas}</span></div>}
               {current.compacto && p.guia && <div className="g-prep-row"><span className="g-prep-label">Guía #</span><span className="g-guia-value">{p.guia}</span></div>}
+              {current.compacto && (
+                <div className="g-prep-row">
+                  <span className="g-prep-label">Fecha envío</span>
+                  <span>{p.fecha_envio ? `${soloFecha(p.fecha_envio)}${haceCuanto(p.fecha_envio) ? ` (${haceCuanto(p.fecha_envio)})` : ''}` : '—'}</span>
+                </div>
+              )}
             </div>
             <div className="g-prep-actions">
-              {current.whatsapp && whatsappHref(p) && (
-                <a className="g-btn g-btn-whatsapp" href={whatsappHref(p)} target="_blank" rel="noopener noreferrer">
+              {current.wa && whatsappHref(p, current.wa) && (
+                <a className="g-btn g-btn-whatsapp" href={whatsappHref(p, current.wa)} target="_blank" rel="noopener noreferrer">
                   Escribir por WhatsApp
                 </a>
               )}
@@ -999,45 +1021,45 @@ export default function Gestion() {
         .g-salir { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; font-size: 13px; font-weight: 600; font-family: inherit; padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
         .g-salir:hover { background: rgba(255,255,255,0.28); }
 
-        .g-nav { background: #fff; border-bottom: 1px solid rgba(0,82,97,0.1); padding: 12px 0; }
+        .g-nav { background: #fff; border-bottom: 1px solid rgba(0,82,97,0.1); padding: 6px 0; }
         .g-nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; overflow-x: auto; }
-        .g-nav-btn { display: flex; align-items: center; gap: 6px; padding: 10px 18px; border: none; background: none; font-size: 15px; font-weight: 600; color: #45564f; cursor: pointer; border-radius: 8px; transition: all 0.2s; white-space: nowrap; font-family: inherit; position: relative; }
+        .g-nav-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border: none; background: none; font-size: 15px; font-weight: 600; color: #45564f; cursor: pointer; border-radius: 8px; transition: all 0.2s; white-space: nowrap; font-family: inherit; position: relative; }
         .g-nav-btn:hover { background: #f0f7f4; color: #005261; }
         .g-nav-btn.active { background: #e8f5f0; color: #005261; }
         .g-nav-badge { background: #00ae84; color: #fff; font-size: 12px; font-weight: 700; padding: 1px 7px; border-radius: 10px; min-width: 20px; text-align: center; }
 
-        .g-main { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        .g-main { max-width: 1200px; margin: 0 auto; padding: 14px 24px; line-height: 1.35; }
 
-        .g-stat { background: #fff; border-radius: 12px; padding: 20px; text-align: center; border: 1px solid rgba(0,82,97,0.08); }
-        .g-stat-value { font-size: 32px; font-weight: 700; color: #005261; font-variant-numeric: tabular-nums; }
-        .g-stat-label { font-size: 14px; color: #45564f; margin-top: 4px; }
-        .g-stat-sub { font-size: 13px; color: #e67700; margin-top: 4px; font-weight: 600; }
+        .g-stat { background: #fff; border-radius: 12px; padding: 11px 14px; text-align: center; border: 1px solid rgba(0,82,97,0.08); }
+        .g-stat-value { font-size: 25px; font-weight: 700; color: #005261; font-variant-numeric: tabular-nums; }
+        .g-stat-label { font-size: 13px; color: #45564f; margin-top: 1px; }
+        .g-stat-sub { font-size: 12px; color: #e67700; margin-top: 1px; font-weight: 600; }
 
-        .g-pendientes { display: flex; flex-direction: column; gap: 20px; }
+        .g-pendientes { display: flex; flex-direction: column; gap: 12px; }
 
         .g-sub-tabs { display: flex; gap: 4px; }
-        .g-sub-tab { display: flex; align-items: center; gap: 6px; padding: 10px 18px; border: none; border-bottom: 3px solid transparent; background: none; font-size: 15px; font-weight: 600; color: #45564f; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .g-sub-tab { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border: none; border-bottom: 3px solid transparent; background: none; font-size: 15px; font-weight: 600; color: #45564f; cursor: pointer; font-family: inherit; transition: all 0.2s; }
         .g-sub-tab:hover { color: #005261; }
         .g-sub-tab.active { border-bottom-color: #005261; }
         .g-sub-count { font-size: 11px; font-weight: 700; color: #fff; background: #999; padding: 1px 7px; border-radius: 10px; min-width: 18px; text-align: center; }
 
         .g-print-bar { display: flex; justify-content: flex-end; }
 
-        .g-seccion-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+        .g-seccion-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 10px; }
 
         .g-prep-card { background: #fff; border-radius: 12px; border: 1px solid rgba(0,82,97,0.08); overflow: hidden; }
-        .g-prep-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(0,82,97,0.06); }
+        .g-prep-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid rgba(0,82,97,0.06); }
         .g-prep-header-right { display: flex; align-items: center; gap: 8px; }
         .g-btn-editar { border: 1px solid rgba(0,82,97,0.2); background: #fff; color: #005261; border-radius: 6px; padding: 2px 8px; font-size: 14px; cursor: pointer; line-height: 1.4; transition: all 0.2s; }
         .g-btn-editar:hover { background: #e8f5f0; }
         .g-modal-campo { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #45564f; font-weight: 600; }
         .g-prep-orden { font-weight: 700; color: #00ae84; font-size: 16px; }
-        .g-prep-body { padding: 16px 20px; }
-        .g-prep-row { display: flex; justify-content: space-between; gap: 20px; padding: 4px 0; font-size: 14px; }
-        .g-prep-qty { font-size: 15px; padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid rgba(0,82,97,0.06); }
+        .g-prep-body { padding: 8px 14px; }
+        .g-prep-row { display: flex; justify-content: space-between; gap: 16px; padding: 1px 0; font-size: 14px; line-height: 1.3; }
+        .g-prep-qty { font-size: 14px; padding-bottom: 5px; margin-bottom: 3px; border-bottom: 1px solid rgba(0,82,97,0.06); }
         .g-prep-label { color: #45564f; flex-shrink: 0; }
         .g-prep-row > span:last-child, .g-prep-row > strong { text-align: right; min-width: 0; overflow-wrap: break-word; }
-        .g-prep-actions { padding: 12px 20px; border-top: 1px solid rgba(0,82,97,0.06); display: flex; flex-direction: column; gap: 10px; }
+        .g-prep-actions { padding: 8px 14px; border-top: 1px solid rgba(0,82,97,0.06); display: flex; flex-direction: column; gap: 7px; }
         .g-guia-row { display: flex; align-items: center; gap: 10px; }
         .g-guia-label { font-size: 14px; font-weight: 700; color: #005261; white-space: nowrap; }
         .g-guia-input { flex: 1; width: auto; }
@@ -1045,19 +1067,19 @@ export default function Gestion() {
 
         .g-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 0.02em; text-transform: uppercase; }
 
-        .g-filters { display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
-        .g-filter { padding: 6px 14px; border: 1px solid rgba(0,82,97,0.15); background: #fff; border-radius: 6px; font-size: 14px; cursor: pointer; color: #45564f; font-family: inherit; font-weight: 500; transition: all 0.2s; white-space: nowrap; }
+        .g-filters { display: flex; gap: 6px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 4px; }
+        .g-filter { padding: 4px 12px; border: 1px solid rgba(0,82,97,0.15); background: #fff; border-radius: 6px; font-size: 14px; cursor: pointer; color: #45564f; font-family: inherit; font-weight: 500; transition: all 0.2s; white-space: nowrap; }
         .g-filter:hover { border-color: #00ae84; color: #005261; }
         .g-filter.active { background: #005261; color: #fff; border-color: #005261; }
 
         .g-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(0,82,97,0.08); background: #fff; }
         .g-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-        .g-table th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #45564f; background: #f8fbf9; border-bottom: 1px solid rgba(0,82,97,0.08); white-space: nowrap; }
-        .g-table td { padding: 10px 16px; border-bottom: 1px solid rgba(0,82,97,0.05); white-space: nowrap; }
+        .g-table th { text-align: left; padding: 7px 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #45564f; background: #f8fbf9; border-bottom: 1px solid rgba(0,82,97,0.08); white-space: nowrap; }
+        .g-table td { padding: 5px 12px; border-bottom: 1px solid rgba(0,82,97,0.05); white-space: nowrap; }
         .g-table tbody tr:hover { background: #f5faf8; }
         .g-orden-cell { font-weight: 700; color: #00ae84; }
 
-        .g-btn { padding: 8px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .g-btn { padding: 6px 14px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
         .g-btn-primary { background: linear-gradient(135deg, #00ae84, #005261); color: #fff; }
         .g-btn-primary:hover { opacity: 0.9; }
         .g-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -1072,24 +1094,24 @@ export default function Gestion() {
         .g-btn-small { padding: 5px 12px; font-size: 13px; background: #e8f5f0; color: #005261; }
         .g-btn-small:hover { background: #d0ece4; }
 
-        .g-empty { text-align: center; padding: 48px 20px; color: #45564f; font-size: 16px; }
+        .g-empty { text-align: center; padding: 26px 16px; color: #45564f; font-size: 16px; }
 
-        .g-inventario { display: flex; flex-direction: column; gap: 24px; }
-        .g-inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .g-inventario { display: flex; flex-direction: column; gap: 14px; }
+        .g-inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         @media (max-width: 640px) { .g-inv-grid { grid-template-columns: 1fr; } }
-        .g-inv-form { background: #fff; border-radius: 12px; border: 1px solid rgba(0,82,97,0.08); padding: 24px; }
+        .g-inv-form { background: #fff; border-radius: 12px; border: 1px solid rgba(0,82,97,0.08); padding: 14px 16px; }
         .g-inv-form h3 { font-size: 17px; color: #005261; margin-bottom: 4px; }
-        .g-inv-form p { font-size: 14px; color: #45564f; margin-bottom: 16px; }
+        .g-inv-form p { font-size: 14px; color: #45564f; margin-bottom: 10px; }
         .g-inv-input-row { display: flex; gap: 12px; }
-        .g-input { padding: 10px 14px; border: 1px solid rgba(0,82,97,0.2); border-radius: 8px; font-size: 15px; font-family: inherit; outline: none; width: 200px; }
+        .g-input { padding: 7px 12px; border: 1px solid rgba(0,82,97,0.2); border-radius: 8px; font-size: 15px; font-family: inherit; outline: none; width: 200px; }
         .g-input:focus { border-color: #00ae84; box-shadow: 0 0 0 3px rgba(0,174,132,0.1); }
 
         .g-nav-crear { margin-left: auto; white-space: nowrap; align-self: center; }
-        .g-inv-producto { background: #fff; border-radius: 12px; border: 1px solid rgba(0,82,97,0.08); padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+        .g-inv-producto { background: #fff; border-radius: 12px; border: 1px solid rgba(0,82,97,0.08); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
         .g-inv-producto h3 { font-size: 17px; color: #005261; }
 
         .g-modal-overlay { position: fixed; inset: 0; background: rgba(0,40,45,0.5); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 20px; }
-        .g-modal { background: #fff; border-radius: 16px; padding: 28px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .g-modal { background: #fff; border-radius: 16px; padding: 20px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .g-modal h3 { font-size: 19px; color: #005261; }
         .g-modal-sub { font-size: 14px; color: #45564f; margin-bottom: 6px; }
         .g-modal .g-input { width: 100%; }
@@ -1101,8 +1123,8 @@ export default function Gestion() {
         .g-modal-hint { font-size: 12px; color: #77857f; margin-bottom: 8px; }
         .g-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
 
-        .g-loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; font-size: 17px; color: #45564f; }
-        .g-usuarios { display: flex; flex-direction: column; gap: 20px; }
+        .g-loading { display: flex; align-items: center; justify-content: center; min-height: 40vh; font-size: 17px; color: #45564f; }
+        .g-usuarios { display: flex; flex-direction: column; gap: 12px; }
         .g-form-usuario { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
         .g-form-usuario .g-input { width: 230px; }
         .g-check { display: flex; align-items: center; gap: 7px; font-size: 14px; color: #45564f; font-weight: 600; cursor: pointer; }
