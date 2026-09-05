@@ -1078,8 +1078,8 @@ export default function Gestion() {
         .g-table { width: 100%; border-collapse: collapse; font-size: 15px; }
         .g-table th { text-align: left; padding: 7px 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #45564f; background: #f8fbf9; border-bottom: 1px solid rgba(0,82,97,0.08); white-space: nowrap; }
         .g-table td { padding: 6px 12px; border-bottom: 1px solid rgba(0,82,97,0.05); white-space: nowrap; }
-        .g-table tbody tr:nth-child(even) { background: #fafbfa; }
-        .g-table tbody tr:hover { background: #f5faf8; }
+        .g-table tbody tr:nth-child(even) { background: #f1f5f3; }
+        .g-table tbody tr:hover { background: #ddeee7; }
         .g-orden-cell { font-weight: 700; color: #00ae84; }
 
         .g-btn { padding: 6px 14px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
