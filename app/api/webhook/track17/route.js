@@ -6,20 +6,17 @@
 // /api/entrega. Se le PREGUNTA en vez de dar la entrega por hecha: Inter
 // marca "entregado" lo que dejó en portería o con un vecino.
 //
-// Problema (DeliveryFailure / Exception / Expired) → correo interno al
-// equipo con los datos del cliente, para resolverlo antes de que reclame.
+// Problema real (dirección errada, rehusado, no reclamado...) → correo interno
+// al equipo, para resolverlo antes de que el cliente reclame.
+//
+// Qué se hace con cada estado vive en lib/track17.js, porque el cron consulta
+// lo mismo cada media hora y no debe haber dos versiones de esa decisión.
 //
 // Configurar esta URL en https://api.17track.net/admin/settings
 // (Package Webhook, V2.4, estados: Entregado, No entregado, Alerta, Caducado)
 // ============================================================
 import { after } from 'next/server';
-import { buscarPorGuia, telefonoE164 } from '@/lib/pedidos';
-import { notificarGHL, enviarCorreo, htmlPedido } from '@/lib/email';
-import { estadosPorGuia, esProblemaReal } from '@/lib/track17';
-
-// Nombres de estado de 17track v2.4 (los checkboxes del panel en español:
-// No entregado = DeliveryFailure, Alerta = Exception, Caducado = Expired)
-const PROBLEMAS = new Set(['deliveryfailure', 'exception', 'expired']);
+import { estadosPorGuia, procesarEstados } from '@/lib/track17';
 
 export async function POST(request) {
   const payload = await request.json().catch(() => null);
@@ -33,80 +30,6 @@ export async function POST(request) {
 
   // Se responde de una y el trabajo sigue después: un webhook que tarda es
   // un webhook que el emisor reintenta.
-  after(() => procesar(estados));
+  after(() => procesarEstados(estados));
   return Response.json({ received: true });
-}
-
-// 17track no firma sus push, así que la defensa no es creerle al remitente
-// sino al dato: solo se actúa sobre una guía que corresponda a un pedido
-// nuestro y que además siga en "Enviado". Lo peor que consigue un push falso
-// es una pregunta de más al cliente o un correo de más al equipo.
-async function procesar(estados) {
-  for (const [guia, { estado, detalle, evento }] of estados) {
-    const clave = estado.toLowerCase();
-    const entregado = clave === 'delivered';
-    if (!entregado && !PROBLEMAS.has(clave)) continue;
-    // El estado de 17track no basta: solo se avisa si el último evento de Inter
-    // describe un desenlace de verdad. Una alerta que grita en falso se deja de
-    // leer, y entonces no sirve el día que sea real.
-    if (!entregado && !esProblemaReal(evento)) {
-      console.log(`[17track] ${guia}: ${estado} pero el último evento es "${evento}" — no se avisa.`);
-      continue;
-    }
-
-    const pedidos = await buscarPorGuia(guia);
-    if (!pedidos.length) {
-      console.warn(`[17track] La guía ${guia} no corresponde a ningún pedido.`);
-      continue;
-    }
-
-    for (const pedido of pedidos) {
-    if (pedido.estado !== 'Enviado') {
-      console.log(`[17track] ${pedido.orden} está en "${pedido.estado}": se ignora ${estado}.`);
-      continue;
-    }
-
-    if (entregado) {
-      const nombre = String(pedido.nombre || '').trim();
-      await notificarGHL(
-        {
-          // Ver el comentario del cron: sin esto los dos flujos de GHL son
-          // indistinguibles para quien los recibe.
-          evento: 'entrega',
-          phone: telefonoE164(pedido.telefono),
-          first_name: nombre.split(/\s+/)[0] || '',
-          full_name: nombre,
-          email: pedido.email || '',
-          orden: pedido.orden,
-          nombre,
-          telefono: pedido.telefono,
-          ciudad: pedido.ciudad,
-          guia: pedido.guia,
-          productos: pedido.productos || `${pedido.cantidad || 1}× Tapete Vital`,
-        },
-        process.env.GHL_WEBHOOK_ENTREGA_URL
-      );
-      console.log(`[17track] ${pedido.orden} entregado según Inter → preguntando al cliente.`);
-    } else {
-      await enviarCorreo({
-        to: process.env.EMAIL_INTERNO || 'pedidos@tapetevital.co',
-        subject: `🔴 Problema con el envío ${pedido.orden} (${estado})`,
-        html: htmlPedido({
-          titulo: 'Interrapidísimo reporta un problema con este envío',
-          orden: pedido.orden,
-          datos: {
-            Estado: detalle ? `${estado} (${detalle})` : estado,
-            'Último movimiento': evento || 'no reportado',
-            Cliente: pedido.nombre,
-            Teléfono: pedido.telefono,
-            Ciudad: pedido.ciudad,
-            Guía: pedido.guia,
-            'Qué hacer': 'Rastrear la guía con Inter y contactar al cliente hoy, antes de que tenga que reclamar.',
-          },
-        }),
-      });
-      console.log(`[17track] ${pedido.orden} con problema (${estado}) → correo interno enviado.`);
-    }
-    }
-  }
 }

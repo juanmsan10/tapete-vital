@@ -19,7 +19,7 @@
 // ============================================================
 import { notificarGHL, enviarCorreo, htmlPedido, correoConfirmacionCompra } from '@/lib/email';
 import { leerPedidos, actualizarPedido, telefonoE164 } from '@/lib/pedidos';
-import { registrarGuias } from '@/lib/track17';
+import { registrarGuias, consultarGuias, estadosPorGuia, procesarEstados } from '@/lib/track17';
 import { enviarPurchaseCAPI } from '@/lib/meta';
 import { formatoCOP } from '@/lib/pricing';
 
@@ -162,13 +162,28 @@ export async function GET(request) {
   ];
   await registrarGuias(guias);
 
+  //    Y se les pregunta el estado en vez de esperar a que 17track lo empuje:
+  //    consultar no descuenta cuota, y su push ya nos dejó sin enterarnos de
+  //    una entrega. Solo se atienden las ENTREGAS; los problemas siguen
+  //    llegando por push, que dispara al cambiar y no se repite cada media
+  //    hora. La marca `preguntado` evita reenviarle el WhatsApp a quien ya lo
+  //    recibió y no ha contestado.
+  const reportes = await consultarGuias(guias);
+  const entregadas = new Map(
+    reportes
+      .flatMap((r) => [...estadosPorGuia(r)])
+      .filter(([, e]) => e.estado.toLowerCase() === 'delivered')
+  );
+  if (entregadas.size) await procesarEstados(entregadas);
+
   console.log(
-    `[cron/abandonados] revisados=${pedidos.length} recuperados=${recuperados.length} notificados=${abandonados.length} vigiladas=${guias.length}`
+    `[cron/abandonados] revisados=${pedidos.length} recuperados=${recuperados.length} notificados=${abandonados.length} vigiladas=${guias.length} entregadas=${entregadas.size}`
   );
   return Response.json({
     revisados: pedidos.length,
     recuperados: recuperados.length,
     notificados: abandonados.length,
     vigiladas: guias.length,
+    entregadas: entregadas.size,
   });
 }
