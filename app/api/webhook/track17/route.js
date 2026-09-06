@@ -15,7 +15,7 @@
 import { after } from 'next/server';
 import { buscarPorGuia, telefonoE164 } from '@/lib/pedidos';
 import { notificarGHL, enviarCorreo, htmlPedido } from '@/lib/email';
-import { estadosPorGuia, esRuido } from '@/lib/track17';
+import { estadosPorGuia, esProblemaReal } from '@/lib/track17';
 
 // Nombres de estado de 17track v2.4 (los checkboxes del panel en español:
 // No entregado = DeliveryFailure, Alerta = Exception, Caducado = Expired)
@@ -46,10 +46,11 @@ async function procesar(estados) {
     const clave = estado.toLowerCase();
     const entregado = clave === 'delivered';
     if (!entregado && !PROBLEMAS.has(clave)) continue;
-    // Un "problema" cuyo último evento es un movimiento interno de Inter no es
-    // un problema: avisar de eso entrena al equipo a ignorar estos correos.
-    if (!entregado && esRuido(evento)) {
-      console.log(`[17track] ${guia}: ${estado} por "${evento}" — movimiento normal, no se avisa.`);
+    // El estado de 17track no basta: solo se avisa si el último evento de Inter
+    // describe un desenlace de verdad. Una alerta que grita en falso se deja de
+    // leer, y entonces no sirve el día que sea real.
+    if (!entregado && !esProblemaReal(evento)) {
+      console.log(`[17track] ${guia}: ${estado} pero el último evento es "${evento}" — no se avisa.`);
       continue;
     }
 
