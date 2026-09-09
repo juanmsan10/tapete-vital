@@ -117,6 +117,7 @@ export async function PUT(request) {
         email: avisarEnvio.email,
         guia: avisarEnvio.guia,
         ciudad: avisarEnvio.ciudad,
+        productos: avisarEnvio.productos,
       });
       // Fuera del camino crítico: 17track no debe hacer esperar al panel.
       after(() => registrarGuia(avisarEnvio.guia));
