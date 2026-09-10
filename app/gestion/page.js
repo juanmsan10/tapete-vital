@@ -29,15 +29,22 @@ function ListaProductos({ pedido }) {
   );
 }
 
-// La guía llega después de despachar: la transportadora la entrega cuando ya
-// recogió. Por eso "Enviar" no la pide, y los enviados esperan en "Asignar
-// guía" hasta que se registra. El número es el que separa las dos pestañas,
-// así que no hace falta un estado extra para saber en cuál va cada pedido.
+// La guía llega después de despachar: Interrapidísimo la entrega cuando ya
+// recogió. Por eso "Enviar" no la pide, y esos pedidos esperan en "Asignar
+// guía" hasta que se registra.
+//
+// Con mensajero propio no hay guía nunca, así que esperar una dejaría el
+// pedido atascado ahí para siempre: quien decide la pestaña es la
+// transportadora elegida al despachar, y la guía solo dentro de Inter.
 const SUB_TABS = [
   // Rojo (el mismo de Rechazado) y con la burbuja SIEMPRE roja: son ventas escapándose
   { id: 'abandonado', estado: 'Iniciado', label: 'Abandonado', next: 'Aprobado', accion: 'Marcar como aprobado', color: '#D64541', urgente: true, whatsapp: true, wa: 'abandono' },
   { id: 'empacar', estado: 'Aprobado', label: 'Empacar', next: 'Empacado', accion: 'Marcar como empacado', color: '#00AE84' },
-  { id: 'enviar', estado: 'Empacado', label: 'Enviar', next: 'Enviado', accion: 'Marcar como enviado', color: '#27798F' },
+  { id: 'enviar', estado: 'Empacado', label: 'Enviar', next: 'Enviado', color: '#27798F',
+    opciones: [
+      { transportadora: 'inter', accion: 'Enviar con Interrapidísimo' },
+      { transportadora: 'mensajero', accion: 'Enviar con mensajero' },
+    ] },
   { id: 'guia', estado: 'Enviado', label: 'Asignar guía', accion: 'Guardar guía', color: '#7A4EAB', pideGuia: true, sinGuia: true },
   { id: 'entrega', estado: 'Enviado', label: 'Confirmar entrega', next: 'Entregado', accion: 'Entrega confirmada', color: '#005261', compacto: true, conGuia: true, wa: 'entrega' },
 ];
@@ -52,9 +59,12 @@ const PASOS_BODEGA = new Set(['empacar', 'enviar', 'guia']);
 function perteneceATab(p, st) {
   if (st.estado === 'Iniciado') return p.estado === 'Iniciado' || p.estado === 'Rechazado';
   if (p.estado !== st.estado) return false;
+  // Los pedidos anteriores a esta columna salieron todos por Inter.
+  const conMensajero = p.transportadora === 'mensajero';
   const tieneGuia = Boolean(String(p.guia || '').trim());
-  if (st.sinGuia) return !tieneGuia;
-  if (st.conGuia) return tieneGuia;
+  // Un envío con mensajero nunca pasa por "Asignar guía": va derecho a confirmar.
+  if (st.sinGuia) return !conMensajero && !tieneGuia;
+  if (st.conGuia) return conMensajero || tieneGuia;
   return true;
 }
 
@@ -581,7 +591,16 @@ function TabPendientes({ pedidos, pasos, historico, onUpdateEstado, onEditar }) 
                 <div className="g-prep-row"><span className="g-prep-label">Dirección</span><span>{p.direccion || '—'}</span></div>
               )}
               {!current.compacto && p.notas && <div className="g-prep-row"><span className="g-prep-label">Notas</span><span>{p.notas}</span></div>}
-              {current.compacto && p.guia && <div className="g-prep-row"><span className="g-prep-label">Guía #</span><span className="g-guia-value">{p.guia}</span></div>}
+              {/* Sin guía y sin explicación parecería un dato faltante; con
+                  mensajero es que no existe. */}
+              {current.compacto && (
+                <div className="g-prep-row">
+                  <span className="g-prep-label">{p.transportadora === 'mensajero' ? 'Entrega' : 'Guía #'}</span>
+                  {p.transportadora === 'mensajero'
+                    ? <span>Mensajero propio</span>
+                    : <span className="g-guia-value">{p.guia || '—'}</span>}
+                </div>
+              )}
               {current.compacto && (
                 <div className="g-prep-row">
                   <span className="g-prep-label">Fecha envío</span>
@@ -607,21 +626,31 @@ function TabPendientes({ pedidos, pasos, historico, onUpdateEstado, onEditar }) 
                   />
                 </div>
               )}
-              <button
-                className="g-btn g-btn-primary"
-                disabled={current.pideGuia && !String(guias[p.orden] || '').trim()}
-                onClick={async () => {
-                  await onUpdateEstado(p.orden, current.next, current.pideGuia ? guias[p.orden] : undefined);
-                  // Al aprobar un intento, los demás intentos del cliente se descartan solos
-                  if (p.grupo?.length > 1) {
-                    for (const o of p.grupo) {
-                      if (o.orden !== p.orden) await onUpdateEstado(o.orden, 'Descartado');
+              {/* Un paso puede tener varias salidas: "Enviar" pregunta por dónde
+                  sale el pedido, porque de eso depende si habrá guía o no. */}
+              {(current.opciones ?? [{ accion: current.accion }]).map((opcion) => (
+                <button
+                  key={opcion.transportadora || 'unica'}
+                  className="g-btn g-btn-primary"
+                  disabled={current.pideGuia && !String(guias[p.orden] || '').trim()}
+                  onClick={async () => {
+                    await onUpdateEstado(
+                      p.orden,
+                      current.next,
+                      current.pideGuia ? guias[p.orden] : undefined,
+                      opcion.transportadora
+                    );
+                    // Al aprobar un intento, los demás intentos del cliente se descartan solos
+                    if (p.grupo?.length > 1) {
+                      for (const o of p.grupo) {
+                        if (o.orden !== p.orden) await onUpdateEstado(o.orden, 'Descartado');
+                      }
                     }
-                  }
-                }}
-              >
-                {current.accion}
-              </button>
+                  }}
+                >
+                  {opcion.accion}
+                </button>
+              ))}
               {estadoAnterior(current.estado) && (
                 <span
                   className="g-volver"
@@ -923,25 +952,32 @@ export default function Gestion() {
     }
   };
 
-  const updateEstado = async (orden, nuevoEstado, guia) => {
+  const updateEstado = async (orden, nuevoEstado, guia, transportadora) => {
     setUpdating(true);
     try {
       // Asignar guía no mueve de estado: solo guarda el número
       const payload = { orden, ...(nuevoEstado ? { estado: nuevoEstado } : {}) };
       if (guia) payload.guia = guia;
+      if (transportadora) payload.transportadora = transportadora;
       await fetch('/api/gestion', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       setPedidos(prev => prev.map(p => p.orden === orden
-        ? { ...p, ...(nuevoEstado ? { estado: nuevoEstado } : {}), ...(guia ? { guia } : {}) }
+        ? { ...p, ...(nuevoEstado ? { estado: nuevoEstado } : {}),
+            ...(guia ? { guia } : {}), ...(transportadora ? { transportadora } : {}) }
         : p));
       // El pedido sale de la pestaña actual: decir a dónde fue, si no
       // parece que se hubiera borrado
       const estadoFinal = nuevoEstado || pedidos.find(p => p.orden === orden)?.estado;
+      const previo = pedidos.find(p => p.orden === orden);
+      const conMensajero = (transportadora ?? previo?.transportadora) === 'mensajero';
+      const guiaFinal = guia || previo?.guia;
       const destino = SUB_TABS.find(t => t.estado === estadoFinal
-        && (t.conGuia ? Boolean(guia) : t.sinGuia ? !guia : true));
+        && (t.conGuia ? conMensajero || Boolean(guiaFinal)
+          : t.sinGuia ? !conMensajero && !guiaFinal
+          : true));
       mostrarAviso(
         nuevoEstado === 'Descartado'
           ? `${orden} descartado — queda en el Histórico`

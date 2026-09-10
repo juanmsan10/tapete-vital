@@ -75,9 +75,18 @@ export async function PUT(request) {
     // número rastrear. Se compara contra la anterior para no reenviar el mismo
     // correo cuando el panel guarda otros campos del pedido.
     const guiaNueva = String(campos.guia || '').trim();
+    const conGuiaNueva = guiaNueva && guiaNueva !== String(previo?.guia || '').trim();
+    // Con mensajero propio no hay guía que esperar: el aviso sale en el momento
+    // de despachar, que es cuando el cliente necesita saberlo.
+    const saleConMensajero =
+      campos.transportadora === 'mensajero' && previo?.transportadora !== 'mensajero';
     const avisarEnvio =
-      guiaNueva && guiaNueva !== String(previo?.guia || '').trim() && previo?.email
-        ? { ...previo, guia: guiaNueva }
+      (conGuiaNueva || saleConMensajero) && previo?.email
+        ? {
+            ...previo,
+            guia: guiaNueva || previo?.guia || '',
+            transportadora: campos.transportadora ?? previo?.transportadora,
+          }
         : null;
 
     await actualizarPedido(orden, campos);
@@ -118,6 +127,7 @@ export async function PUT(request) {
         guia: avisarEnvio.guia,
         ciudad: avisarEnvio.ciudad,
         productos: avisarEnvio.productos,
+        transportadora: avisarEnvio.transportadora,
       });
       // Fuera del camino crítico: 17track no debe hacer esperar al panel.
       after(() => registrarGuia(avisarEnvio.guia));
