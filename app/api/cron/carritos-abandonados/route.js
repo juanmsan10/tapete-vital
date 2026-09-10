@@ -17,8 +17,8 @@
 //    La conciliación corre ANTES, así un pago con webhook
 //    caído nunca recibe el mensaje de carrito abandonado.
 // ============================================================
-import { notificarGHL, enviarCorreo, htmlPedido, correoConfirmacionCompra, correoDemorados } from '@/lib/email';
-import { leerPedidos, actualizarPedido, telefonoE164 } from '@/lib/pedidos';
+import { notificarGHL, enviarCorreo, htmlPedido, correoConfirmacionCompra, correoDemorados, preguntarPorEntrega } from '@/lib/email';
+import { leerPedidos, actualizarPedido, telefonoE164, marcarPreguntado } from '@/lib/pedidos';
 import { registrarGuias, consultarGuias, estadosPorGuia, procesarEstados } from '@/lib/track17';
 import { enviarPurchaseCAPI } from '@/lib/meta';
 import { formatoCOP } from '@/lib/pricing';
@@ -40,6 +40,16 @@ function edadMinutos(fecha) {
   if (/p/i.test(ap)) h += 12;
   const epoch = Date.UTC(+y, +mon - 1, +d, h + 5, +min, +s); // +5h → UTC
   return (Date.now() - epoch) / 60000;
+}
+
+// "10/9/2026, 3:20:15 p. m." → "2026-09-10". Comparar días calendario evita
+// las trampas de contar horas: un despacho de ayer a las 11 p. m. y otro de
+// ayer a las 8 a. m. son los dos "de ayer".
+function diaDe(fechaTexto) {
+  const m = String(fechaTexto || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!m) return null;
+  const [, d, mes, anio] = m;
+  return `${anio}-${String(mes).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
 // Días hábiles entre dos fechas. Inter no reparte sábados ni domingos, así que
@@ -212,6 +222,7 @@ export async function GET(request) {
     new Date().toLocaleString('en-US', { timeZone: 'America/Bogota', hour: 'numeric', hour12: false })
   );
   let demorados = [];
+  let preguntadosMensajero = 0;
   if (horaBogota === 8) {
     const porGuia = new Map(reportes.flatMap((r) => [...estadosPorGuia(r)]));
     demorados = pedidos
@@ -228,10 +239,27 @@ export async function GET(request) {
       })
       .filter(Boolean);
     if (demorados.length) await correoDemorados(demorados);
+
+    //    Y los que salieron con mensajero propio: 17track no los ve, así que
+    //    nadie avisaría que llegaron. Se le pregunta al cliente a la mañana
+    //    siguiente del despacho —no el mismo día, que el mensajero puede ir en
+    //    camino— y una sola vez, que de eso se encarga `preguntado`.
+    const hoyBogota = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
+    const conMensajero = pedidos.filter((p) => {
+      if (p.estado !== 'Enviado' || p.transportadora !== 'mensajero' || p.preguntado) return false;
+      const dia = diaDe(p.fecha_envio);
+      return Boolean(dia) && dia < hoyBogota;
+    });
+    for (const p of conMensajero) {
+      await preguntarPorEntrega(p);
+      await marcarPreguntado(p.orden);
+      console.log(`[mensajero] ${p.orden} despachado el ${diaDe(p.fecha_envio)} → preguntando al cliente.`);
+    }
+    if (conMensajero.length) preguntadosMensajero = conMensajero.length;
   }
 
   console.log(
-    `[cron/abandonados] revisados=${pedidos.length} recuperados=${recuperados.length} notificados=${abandonados.length} vigiladas=${guias.length} entregadas=${entregadas.size} demorados=${demorados.length}`
+    `[cron/abandonados] revisados=${pedidos.length} recuperados=${recuperados.length} notificados=${abandonados.length} vigiladas=${guias.length} entregadas=${entregadas.size} demorados=${demorados.length} mensajero=${preguntadosMensajero}`
   );
   return Response.json({
     revisados: pedidos.length,
@@ -240,5 +268,6 @@ export async function GET(request) {
     vigiladas: guias.length,
     entregadas: entregadas.size,
     demorados: demorados.length,
+    mensajero: preguntadosMensajero,
   });
 }
