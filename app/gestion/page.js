@@ -148,16 +148,10 @@ function EstadoBadge({ estado }) {
 function imprimirEtiquetas(pedidos) {
   const etiquetas = pedidos.map(p => `
     <div class="etiqueta">
-      <div class="et-brand"><span class="et-brand-name">Polo a Tierra</span></div>
-      <div class="et-orden">${p.orden}</div>
-      ${p.productos ? `<div class="et-campo"><span class="et-label">Contiene:</span> ${p.productos}</div>` : ''}
-      <div class="et-campo"><span class="et-label">Para:</span> ${p.nombre || '—'}</div>
-      <div class="et-campo"><span class="et-label">Tel:</span> ${p.telefono || '—'}</div>
-      <div class="et-campo"><span class="et-label">CC/NIT:</span> ${p.cedula || '—'}</div>
-      <div class="et-direccion">
-        <div class="et-ciudad">${p.ciudad || '—'}</div>
-        <div class="et-dir-texto">${p.direccion || '—'}</div>
-      </div>
+      <div class="et-nombre">${p.nombre || '—'}</div>
+      <div class="et-cel">${p.telefono || '—'}</div>
+      <div class="et-direccion">${p.direccion || '—'}</div>
+      <div class="et-ciudad">${p.ciudad || '—'}</div>
       <div class="et-notas">${p.notas ? `<span class="et-notas-label">Nota:</span> ${p.notas}` : ''}</div>
     </div>
   `).join('');
@@ -169,18 +163,15 @@ function imprimirEtiquetas(pedidos) {
       @page { size: 50mm 50mm; margin: 0; }
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font-family: 'Assistant', -apple-system, Arial, sans-serif; }
-      .etiqueta { width: 50mm; height: 50mm; padding: 2.5mm 3mm; font-size: 7pt; line-height: 1.35; color: #000; display: flex; flex-direction: column; page-break-after: always; }
+      /* Etiqueta térmica de 50x50 mm en la JADENS JD-268BT de bodega. Ver docs/impresora-bodega.md */
+      .etiqueta { width: 50mm; height: 50mm; padding: 3mm 3.5mm; line-height: 1.3; color: #000; display: flex; flex-direction: column; page-break-after: always; }
       .etiqueta:last-child { page-break-after: auto; }
-      .et-brand { border-bottom: 0.5px solid #000; padding-bottom: 1.2mm; margin-bottom: 1.5mm; }
-      .et-brand-name { font-size: 5.5pt; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
-      .et-orden { font-size: 10pt; font-weight: 700; margin-bottom: 1.2mm; }
-      .et-campo { font-size: 7pt; padding: 0.2mm 0; }
-      .et-label { font-weight: 700; }
-      .et-direccion { margin-top: 1.2mm; padding-top: 1.2mm; border-top: 0.5px dashed #000; }
-      .et-direccion .et-ciudad { font-weight: 700; font-size: 7.5pt; margin-bottom: 0.3mm; }
-      .et-direccion .et-dir-texto { font-size: 7pt; line-height: 1.4; }
-      .et-notas { margin-top: auto; padding-top: 1mm; border-top: 0.5px dotted #000; font-size: 6.5pt; font-style: italic; min-height: 4mm; }
-      .et-notas-label { font-weight: 700; font-style: normal; font-size: 5.5pt; text-transform: uppercase; letter-spacing: 0.05em; }
+      .et-nombre { font-size: 10pt; font-weight: 700; }
+      .et-cel { font-size: 9pt; margin-bottom: 1.5mm; }
+      .et-direccion { font-size: 9pt; line-height: 1.35; }
+      .et-ciudad { font-size: 10pt; font-weight: 700; margin-top: 0.5mm; }
+      .et-notas { margin-top: auto; padding-top: 1mm; border-top: 0.5px dotted #000; font-size: 7pt; font-style: italic; min-height: 4mm; }
+      .et-notas-label { font-weight: 700; font-style: normal; font-size: 6pt; text-transform: uppercase; letter-spacing: 0.05em; }
     </style></head><body>${etiquetas}</body></html>`);
   win.document.close();
   win.document.fonts.ready.then(() => win.print());
