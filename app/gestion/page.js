@@ -166,21 +166,22 @@ function imprimirEtiquetas(pedidos) {
   win.document.write(`<!DOCTYPE html><html><head><title>Etiquetas de envío</title>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap');
-      @page { size: 50mm 50mm; margin: 0; }
+      @page { size: 100mm 150mm; margin: 0; }
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font-family: 'Assistant', -apple-system, Arial, sans-serif; }
-      .etiqueta { width: 50mm; height: 50mm; padding: 2.5mm 3mm; font-size: 7pt; line-height: 1.35; color: #000; display: flex; flex-direction: column; page-break-after: always; }
+      /* Etiqueta de 4x6 pulgadas (100x150 mm), la que trae la JADENS JD-268BT de bodega. Ver docs/impresora-bodega.md */
+      .etiqueta { width: 100mm; height: 150mm; padding: 6mm 7mm; font-size: 12pt; line-height: 1.35; color: #000; display: flex; flex-direction: column; page-break-after: always; }
       .etiqueta:last-child { page-break-after: auto; }
-      .et-brand { border-bottom: 0.5px solid #000; padding-bottom: 1.2mm; margin-bottom: 1.5mm; }
-      .et-brand-name { font-size: 5.5pt; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
-      .et-orden { font-size: 10pt; font-weight: 700; margin-bottom: 1.2mm; }
-      .et-campo { font-size: 7pt; padding: 0.2mm 0; }
+      .et-brand { border-bottom: 1px solid #000; padding-bottom: 2.5mm; margin-bottom: 3mm; }
+      .et-brand-name { font-size: 10pt; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
+      .et-orden { font-size: 26pt; font-weight: 700; margin-bottom: 3mm; }
+      .et-campo { font-size: 13pt; padding: 0.8mm 0; }
       .et-label { font-weight: 700; }
-      .et-direccion { margin-top: 1.2mm; padding-top: 1.2mm; border-top: 0.5px dashed #000; }
-      .et-direccion .et-ciudad { font-weight: 700; font-size: 7.5pt; margin-bottom: 0.3mm; }
-      .et-direccion .et-dir-texto { font-size: 7pt; line-height: 1.4; }
-      .et-notas { margin-top: auto; padding-top: 1mm; border-top: 0.5px dotted #000; font-size: 6.5pt; font-style: italic; min-height: 4mm; }
-      .et-notas-label { font-weight: 700; font-style: normal; font-size: 5.5pt; text-transform: uppercase; letter-spacing: 0.05em; }
+      .et-direccion { margin-top: 3mm; padding-top: 3mm; border-top: 1px dashed #000; }
+      .et-direccion .et-ciudad { font-weight: 700; font-size: 20pt; margin-bottom: 1.5mm; }
+      .et-direccion .et-dir-texto { font-size: 16pt; line-height: 1.4; }
+      .et-notas { margin-top: auto; padding-top: 2.5mm; border-top: 1px dotted #000; font-size: 12pt; font-style: italic; min-height: 12mm; }
+      .et-notas-label { font-weight: 700; font-style: normal; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.05em; }
     </style></head><body>${etiquetas}</body></html>`);
   win.document.close();
   win.document.fonts.ready.then(() => win.print());
