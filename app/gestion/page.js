@@ -592,6 +592,16 @@ function TabPendientes({ pedidos, pasos, historico, onUpdateEstado, onEditar }) 
                     : <span className="g-guia-value">{p.guia || '—'}</span>}
                 </div>
               )}
+              {/* Saber si ya se le preguntó es lo que decide entre esperar y
+                  cerrar. Sin esto había que ir a los logs de GHL a averiguarlo. */}
+              {current.compacto && (
+                <div className="g-prep-row">
+                  <span className="g-prep-label">Cliente</span>
+                  <span>{p.preguntado
+                    ? `Preguntado ${soloFecha(p.preguntado)} — sin responder`
+                    : 'Aún no se le ha preguntado'}</span>
+                </div>
+              )}
               {current.compacto && (
                 <div className="g-prep-row">
                   <span className="g-prep-label">Fecha envío</span>
