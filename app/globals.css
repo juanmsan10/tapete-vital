@@ -704,3 +704,12 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
 @media (max-width: 640px) {
   .tienda-subtitulo { white-space: normal; max-width: 560px !important; }
 }
+
+/* Order bump: segundo tapete justo antes de pagar (solo cuando lleva 1) */
+.order-bump {
+  display: flex; gap: 12px; align-items: flex-start; cursor: pointer;
+  background: #EAF7F2; border: 2px dashed var(--verde); border-radius: 12px;
+  padding: 14px 16px; margin: 4px 0 16px; font-size: 15px; line-height: 1.45; color: var(--teal-oscuro);
+}
+.order-bump input { width: 22px; height: 22px; margin-top: 2px; accent-color: var(--verde); flex: none; }
+.order-bump strong { color: var(--verde); }

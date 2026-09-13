@@ -262,6 +262,16 @@ export default function CheckoutForm() {
             <textarea id="notas" rows={2} value={form.notas} onChange={(e) => actualizar('notas', e.target.value)} />
           </div>
 
+          {!ordenLista && cantidad === 1 && (
+            <label className="order-bump">
+              <input type="checkbox" checked={false} onChange={() => setCantidad(2)} />
+              <span>
+                <strong>Agrega un segundo tapete por {formatoCOP(PRECIO_UNITARIO_DESCUENTO)}</strong> y ahorras{' '}
+                {formatoCOP(PRECIO_UNITARIO - PRECIO_UNITARIO_DESCUENTO)}. Uno para la cama y otro para el
+                escritorio, o uno para tus papás.
+              </span>
+            </label>
+          )}
           {!ordenLista && (
             <>
               <p style={{ textAlign: 'center', fontSize: 13.5, color: 'var(--gris-texto)', margin: '0 0 10px' }}>
