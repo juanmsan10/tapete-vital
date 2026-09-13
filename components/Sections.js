@@ -74,17 +74,17 @@ export function Header() {
   );
 }
 
-export function Hero() {
+export function Hero({ h1, subtitulo } = {}) {
   const videoId = 'YqL-kYW0FXA';
   return (
     <section className="hero">
       <div className="contenedor hero-grid">
         <div className="hero-texto">
           <h1>
-            ¿Estás cansado, con insomnio y dolores que tu médico <em>no puede explicar</em>?
+            {h1 ?? <>¿Estás cansado, con insomnio y dolores que tu médico <em>no puede explicar</em>?</>}
           </h1>
           <p className="subtitulo">
-            La ciencia aclara por qué tu casa te está inflamando<br className="salto-desktop" /> y qué hacer para revertirlo.
+            {subtitulo ?? <>La ciencia aclara por qué tu casa te está inflamando<br className="salto-desktop" /> y qué hacer para revertirlo.</>}
           </p>
         </div>
         <div className="video-marco">
@@ -121,12 +121,12 @@ export function FranjaConfianza() {
   );
 }
 
-export function Beneficios() {
-  const items = [
-    { icono: Icono.luna, titulo: 'Duerme profundo', texto: 'Mejora tu sueño y despierta con más energía.' },
-    { icono: Icono.gota, titulo: 'Menos inflamación', texto: 'Descarga tu cuerpo y alivia tus dolores.' },
-    { icono: Icono.corazon, titulo: 'Mejor circulación', texto: 'Revitaliza tu sangre y regula tu presión arterial.' },
-    { icono: Icono.sol, titulo: 'Más tranquilidad', texto: 'Disminuye el estrés y calma tu ansiedad.' },
+export function Beneficios({ items: itemsAngulo } = {}) {
+  const items = itemsAngulo ?? [
+    { icono: 'luna', titulo: 'Duerme profundo', texto: 'Mejora tu sueño y despierta con más energía.' },
+    { icono: 'gota', titulo: 'Menos inflamación', texto: 'Descarga tu cuerpo y alivia tus dolores.' },
+    { icono: 'corazon', titulo: 'Mejor circulación', texto: 'Revitaliza tu sangre y regula tu presión arterial.' },
+    { icono: 'sol', titulo: 'Más tranquilidad', texto: 'Disminuye el estrés y calma tu ansiedad.' },
   ];
   return (
     <section id="beneficios" className="seccion seccion--crema centro">
@@ -136,7 +136,7 @@ export function Beneficios() {
         <div className="beneficios-grid">
           {items.map((b) => (
             <div className="beneficio" key={b.titulo}>
-              <div className="icono">{b.icono}</div>
+              <div className="icono">{Icono[b.icono]}</div>
               <h3>{b.titulo}</h3>
               <p>{b.texto}</p>
             </div>
@@ -218,7 +218,9 @@ export function Medicos() {
   );
 }
 
-export function Testimonios() {
+export function Testimonios({ primero = [] } = {}) {
+  // Los del ángulo del anuncio van primero, en el orden pedido.
+  const rango = (t) => (primero.includes(t.autor) ? primero.indexOf(t.autor) : primero.length);
   const lista = [
     { texto: 'Mi doctora me recomendó el tapete para el insomnio, los dolores lumbares y el exceso de carga electromagnética. Usándolo he logrado un sueño reparador y mis dolores han disminuido un 80%.', autor: 'Lola Carvajal' },
     { texto: 'Duermo mucho mejor y ya no me siento tan cansada. Ya no me duele la espalda. A mi esposo le dolía una mano, lo ensayó y en 3 días sintió una mejoría impresionante.', autor: 'Tatiana Gallego' },
@@ -226,7 +228,7 @@ export function Testimonios() {
     { texto: 'El tapete me ha ayudado a mejorar la calidad del sueño y el descanso. Duermo con él todas las noches y no volví a presentar episodios de insomnio.', autor: 'Adriana Osorio' },
     { texto: 'Conocí el tapete por recomendación de varios médicos funcionales. Ha marcado la diferencia en mi calidad de vida. Acabo de comprar otro para mis suegros.', autor: 'Magda Riascos' },
     { texto: 'Uso el tapete hace más de un año: descanso profundo al dormir y recuperé la capacidad de soñar. Hacer polo a tierra me permitió volver a tener sueños.', autor: 'Glemis Mogollón' },
-  ];
+  ].sort((a, b) => rango(a) - rango(b));
   return (
     <section className="seccion seccion--crema centro">
       <div className="contenedor">
@@ -245,15 +247,17 @@ export function Testimonios() {
   );
 }
 
-export function Oferta() {
+export function Oferta({
+  titulo = 'El insomnio y la fatiga no aparecen de un día para otro',
+  texto = 'Se acumulan silenciosamente hasta que el cuerpo no aguanta más. El Tapete Vital le devuelve a tu cuerpo lo que tanto necesita. Sin esfuerzo, sin cambiar tu rutina.',
+} = {}) {
   return (
     <section className="seccion centro" id="oferta">
       <div className="contenedor">
         <span className="eyebrow">Consigue el tuyo</span>
-        <h2 className="titulo-seccion">El insomnio y la fatiga no aparecen de un día para otro</h2>
+        <h2 className="titulo-seccion">{titulo}</h2>
         <p className="texto-grande mt-32" style={{ maxWidth: 620, margin: '18px auto 0' }}>
-          Se acumulan silenciosamente hasta que el cuerpo no aguanta más. El Tapete Vital le
-          devuelve a tu cuerpo lo que tanto necesita. Sin esfuerzo, sin cambiar tu rutina.
+          {texto}
         </p>
         <div className="oferta-caja mt-44">
           <div className="cabeza">
@@ -312,8 +316,9 @@ export function Garantia() {
   );
 }
 
-export function FAQ() {
+export function FAQ({ extra = [] } = {}) {
   const preguntas = [
+    ...extra,
     {
       q: '¿Cómo funciona el Tapete Vital?',
       a: 'Conecta tu cuerpo con el campo electromagnético de la tierra a través del polo a tierra de cualquier tomacorriente. Cuando pones tus pies sobre el tapete, es como si los pusieras directamente sobre el césped.',
