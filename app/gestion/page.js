@@ -170,8 +170,8 @@ function imprimirEtiquetas(pedidos) {
       .et-cel { font-size: 9pt; margin-bottom: 1.5mm; }
       .et-direccion { font-size: 9pt; line-height: 1.35; margin-top: 0.5mm; }
       .et-ciudad { font-size: 9pt; font-weight: 700; }
-      .et-notas { margin-top: auto; padding-top: 1mm; border-top: 0.5px dotted #000; font-size: 7pt; font-style: italic; min-height: 4mm; }
-      .et-notas-label { font-weight: 700; font-style: normal; font-size: 6pt; text-transform: uppercase; letter-spacing: 0.05em; }
+      .et-notas { margin-top: auto; padding-top: 1mm; border-top: 0.5px dotted #000; font-size: 9pt; line-height: 1.3; }
+      .et-notas-label { font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
     </style></head><body>${etiquetas}</body></html>`);
   win.document.close();
   win.document.fonts.ready.then(() => win.print());
