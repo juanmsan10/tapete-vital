@@ -150,8 +150,8 @@ function imprimirEtiquetas(pedidos) {
     <div class="etiqueta">
       <div class="et-nombre">${p.nombre || '—'}</div>
       <div class="et-cel">${p.telefono || '—'}</div>
-      <div class="et-direccion">${p.direccion || '—'}</div>
       <div class="et-ciudad">${p.ciudad || '—'}</div>
+      <div class="et-direccion">${p.direccion || '—'}</div>
       <div class="et-notas">${p.notas ? `<span class="et-notas-label">Nota:</span> ${p.notas}` : ''}</div>
     </div>
   `).join('');
@@ -166,10 +166,10 @@ function imprimirEtiquetas(pedidos) {
       /* Etiqueta térmica de 50x50 mm en la JADENS JD-268BT de bodega. Ver docs/impresora-bodega.md */
       .etiqueta { width: 50mm; height: 50mm; padding: 3mm 3.5mm; line-height: 1.3; color: #000; display: flex; flex-direction: column; page-break-after: always; }
       .etiqueta:last-child { page-break-after: auto; }
-      .et-nombre { font-size: 10pt; font-weight: 700; }
+      .et-nombre { font-size: 9pt; font-weight: 700; }
       .et-cel { font-size: 9pt; margin-bottom: 1.5mm; }
-      .et-direccion { font-size: 9pt; line-height: 1.35; }
-      .et-ciudad { font-size: 10pt; font-weight: 700; margin-top: 0.5mm; }
+      .et-direccion { font-size: 9pt; line-height: 1.35; margin-top: 0.5mm; }
+      .et-ciudad { font-size: 9pt; font-weight: 700; }
       .et-notas { margin-top: auto; padding-top: 1mm; border-top: 0.5px dotted #000; font-size: 7pt; font-style: italic; min-height: 4mm; }
       .et-notas-label { font-weight: 700; font-style: normal; font-size: 6pt; text-transform: uppercase; letter-spacing: 0.05em; }
     </style></head><body>${etiquetas}</body></html>`);
