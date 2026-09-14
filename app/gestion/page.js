@@ -156,7 +156,13 @@ function imprimirEtiquetas(pedidos) {
     </div>
   `).join('');
 
-  const win = window.open('', '_blank');
+  // Iframe oculto en vez de pestaña nueva: el diálogo de impresión sale en la misma pestaña
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;width:0;height:0;border:0;visibility:hidden';
+  document.body.appendChild(iframe);
+  const win = iframe.contentWindow;
+  win.addEventListener('afterprint', () => iframe.remove());
+  win.document.open();
   win.document.write(`<!DOCTYPE html><html><head><title>Etiquetas de envío</title>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap');
