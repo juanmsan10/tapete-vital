@@ -1,0 +1,132 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>VSL de 6 minutos</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Assistant:wght@400;600;700&display=swap">
+<style>
+:root{
+  --fondo:#F7FAF8; --superficie:#FFFFFF; --tinta:#10292C; --tinta-2:#3F5B5E; --linea:#D5E3DE;
+  --teal:#005261; --verde:#00AE84; --menta:#64C9A7; --menta-suave:#E4F5EE; --ambar:#B7791F; --ambar-suave:#FBF1DF;
+  --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif; --cuerpo:"Assistant","Segoe UI",Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --fondo:#0F1F21; --superficie:#16292C; --tinta:#E6EFEC; --tinta-2:#A9C2BC; --linea:#28413F;
+    --teal:#8FD6C7; --verde:#37C79E; --menta:#64C9A7; --menta-suave:#173833; --ambar:#E2B36A; --ambar-suave:#3A2E17;
+  }
+}
+:root[data-theme="dark"]{
+  --fondo:#0F1F21; --superficie:#16292C; --tinta:#E6EFEC; --tinta-2:#A9C2BC; --linea:#28413F;
+  --teal:#8FD6C7; --verde:#37C79E; --menta:#64C9A7; --menta-suave:#173833; --ambar:#E2B36A; --ambar-suave:#3A2E17;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);font-family:var(--cuerpo);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--teal)}
+h1,h2,h3,h4{font-family:var(--display);line-height:1.05;margin:0;text-wrap:balance;color:var(--tinta)}
+h1{font-size:clamp(40px,6vw,64px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:32px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+h3{font-size:26px;font-weight:600}
+h4{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--verde);margin-bottom:6px}
+p{margin:0 0 12px}
+.pagina{display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;max-width:1200px;margin:0 auto;padding:40px 28px 80px}
+@media (max-width:900px){.pagina{grid-template-columns:1fr;gap:24px}.indice{position:static}}
+.indice{position:sticky;top:24px;align-self:start;font-size:14px}
+.indice ol{list-style:none;margin:0;padding:0;border-left:2px solid var(--linea)}
+.indice li a{display:block;padding:6px 14px;color:var(--tinta-2);text-decoration:none;border-left:2px solid transparent;margin-left:-2px}
+.indice li a:hover,.indice li a:focus-visible{color:var(--teal);border-left-color:var(--verde);outline:none}
+.indice .grupo{font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;font-size:12px;color:var(--verde);margin:18px 0 6px 14px}
+.cabecera{margin-bottom:40px;max-width:760px}
+.cabecera .fecha{font-family:var(--display);text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--verde);margin-bottom:10px}
+.cabecera p{font-size:19px;color:var(--tinta-2);max-width:62ch}
+section{margin-bottom:56px}
+section>h2{margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--linea)}
+.datos{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:8px 0 16px}
+.dato{background:var(--superficie);border:1px solid var(--linea);padding:14px 16px}
+.dato .n{font-family:var(--display);font-size:34px;font-weight:700;color:var(--teal);font-variant-numeric:tabular-nums;line-height:1}
+.dato .l{font-size:13px;color:var(--tinta-2);margin-top:6px}
+.reglas{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.regla{background:var(--superficie);border:1px solid var(--linea);padding:18px 20px}
+.regla p:last-child{margin:0}
+.regla ul{margin:6px 0 0;padding-left:18px}
+.ojo{background:var(--ambar-suave);border-left:4px solid var(--ambar);padding:12px 16px;margin:14px 0}
+.ojo strong{color:var(--ambar)}
+.ficha{background:var(--superficie);border:1px solid var(--linea);margin-bottom:28px;scroll-margin-top:20px}
+.ficha-cab{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 18px;padding:20px 24px 14px;border-bottom:1px solid var(--linea);background:var(--menta-suave)}
+.ficha-cab h3{font-size:30px}
+.ficha-cab .ruta{font-family:var(--display);font-size:16px;letter-spacing:.04em;color:var(--teal);background:var(--superficie);padding:2px 10px;border:1px solid var(--linea)}
+.ficha-cab .avatar{flex-basis:100%;color:var(--tinta-2);font-size:15px}
+.ficha-cuerpo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0}
+@media (max-width:760px){.ficha-cuerpo{grid-template-columns:1fr}}
+.col{padding:18px 24px}
+.col+.col{border-left:1px solid var(--linea)}
+@media (max-width:760px){.col+.col{border-left:0;border-top:1px solid var(--linea)}}
+.bloque{margin-bottom:18px}
+.bloque:last-child{margin-bottom:0}
+.bloque ul,.bloque ol{margin:0;padding-left:18px}
+.bloque li{margin-bottom:6px}
+.gancho{font-weight:600;color:var(--tinta)}
+.evidencia li{font-size:15px;color:var(--tinta-2)}
+.evidencia b{color:var(--tinta)}
+.copy{background:var(--fondo);border:1px dashed var(--linea);padding:12px 14px;font-size:15px;white-space:pre-line}
+.guion{counter-reset:beat}
+.guion li{list-style:none;position:relative;padding-left:60px;margin-bottom:8px;font-size:15px}
+.guion li .t{position:absolute;left:0;top:1px;font-family:var(--display);font-size:14px;letter-spacing:.06em;color:var(--verde);font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-size:14px;background:var(--superficie)}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--linea);vertical-align:top}
+th{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--verde)}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tabla{overflow-x:auto;border:1px solid var(--linea)}
+.semana{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.semana .regla h3{font-size:20px;margin-bottom:8px;color:var(--teal)}
+.pie{color:var(--tinta-2);font-size:14px;border-top:1px solid var(--linea);padding-top:16px}
+</style><style>
+.paso{background:var(--superficie);border:1px solid var(--linea);padding:18px 22px;margin-bottom:14px}
+.paso h3{font-size:22px;color:var(--teal);margin-bottom:8px}
+.paso ul,.paso ol{margin:6px 0 0;padding-left:20px}.paso li{margin-bottom:5px}
+.spec{display:grid;grid-template-columns:220px 1fr;gap:6px 16px;font-size:15px}.spec dt{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--verde);padding-top:3px}.spec dd{margin:0}
+.chk li{list-style:none;padding-left:34px;position:relative}.chk li::before{content:"";position:absolute;left:0;top:4px;width:18px;height:18px;border:2px solid var(--verde);border-radius:4px}
+code{font-family:ui-monospace,Menlo,monospace;font-size:.92em;background:var(--menta-suave);padding:1px 6px;border-radius:4px}
+.dialogo{border-left:4px solid var(--menta);padding:8px 16px;margin:8px 0;font-style:italic}
+</style>
+<div class="pagina">
+<nav class="indice" aria-label="Índice"><ol>
+<li><a href="#audios">1 · Audios de Juan Manuel</a></li>
+<li><a href="#corte">2 · Corte del VSL (Jeffer)</a></li>
+<li><a href="#reglas">Reglas y exportación</a></li>
+</ol></nav>
+<div>
+<header class="cabecera"><div class="fecha">Polo a Tierra · VSL · 21 de septiembre de 2026</div><h1>VSL de 6 minutos</h1>
+<p>Dos entregas y nada más: los tres audios que graba Juan Manuel, y el corte exacto del VSL que arma Jeffer. El video fuente es el VSL original horizontal (~12 min); los carteles ya están hechos en Drive → Piezas pauta sep-2026 → <code>03 Carteles VSL 16x9</code>.</p></header>
+
+<section id="audios"><h2>1 · Los 3 audios que graba Juan Manuel</h2>
+<p>Solo voz, no hace falta cámara. Con el celular a 20 cm de la boca, en un cuarto con cortinas o ropa (sin eco), sin música de fondo. Cada frase <b>dos veces</b>, con el mismo tono tranquilo del VSL. Dilas exactamente así:</p>
+<div class="paso"><h3><code>AUDIO-garantia.m4a</code></h3><div class="dialogo">"Y tienes 60 días de garantía: si no sientes la diferencia en tu sueño, tu energía o tus dolores, te devolvemos tu dinero."</div></div>
+<div class="paso"><h3><code>AUDIO-dos-tapetes.m4a</code></h3><div class="dialogo">"Y si llevas dos, uno para la cama y otro para el escritorio, o uno para tus papás, cada uno te queda en 269.000."</div></div>
+<div class="paso"><h3><code>AUDIO-estudios.m4a</code></h3><div class="dialogo">"Más de 20 estudios publicados en revistas médicas, como el Journal of Alternative and Complementary Medicine, lo han medido."</div></div>
+<p>Los tres archivos van a Drive → Piezas pauta sep-2026 → <code>05 Entregas Jeffer</code>. Es lo único que necesita Jeffer de Juan Manuel para este entregable.</p></section>
+
+<section id="corte"><h2>2 · Corte del VSL — Jeffer</h2>
+<p>Horizontal 1920×1080, para YouTube y la landing. Se arma en este orden nuevo (no es el orden del video original). Cada bloque dice con qué frase entra, con qué frase sale, y qué se corta por dentro o se superpone.</p>
+<div class="tabla"><table><thead><tr><th>#</th><th>Bloque</th><th>Entra en…</th><th>Sale en…</th><th>Por dentro / superponer</th><th>Dura</th></tr></thead><tbody>
+<tr><td class="num">1</td><td><b>Gancho: multímetro</b></td><td>"Aquí tengo un multímetro y quiero mostrarte cómo el tapete vital puede descargar tu cuerpo…"</td><td>"…podemos ver como yo descargo mi cuerpo de inmediato."</td><td>Cortar la explicación larga de las puntas; dejar solo "la punta negra la tengo conectada a la tierra y la punta roja la estoy tocando con mis dedos". Cortar la lista "lámpara del computador, lámparas de la iluminación, tomacorrientes". Zoom digital al display cuando el número cae.</td><td class="num">0:25</td></tr>
+<tr><td class="num">2</td><td><b>Presentación</b></td><td>"Hola, mi nombre es Juan Manuel Sánchez, soy el fundador de Polo a Tierra"</td><td>"…están formulando a diario en su consulta esta terapia"</td><td>Cortar "una empresa colombiana que está transformando…" hasta "…recuperación de sus pacientes", y "Desde entonces, este mensaje ha pasado por grandes escenarios…". Queda: nombre + "hace 6 años comencé a trabajar con médicos" + "miles de médicos… están formulando". Rótulo inferior: <b>Juan Manuel Sánchez · Fundador, Polo a Tierra</b> (Assistant, caja verde #00AE84).</td><td class="num">0:12</td></tr>
+<tr><td class="num">3</td><td><b>Termografía</b></td><td>"Cuando nosotros hacemos polo a tierra pasan cosas increíbles y voy a mostrarte algunas de ellas."</td><td>"…ahora se ve claramente el pie completo en la termografía."</td><td>Cortar "Ahora te voy a explicar cómo se conectaron a la Tierra durante cuatro noches" (nunca lo explica). Imágenes térmicas a pantalla completa mientras habla.</td><td class="num">0:40</td></tr>
+<tr><td class="num">4</td><td><b>Sangre</b></td><td>"En este otro estudio podemos ver los cambios en la circulación…"</td><td>"…y por supuesto la oxigenación que recibe todo su cuerpo."</td><td>Cortar "Aumenta la concentración de electrolitos en la sangre". Si quedó la toma donde dice "salemos por la tierra", cortarla.</td><td class="num">0:35</td></tr>
+<tr><td class="num">5</td><td><b>Presión arterial</b></td><td>"¿Qué pasa a largo plazo? Que vemos que pacientes con hipertensión…"</td><td>"…la presión arterial de todos los pacientes empezó a bajar significativamente."</td><td>Cortar desde "Pensemos qué puede pasar con pacientes…" hasta "…sumamente efectiva" (promesa que Meta castiga). Superponer texto: <b>10 pacientes · 3 meses · −14% de presión sistólica en promedio</b>.</td><td class="num">0:30</td></tr>
+<tr><td class="num">6</td><td><b>Cortisol</b></td><td>"Ahora vamos a hablar del cortisol."</td><td>"…estos son los valores casi que de libro que deberíamos tener."</td><td>Dejar la frase "mantenemos un cortisol tan elevado y tan dispar… como se puede ver aquí en la gráfica". Cortar el resto de biorritmos ("El cortisol está muy determinado…") y TODO el párrafo del endocrino ("Un endocrino sabe…" hasta "…muy muy poderosa").</td><td class="num">0:50</td></tr>
+<tr><td class="num">7</td><td><b>Por qué te pasa</b></td><td>"Durante miles y miles de años caminamos con los pies descalzos."</td><td>"…pueden pasar meses, incluso años sin hacer polo a tierra. Y esto es muy serio para su salud."</td><td><b>Cortar la frase "Estamos hablando de decenas de estudios clínicos publicados en las revistas científicas más importantes del mundo"</b> y en su lugar: 4 s del cartel <code>VSL-cartel-estudios-v4.png</code> con <code>AUDIO-estudios.m4a</code> encima. Cortar las dos tomas donde dice "pueblo a tierra" y la de "descalsos".</td><td class="num">0:40</td></tr>
+<tr><td class="num">8</td><td><b>El tapete</b></td><td>"Ahora, este que tú puedes ver aquí es el tapete vital."</td><td>"…paso toda la noche, todas las noches, conectado con la tierra."</td><td>Nada por dentro. Si dice "pueblo a tierra del sistema eléctrico", cortar esa media frase y dejar "por el tercer huequito, el orificio redondo".</td><td class="num">0:30</td></tr>
+<tr><td class="num">9</td><td><b>La casa y el parque</b></td><td>"Aunque no podamos verlo, vivimos en un ambiente tóxico para nuestras células."</td><td>"…donde necesitamos un tapete vital para drenar esta energía. ¿Puedes ver por qué?"</td><td>Dejar solo: "vivimos en un ambiente tóxico… campo minado de contaminación electromagnética" + "Por eso hay tanta gente con insomnios, depresión, fatiga… al colapso". <b>Cortar las tres claves completas</b> (módem, celular, "haz polo a tierra todos los días"). Saltar a "Desafortunadamente, ir al parque 5 minutos…" y seguir hasta "¿Puedes ver por qué?". Cortar "voy a ser muy honesto contigo, no tenemos mucho tiempo…" hasta "…impacto muy peligroso en nuestra salud". Superponer: <b>Las 3 claves para limpiar tu casa vienen en la guía que te regalamos.</b></td><td class="num">0:40</td></tr>
+<tr><td class="num">10</td><td><b>Terapias y sueros</b></td><td>"Las herramientas como terapias, sueros, suplementos son muy buenas…"</td><td>"…está hecho para durar años."</td><td>Nada.</td><td class="num">0:20</td></tr>
+<tr><td class="num">11</td><td><b>Oferta</b></td><td>"Bien, pues hoy tengo una oferta muy especial para ti."</td><td>"…hubiese costado 498,000 pesos y vas a pagar solamente 299,000."</td><td>Cortar "Hemos hecho un esfuerzo enorme para llegar a millones de hogares". Cortar la PRIMERA mención del precio ("anteriormente tenía un precio de 449… ahora cuesta solo 299") y dejar solo la cuenta final. De la guía dejar "vas a recibir un regalo… la guía esencial… 49,000 pesos… completamente gratis". <b>Cortar "Esta es una oferta única… mientras aún está disponible"</b>. Mientras hace la cuenta: <code>VSL-cartel-oferta-v4.png</code> a pantalla completa con su voz encima. Al final del bloque, sobre el mismo cartel: <code>AUDIO-dos-tapetes.m4a</code>.</td><td class="num">0:50</td></tr>
+<tr><td class="num">12</td><td><b>Cierre: garantía</b></td><td colspan="2"><code>VSL-cartel-garantia-v4.png</code> a pantalla completa con <code>AUDIO-garantia.m4a</code> encima.</td><td>Cerrar con el texto "Consigue tu Tapete Vital aquí abajo" sobre el cartel, y la música bajando.</td><td class="num">0:10</td></tr>
+</tbody></table></div>
+<p><b>Total: unos 6 minutos.</b></p></section>
+
+<section id="reglas"><h2>Reglas y exportación</h2>
+<div class="reglas">
+<div class="regla"><h4>Prohibido</h4><ul><li>Las palabras "cura", "cura la presión", "reemplaza tu tratamiento". Si un corte deja una frase así, se quita.</li><li>Escasez inventada: nada de "solo por hoy" ni contadores.</li><li>Fuentes distintas de Assistant en los textos superpuestos.</li></ul></div>
+<div class="regla"><h4>Textos superpuestos</h4><p>Assistant Bold 56 px sobre lienzo 1080 de alto, blancos, en caja verde <code>#00AE84</code> al 90%, esquinas 12 px, abajo a la izquierda. Aparecen con corte seco, sin animación letra por letra.</p></div>
+<div class="regla"><h4>Música</h4><p>Un colchón suave sin percusión ni letra, −24 dB debajo de la voz, del banco libre de derechos. La voz de los audios de Juan Manuel se normaliza al mismo nivel que la del VSL (−14 LUFS).</p></div>
+<div class="regla"><h4>Exportación</h4><p>MP4, H.264, 1920×1080, fps del original, 12-16 Mbps, audio AAC 48 kHz. Nombre: <code>VSL-6min-v1.mp4</code>, a <code>05 Entregas Jeffer</code>. Exportar también el primer cuadro como JPG (miniatura).</p></div>
+</div>
+<p class="pie">Los carteles v4 están en Drive → Piezas pauta sep-2026 → 03 Carteles VSL 16x9. Video fuente: el archivo original del VSL que comparte Juan Manuel (no el de YouTube). Antes de entregar: verlo una vez en el celular sin sonido; si se entiende, está bien.</p></section>
+</div></div></html>
