@@ -48,7 +48,7 @@ export default async function LandingAngulo({ params }) {
         <CTAFinal />
       </main>
       <Script id="evento-viewcontent" strategy="afterInteractive">
-        {`if (window.fbq) fbq('track', 'ViewContent', { content_name: 'Tapete Vital', content_category: '${angulo}', currency: 'COP', value: 299000 });`}
+        {`document.cookie='angulo=${angulo};path=/;max-age=2592000';if (window.fbq) fbq('track', 'ViewContent', { content_name: 'Tapete Vital', content_category: '${angulo}', currency: 'COP', value: 299000 });`}
       </Script>
     </>
   );

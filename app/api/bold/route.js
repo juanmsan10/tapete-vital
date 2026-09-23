@@ -54,10 +54,14 @@ export async function POST(request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || new URL(request.url).origin;
 
+    // De qué landing de ángulo vino (cookie puesta por /[angulo]); vacío si entró directo
+    const origen = /(?:^|;\s*)angulo=([a-z]+)/.exec(request.headers.get('cookie') || '')?.[1] || '';
+
     // Registrar el pedido
     await crearPedido({
       fecha: new Date().toISOString(),
       orden: orderId,
+      origen,
       estado: 'Iniciado',
       cantidad: unidades,
       total: totales.total,
