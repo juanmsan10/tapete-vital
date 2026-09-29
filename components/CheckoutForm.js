@@ -15,7 +15,9 @@ const PAQUETES = [
   { qty: 3, etiqueta: '3 tapetes' },
 ];
 
-export default function CheckoutForm() {
+// `segundo`: modo precio de cliente (/segundo): $269.000 la unidad desde 1,
+// sin order bump (la oferta que el bump anuncia ya está aplicada).
+export default function CheckoutForm({ segundo = false }) {
   // Default 1: casi todos los compradores reales llevan 1 tapete; preseleccionar 2
   // hacía que el CTA mostrara $552.000 como primer número de compromiso
   const [cantidad, setCantidad] = useState(1);
@@ -34,7 +36,7 @@ export default function CheckoutForm() {
   const [ordenLista, setOrdenLista] = useState(null);
   const boldRef = useRef(null);
 
-  const totales = useMemo(() => calcularTotal(cantidad, zona), [cantidad, zona]);
+  const totales = useMemo(() => calcularTotal(cantidad, zona, segundo), [cantidad, zona, segundo]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.fbq) {
@@ -143,7 +145,7 @@ export default function CheckoutForm() {
       const res = await fetch('/api/bold', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cantidad, zona, ...form }),
+        body: JSON.stringify({ cantidad, zona, segundo, ...form }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'No pudimos generar tu orden.');
@@ -163,12 +165,14 @@ export default function CheckoutForm() {
         <div className="tarjeta">
           <h3>1. Elige tu paquete</h3>
           <p style={{ fontSize: 14.5, color: 'var(--gris-texto)', marginBottom: 18 }}>
-            Llevando 2 o más, cada tapete queda con 10% de descuento — para los tuyos.
+            {segundo
+              ? `Precio de cliente: ${formatoCOP(PRECIO_UNITARIO_DESCUENTO)} cada tapete, lleves los que lleves.`
+              : 'Llevando 2 o más, cada tapete queda con 10% de descuento — para los tuyos.'}
           </p>
           <div className="paquetes" role="radiogroup" aria-label="Cantidad de tapetes">
             {PAQUETES.map((p) => {
-              const unit = p.qty >= 2 ? PRECIO_UNITARIO_DESCUENTO : PRECIO_UNITARIO;
-              const ahorro = p.qty >= 2 ? (PRECIO_UNITARIO - PRECIO_UNITARIO_DESCUENTO) * p.qty : 0;
+              const unit = p.qty >= 2 || segundo ? PRECIO_UNITARIO_DESCUENTO : PRECIO_UNITARIO;
+              const ahorro = unit === PRECIO_UNITARIO_DESCUENTO ? (PRECIO_UNITARIO - PRECIO_UNITARIO_DESCUENTO) * p.qty : 0;
               const activo = cantidad === p.qty;
               return (
                 <button
@@ -183,11 +187,11 @@ export default function CheckoutForm() {
                   <div className="cant">{p.etiqueta}</div>
                   {p.qty === 1 && (
                     <div style={{ fontSize: 13.5, color: 'var(--gris-texto)', textDecoration: 'line-through' }}>
-                      {formatoCOP(PRECIO_LISTA)}
+                      {formatoCOP(segundo ? PRECIO_UNITARIO : PRECIO_LISTA)}
                     </div>
                   )}
                   <div className="precio"><strong>{formatoCOP(unit)}</strong></div>
-                  <div className="unidad">{p.qty > 1 ? 'cada uno' : 'precio de oferta'}</div>
+                  <div className="unidad">{p.qty > 1 ? 'cada uno' : segundo ? 'precio de cliente' : 'precio de oferta'}</div>
                   {ahorro > 0 && <div className="ahorro">Ahorras {formatoCOP(ahorro)}</div>}
                 </button>
               );
@@ -262,7 +266,7 @@ export default function CheckoutForm() {
             <textarea id="notas" rows={2} value={form.notas} onChange={(e) => actualizar('notas', e.target.value)} />
           </div>
 
-          {!ordenLista && cantidad === 1 && (
+          {!ordenLista && cantidad === 1 && !segundo && (
             <label className="order-bump">
               <input type="checkbox" checked={false} onChange={() => setCantidad(2)} />
               <span>

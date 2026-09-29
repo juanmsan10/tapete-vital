@@ -15,7 +15,7 @@ import { crearPedido } from '@/lib/pedidos';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { cantidad, zona, items, nombre, cedula, telefono, email, ciudad, direccion, notas } = body;
+    const { cantidad, zona, items, segundo, nombre, cedula, telefono, email, ciudad, direccion, notas } = body;
 
     if (!nombre || !cedula || !telefono || !direccion || !ciudad) {
       return Response.json({ error: 'Faltan datos de envío obligatorios.' }, { status: 400 });
@@ -36,7 +36,9 @@ export async function POST(request) {
     // Total calculado server-side con la matriz oficial.
     // `items` (tienda multi-producto) tiene prioridad; sin items es el embudo clásico.
     const esCarrito = items && typeof items === 'object';
-    const totales = esCarrito ? calcularTotalCarrito(items, zona) : calcularTotal(cantidad, zona);
+    const totales = esCarrito
+      ? calcularTotalCarrito(items, zona)
+      : calcularTotal(cantidad, zona, segundo === true);
     if (esCarrito && totales.unidades === 0) {
       return Response.json({ error: 'El carrito está vacío.' }, { status: 400 });
     }
