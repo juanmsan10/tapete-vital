@@ -23,7 +23,7 @@ export default function Segundo() {
             <span className="eyebrow">Solo para clientes</span>
             <h1 className="titulo-seccion">Tu segundo tapete, a precio de cliente</h1>
             <p className="texto-grande" style={{ maxWidth: 560, margin: '12px auto 0' }}>
-              Ya tienes el tuyo. El siguiente — para la otra cama, el escritorio o tus papás —
+              Ya tienes el tuyo. El siguiente, para la otra cama, el escritorio o tus papás,
               queda en {formatoCOP(PRECIO_UNITARIO_DESCUENTO)} en vez de {formatoCOP(PRECIO_UNITARIO)},
               con la misma garantía de 60 días.
             </p>
