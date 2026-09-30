@@ -8,8 +8,8 @@ import CheckoutForm from '@/components/CheckoutForm';
 import { formatoCOP, PRECIO_UNITARIO, PRECIO_UNITARIO_DESCUENTO } from '@/lib/pricing';
 
 export const metadata = {
-  title: 'Tu segundo tapete, a precio de cliente — Polo a Tierra',
-  description: 'Por ser cliente de Polo a Tierra, tu siguiente Tapete Vital queda a precio de cliente.',
+  title: 'Agrega un segundo tapete a tu pedido — Polo a Tierra',
+  description: 'Agrega un Tapete Vital a tu pedido recién hecho con el precio de paquete y solo el saldo del envío.',
   robots: { index: false, follow: false },
 };
 
@@ -21,11 +21,11 @@ export default function Segundo() {
         <div className="contenedor">
           <div className="centro">
             <span className="eyebrow">Solo para clientes</span>
-            <h1 className="titulo-seccion">Tu segundo tapete, a precio de cliente</h1>
+            <h1 className="titulo-seccion">Agrega un segundo tapete a tu pedido</h1>
             <p className="texto-grande" style={{ maxWidth: 560, margin: '12px auto 0' }}>
-              Ya tienes el tuyo. El siguiente, para la otra cama, el escritorio o tus papás,
-              queda en {formatoCOP(PRECIO_UNITARIO_DESCUENTO)} en vez de {formatoCOP(PRECIO_UNITARIO)},
-              con la misma garantía de 60 días.
+              Tu pedido está recién hecho: el tapete adicional queda con el precio de paquete,
+              {' '}{formatoCOP(PRECIO_UNITARIO_DESCUENTO)} en vez de {formatoCOP(PRECIO_UNITARIO)},
+              viaja con tu pedido y solo pagas el saldo del envío.
             </p>
           </div>
           <CheckoutForm segundo />

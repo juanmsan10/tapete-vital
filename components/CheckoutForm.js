@@ -166,7 +166,7 @@ export default function CheckoutForm({ segundo = false }) {
           <h3>1. Elige tu paquete</h3>
           <p style={{ fontSize: 14.5, color: 'var(--gris-texto)', marginBottom: 18 }}>
             {segundo
-              ? `Precio de cliente: ${formatoCOP(PRECIO_UNITARIO_DESCUENTO)} cada tapete, lleves los que lleves.`
+              ? `Cuántos tapetes AGREGAS a tu pedido: cada uno queda en ${formatoCOP(PRECIO_UNITARIO_DESCUENTO)} y el envío es solo el saldo.`
               : 'Llevando 2 o más, cada tapete queda con 10% de descuento — para los tuyos.'}
           </p>
           <div className="paquetes" role="radiogroup" aria-label="Cantidad de tapetes">
@@ -191,7 +191,7 @@ export default function CheckoutForm({ segundo = false }) {
                     </div>
                   )}
                   <div className="precio"><strong>{formatoCOP(unit)}</strong></div>
-                  <div className="unidad">{p.qty > 1 ? 'cada uno' : segundo ? 'precio de cliente' : 'precio de oferta'}</div>
+                  <div className="unidad">{p.qty > 1 ? 'cada uno' : segundo ? 'precio de paquete' : 'precio de oferta'}</div>
                   {ahorro > 0 && <div className="ahorro">Ahorras {formatoCOP(ahorro)}</div>}
                 </button>
               );
