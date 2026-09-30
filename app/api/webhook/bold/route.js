@@ -62,7 +62,7 @@ async function procesarEvento(tipo, orderId, total, emailCliente, data) {
     // 2. Correo al cliente — el del formulario de checkout (Sheet) primero;
     //    el de Bold como respaldo (Bold no siempre lo incluye en el payload)
     const emailFinal = pedido?.email || emailCliente;
-    await correoConfirmacionCompra({ orden: orderId, email: emailFinal, total });
+    await correoConfirmacionCompra({ orden: orderId, email: emailFinal, total, pedido });
 
     // 3. Purchase server-side a Meta (event_id = orderId para deduplicar)
     await enviarPurchaseCAPI({ orderId, total: Number(total), email: emailFinal });

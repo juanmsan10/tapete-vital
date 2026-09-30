@@ -17,7 +17,7 @@
 //    La conciliación corre ANTES, así un pago con webhook
 //    caído nunca recibe el mensaje de carrito abandonado.
 // ============================================================
-import { notificarGHL, enviarCorreo, htmlPedido, correoConfirmacionCompra, correoDemorados, preguntarPorEntrega, correoSegundoTapete } from '@/lib/email';
+import { notificarGHL, enviarCorreo, htmlPedido, correoConfirmacionCompra, correoDemorados, preguntarPorEntrega } from '@/lib/email';
 import { leerPedidos, actualizarPedido, telefonoE164, marcarPreguntado } from '@/lib/pedidos';
 import { registrarGuias, consultarGuias, estadosPorGuia, procesarEstados } from '@/lib/track17';
 import { enviarPurchaseCAPI } from '@/lib/meta';
@@ -137,7 +137,7 @@ export async function GET(request) {
           totales: formatoCOP(p.total),
         }),
       });
-      await correoConfirmacionCompra({ orden: p.orden, email: p.email, total: p.total });
+      await correoConfirmacionCompra({ orden: p.orden, email: p.email, total: p.total, pedido: p });
       await enviarPurchaseCAPI({ orderId: p.orden, total: Number(p.total), email: p.email || null });
     })
   );
@@ -258,36 +258,8 @@ export async function GET(request) {
     if (conMensajero.length) preguntadosMensajero = conMensajero.length;
   }
 
-  // 5. UPSELL DEL SEGUNDO TAPETE (momento 1 de Hormozi): a las 24h de un
-  //    pedido PAGADO de 1 tapete se le ofrece el segundo a precio de cliente
-  //    ($269.000, /segundo). Misma mecánica de ventana que los abandonados:
-  //    cada pedido cae en ella una sola vez y no hace falta marcar nada en la
-  //    base. El comprador de 2+ ya tomó la oferta y no recibe nada.
-  //    ponytail: si el pinger se salta una pasada, ese pedido se queda sin
-  //    correo — mismo trato que ya aceptan los carritos abandonados.
-  const UPSELL_MIN = 24 * 60;
-  const UPSELL_MAX = UPSELL_MIN + (MAX_MIN - MIN_MIN); // ancho = intervalo del cron
-  const PAGADOS = ['Aprobado', 'Empacado', 'Enviado', 'Entregado'];
-  // Un solo correo por cliente aunque tenga dos pedidos en la ventana
-  const porEmail = new Map();
-  pedidos.forEach((p) => {
-    if (!PAGADOS.includes(p.estado) || Number(p.cantidad) !== 1 || !p.email) return;
-    // El que ya compró por /segundo no vuelve a recibir la oferta
-    if (p.origen === 'segundo') return;
-    // Solo pedidos de tapete: vacío es el embudo (solo vende tapete)
-    if (p.productos && !/tapete/i.test(p.productos)) return;
-    const edad = edadMinutos(p.fecha);
-    if (edad === null || edad < UPSELL_MIN || edad >= UPSELL_MAX) return;
-    porEmail.set(p.email.toLowerCase(), p);
-  });
-  const conUpsell = [...porEmail.values()];
-  for (const p of conUpsell) {
-    await correoSegundoTapete({ email: p.email, nombre: p.nombre });
-    console.log(`[upsell] ${p.orden} cumplió 24h pagado con 1 tapete → correo del segundo enviado.`);
-  }
-
   console.log(
-    `[cron/abandonados] revisados=${pedidos.length} recuperados=${recuperados.length} notificados=${abandonados.length} vigiladas=${guias.length} entregadas=${entregadas.size} demorados=${demorados.length} mensajero=${preguntadosMensajero} upsell=${conUpsell.length}`
+    `[cron/abandonados] revisados=${pedidos.length} recuperados=${recuperados.length} notificados=${abandonados.length} vigiladas=${guias.length} entregadas=${entregadas.size} demorados=${demorados.length} mensajero=${preguntadosMensajero}`
   );
   return Response.json({
     revisados: pedidos.length,
@@ -297,6 +269,5 @@ export async function GET(request) {
     entregadas: entregadas.size,
     demorados: demorados.length,
     mensajero: preguntadosMensajero,
-    upsell: conUpsell.length,
   });
 }

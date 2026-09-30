@@ -117,6 +117,7 @@ export async function PUT(request) {
         orden: confirmarA.orden,
         email: confirmarA.email,
         total: confirmarA.total,
+        pedido: confirmarA,
       });
     }
 
