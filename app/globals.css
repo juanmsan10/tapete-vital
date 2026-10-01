@@ -59,6 +59,27 @@ h1, h2, h3 { line-height: 1.15; font-weight: 700; }
 .titulo-seccion { font-size: clamp(28px, 4.5vw, 42px); color: var(--tinta); }
 .titulo-seccion--claro { color: var(--blanco); }
 
+/* Titulares de la serie de carruseles: Oswald condensada en mayúsculas
+   con la barra verde como firma (1-oct-2026). */
+.titulo-seccion,
+.hero h1,
+.cta-final h2,
+.gracias h1 {
+  font-family: 'Oswald', 'Assistant', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+  line-height: 1.14;
+}
+.titulo-seccion::after {
+  content: '';
+  display: block;
+  width: 58px;
+  height: 5px;
+  background: var(--verde);
+  margin: 16px auto 0;
+}
+
 .texto-grande { font-size: clamp(17px, 2.2vw, 20px); color: var(--gris-texto); }
 
 /* ---------- Botones ---------- */
