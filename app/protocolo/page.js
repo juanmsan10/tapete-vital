@@ -34,9 +34,11 @@ const css = `
   .pr-card{background:rgba(255,255,255,.05);border:1px solid rgba(0,174,132,.3);
     border-radius:14px;padding:18px 20px;margin:14px 0}
   .pr-card p:last-child{margin-bottom:0}
-  .pr-est{display:flex;gap:14px;align-items:baseline;margin:14px 0}
-  .pr-est .n{font-family:'Oswald',sans-serif;font-weight:600;font-size:34px;
-    color:var(--verde);line-height:1;min-width:96px;text-align:left}
+  .pr-est{display:grid;grid-template-columns:128px 1fr;gap:16px;
+    align-items:center;padding:14px 0}
+  .pr-est+.pr-est{border-top:1px solid rgba(255,255,255,.1)}
+  .pr-est .n{font-family:'Oswald',sans-serif;font-weight:600;font-size:28px;
+    color:var(--verde);line-height:1.1;white-space:nowrap}
   .pr-est .t{font-size:15.5px;line-height:1.45;color:rgba(255,255,255,.85)}
   .pr-paso{display:flex;gap:14px;margin:14px 0;align-items:flex-start}
   .pr-paso .b{flex:none;width:34px;height:34px;border-radius:50%;
