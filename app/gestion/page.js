@@ -148,10 +148,12 @@ function EstadoBadge({ estado }) {
 function imprimirEtiquetas(pedidos) {
   const etiquetas = pedidos.map(p => `
     <div class="etiqueta">
-      <div class="et-nombre">${p.nombre || '—'}</div>
-      <div class="et-cel">${p.telefono || '—'}</div>
-      <div class="et-ciudad">${p.ciudad || '—'}</div>
-      <div class="et-direccion">${p.direccion || '—'}</div>
+      <div class="et-datos">
+        <div class="et-nombre">${p.nombre || '—'}</div>
+        <div class="et-cel">${p.telefono || '—'}</div>
+        <div class="et-ciudad">${p.ciudad || '—'}</div>
+        <div class="et-direccion">${p.direccion || '—'}</div>
+      </div>
       ${p.notas ? `<div class="et-notas">${p.notas}</div>` : ''}
     </div>
   `).join('');
@@ -166,17 +168,18 @@ function imprimirEtiquetas(pedidos) {
   win.document.write(`<!DOCTYPE html><html><head><title>Etiquetas de envío</title>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&display=swap');
-      @page { size: 50mm 50mm; margin: 0; }
+      @page { size: 100mm 50mm; margin: 0; }
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font-family: 'Assistant', -apple-system, Arial, sans-serif; }
-      /* Etiqueta térmica de 50x50 mm en la JADENS JD-268BT de bodega. Ver docs/impresora-bodega.md */
-      .etiqueta { width: 50mm; height: 50mm; padding: 3mm 3.5mm; line-height: 1.25; color: #000; display: flex; flex-direction: column; page-break-after: always; }
+      /* Etiqueta térmica de 100x50 mm en la JADENS JD-268BT de bodega: datos a la izquierda, nota al mensajero a la derecha. Ver docs/impresora-bodega.md */
+      .etiqueta { width: 100mm; height: 50mm; padding: 3.5mm 4mm; line-height: 1.2; color: #000; display: flex; gap: 3mm; overflow: hidden; page-break-after: always; }
       .etiqueta:last-child { page-break-after: auto; }
-      .et-nombre { font-size: 9pt; font-weight: 700; }
-      .et-cel { font-size: 9pt; margin-bottom: 1.5mm; }
-      .et-direccion { font-size: 9pt; line-height: 1.25; margin-top: 0.5mm; margin-bottom: 1mm; }
-      .et-ciudad { font-size: 9pt; font-weight: 700; }
-      .et-notas { margin-top: auto; border: 0.6mm solid #000; padding: 1mm 1.5mm; font-size: 9pt; font-style: italic; line-height: 1.25; }
+      .et-datos { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+      .et-nombre { font-size: 12pt; font-weight: 700; line-height: 1.1; }
+      .et-cel { font-size: 11pt; margin-top: 0.5mm; margin-bottom: 1.5mm; }
+      .et-ciudad { font-size: 11pt; font-weight: 700; text-transform: uppercase; }
+      .et-direccion { font-size: 10.5pt; margin-top: 0.5mm; }
+      .et-notas { flex: 0 0 34mm; align-self: flex-start; border: 0.7mm solid #000; padding: 1.5mm 2mm; font-size: 10pt; font-style: italic; }
     </style></head><body>${etiquetas}</body></html>`);
   win.document.close();
   win.document.fonts.ready.then(() => win.print());
